@@ -47,13 +47,14 @@ public class DependencyCounterMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        List<String> fileList = scanFile(currentBaseDir);
+/*        List<String> fileList = scanFile(currentBaseDir);
         System.out.println("FilePath:" + currentBaseDir);
         System.out.println("FileSuffix:" + suffix);
         System.out.println("FileTotal:" + fileList.size());
-        System.out.println("allLines:" + allLines);
+        System.out.println("allLines:" + allLines);*/
 
-        new DependencyTree(project).showDependencyTree();
+        DependencyTree dependencyTree = new DependencyTree(project);
+        dependencyTree.showDependencyTree();
     }
 
     /**

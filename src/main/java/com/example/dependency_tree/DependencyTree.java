@@ -22,6 +22,7 @@ import org.eclipse.aether.transport.http.HttpTransporterFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 public class DependencyTree {
@@ -47,6 +48,8 @@ public class DependencyTree {
 
         CollectRequest collectRequest = new CollectRequest();
 
+        DependencyVersionGatherer gatherer = new DependencyVersionGatherer();
+
         collectRequest.setRepositories(new ArrayList<>( Collections.singletonList(
                 new RemoteRepository.Builder( "central", "default", "https://repo.maven.apache.org/maven2/"  ).build())));
 
@@ -56,10 +59,13 @@ public class DependencyTree {
                 System.out.println("--------------------------------------------");
                 CollectResult collectResult = repositorySystem.collectDependencies(session, collectRequest);
                 collectResult.getRoot().accept(new ConsoleDependencyGraphDumper());
+                collectResult.getRoot().accept(gatherer);
                 System.out.println("--------------------------------------------");
             } catch (DependencyCollectionException e) {
                 e.printStackTrace();
             }
         }
+
+        gatherer.printDependencies();
     }
 }
