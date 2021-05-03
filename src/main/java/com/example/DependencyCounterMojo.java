@@ -1,11 +1,13 @@
 package com.example;
 
+import com.example.dependency_tree.DependencyTree;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Mojo(name = "dependency-counter", defaultPhase = LifecyclePhase.COMPILE)
+@Mojo(name = "dependency", defaultPhase = LifecyclePhase.COMPILE)
 public class DependencyCounterMojo extends AbstractMojo {
 
     /**
@@ -40,6 +42,9 @@ public class DependencyCounterMojo extends AbstractMojo {
     @Parameter(property = "suffix", defaultValue = ".java")
     private String suffix;
 
+    @Parameter(defaultValue = "${project}", required = true, readonly = true)
+    MavenProject project;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         List<String> fileList = scanFile(currentBaseDir);
@@ -47,6 +52,8 @@ public class DependencyCounterMojo extends AbstractMojo {
         System.out.println("FileSuffix:" + suffix);
         System.out.println("FileTotal:" + fileList.size());
         System.out.println("allLines:" + allLines);
+
+        new DependencyTree(project).showDependencyTree();
     }
 
     /**
