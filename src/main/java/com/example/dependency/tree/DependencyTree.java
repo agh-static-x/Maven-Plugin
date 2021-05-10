@@ -1,5 +1,6 @@
-package com.example.dependency_tree;
+package com.example.dependency.tree;
 
+import com.example.instrumentation.poc.DependencyInstrumenter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
@@ -22,7 +23,6 @@ import org.eclipse.aether.transport.http.HttpTransporterFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 public class DependencyTree {

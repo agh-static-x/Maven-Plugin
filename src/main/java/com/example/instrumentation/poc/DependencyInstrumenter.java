@@ -1,0 +1,22 @@
+package com.example.instrumentation.poc;
+
+import org.eclipse.aether.graph.DependencyNode;
+import org.eclipse.aether.graph.DependencyVisitor;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+public class DependencyInstrumenter implements DependencyVisitor {
+
+    @Override
+    public boolean visitEnter(DependencyNode dependencyNode) {
+        return true;
+    }
+
+    @Override
+    public boolean visitLeave(DependencyNode dependencyNode) {
+        System.out.println(dependencyNode.getArtifact().getFile());
+        return true;
+    }
+}

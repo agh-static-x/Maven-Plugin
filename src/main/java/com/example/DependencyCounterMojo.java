@@ -1,6 +1,7 @@
 package com.example;
 
-import com.example.dependency_tree.DependencyTree;
+import com.example.dependency.tree.DependencyTree;
+import com.example.instrumentation.poc.DependenciesGatherer;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Mojo(name = "dependency", defaultPhase = LifecyclePhase.COMPILE)
+@Mojo(name = "dependency", defaultPhase = LifecyclePhase.PACKAGE)
 public class DependencyCounterMojo extends AbstractMojo {
 
     /**
@@ -53,8 +54,12 @@ public class DependencyCounterMojo extends AbstractMojo {
         System.out.println("FileTotal:" + fileList.size());
         System.out.println("allLines:" + allLines);*/
 
-        DependencyTree dependencyTree = new DependencyTree(project);
-        dependencyTree.showDependencyTree();
+        DependenciesGatherer gatherer = new DependenciesGatherer(project);
+        try {
+            gatherer.instrumentDependencies();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
