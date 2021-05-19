@@ -4,20 +4,17 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.Enumeration;
 import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.jar.JarInputStream;
 import java.util.zip.CRC32;
-import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class DependenciesGatherer {
-    private MavenProject project;
+    private final MavenProject project;
     String TMP_DIR = "./tmp";
     String LIB_DIR = "./tmp/BOOT-INF/lib";
     String INSTRUMENTED = "./instrumented";
@@ -109,7 +106,7 @@ public class DependenciesGatherer {
 
             zout.close();
             jarFile.close();
-        }finally{
+        } finally {
             FileUtils.deleteDirectory(TMP_DIR);
         }
     }

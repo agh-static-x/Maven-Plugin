@@ -3,10 +3,6 @@ package com.example.instrumentation.poc;
 import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.graph.DependencyVisitor;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 public class DependencyInstrumenter implements DependencyVisitor {
 
     @Override

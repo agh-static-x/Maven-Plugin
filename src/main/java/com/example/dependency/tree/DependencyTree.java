@@ -1,6 +1,5 @@
 package com.example.dependency.tree;
 
-import com.example.instrumentation.poc.DependencyInstrumenter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
