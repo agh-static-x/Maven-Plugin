@@ -92,9 +92,8 @@ public class DependenciesGatherer {
                     zout.closeEntry();
                 }
             }
-            String opentelemetry = "opentelemetry-javaagent-static-all.jar";
 
-            libFiles.append(opentelemetry).append(File.pathSeparator);
+            libFiles.append(agentPath).append(File.pathSeparator);
 
             Process process = new ProcessBuilder("java", "-Dota.static.instrumenter=true",
                     String.format("-javaagent:%s", agentPath), "-cp", String.format("%s", libFiles),
