@@ -1,4 +1,4 @@
-package com.example.dependency.tree;
+package com.example.dependency_tree;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;

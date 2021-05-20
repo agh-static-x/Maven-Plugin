@@ -1,4 +1,4 @@
-package com.example.instrumentation.poc;
+package com.example.instrumentation_poc;
 
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;

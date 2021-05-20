@@ -1,4 +1,4 @@
-package com.example.dependency.tree;
+package com.example.dependency_tree;
 
 import java.io.PrintStream;
 import java.util.ArrayList;

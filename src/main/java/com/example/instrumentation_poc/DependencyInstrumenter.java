@@ -1,4 +1,4 @@
-package com.example.instrumentation.poc;
+package com.example.instrumentation_poc;
 
 import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.graph.DependencyVisitor;

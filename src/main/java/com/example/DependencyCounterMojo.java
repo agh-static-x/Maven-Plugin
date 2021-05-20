@@ -1,6 +1,6 @@
 package com.example;
 
-import com.example.instrumentation.poc.DependenciesGatherer;
+import com.example.instrumentation_poc.DependenciesGatherer;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
