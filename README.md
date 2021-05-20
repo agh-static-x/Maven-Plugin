@@ -1,6 +1,6 @@
 # Plugin
 ## Execution
-Add opentelemetry-javaagent-all.jar with StaticInstrumenter class and patch to your project main folder.
+Add opentelemetry-javaagent-all.jar with StaticInstrumenter class and patch to your project main folder. This version of the project support newer releases of OpenTelemetry javaagent. You can find version used by use in main folder (opentelemetry-static-javaagent-all.jar)
 
 Run `mvn package` in Maven Plugin project and install it to your local repository with comment:
 
