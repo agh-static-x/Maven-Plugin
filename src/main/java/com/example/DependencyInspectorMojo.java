@@ -10,14 +10,17 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 @Mojo(name = "dependency-inspection", defaultPhase = LifecyclePhase.PACKAGE)
-public class DependencyCounterMojo extends AbstractMojo {
+public class DependencyInspectorMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     MavenProject project;
 
+    @Parameter(property = "agentPath", defaultValue = "opentelemetry-javaagent-static-all.jar")
+    private String agentPath;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        DependenciesGatherer gatherer = new DependenciesGatherer(project);
+        DependenciesGatherer gatherer = new DependenciesGatherer(project, agentPath);
         try {
             gatherer.instrumentDependencies();
             gatherer.instrumentMain();
