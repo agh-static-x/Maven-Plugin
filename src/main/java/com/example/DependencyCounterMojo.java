@@ -55,7 +55,9 @@ public class DependencyCounterMojo extends AbstractMojo {
         System.out.println("allLines:" + allLines);*/
 
         DependenciesGatherer gatherer = new DependenciesGatherer(project);
+        DependencyTree tree = new DependencyTree(project);
         try {
+            tree.showDependencyTree();
             gatherer.instrumentDependencies();
             gatherer.instrumentMain();
         }catch(Exception e){

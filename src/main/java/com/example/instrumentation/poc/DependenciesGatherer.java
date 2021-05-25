@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
+import java.util.regex.Pattern;
 import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
@@ -34,7 +35,8 @@ public class DependenciesGatherer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String[] outFileNameParts = jarFile.getName().split("\\\\");
+        String pattern = Pattern.quote(System.getProperty("file.separator"));
+        String[] outFileNameParts = jarFile.getName().split(pattern);
         final String outFileName = outFileNameParts[outFileNameParts.length - 1];
         String mainPath = outFileName+File.pathSeparator+"opentelemetry-javaagent-static-all.jar";
         Process process = new ProcessBuilder("java", "-Dota.static.instrumenter=true",
@@ -65,7 +67,8 @@ public class DependenciesGatherer {
             }
 
             assert jarFile != null;
-            String[] outFileNameParts = jarFile.getName().split("\\\\");
+            String pattern = Pattern.quote(System.getProperty("file.separator"));
+            String[] outFileNameParts = jarFile.getName().split(pattern);
             final String outFileName = outFileNameParts[outFileNameParts.length - 1];
             //final File outFile = new File(INSTRUMENTED, outFileName);
             final File outFile = new File(outFileName);
