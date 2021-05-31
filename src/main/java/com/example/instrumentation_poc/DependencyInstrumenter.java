@@ -1,11 +1,7 @@
-package com.example.instrumentation.poc;
+package com.example.instrumentation_poc;
 
 import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.graph.DependencyVisitor;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DependencyInstrumenter implements DependencyVisitor {
 

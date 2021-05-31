@@ -1,4 +1,4 @@
-package com.example.dependency.tree;
+package com.example.dependency_tree;
 
 import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.graph.DependencyVisitor;
@@ -15,14 +15,14 @@ public class DependencyVersionGatherer implements DependencyVisitor {
     @Override
     public boolean visitEnter(DependencyNode dependencyNode) {
         String id = dependencyNode.getArtifact().getGroupId() + ":" +dependencyNode.getArtifact().getArtifactId();
-        if(dependencies.containsKey(id)){
+        if (dependencies.containsKey(id)) {
             List<String> versions = dependencies.get(id);
             if(!versions.contains(dependencyNode.getArtifact().getVersion())) {
                 versions.add(dependencyNode.getArtifact().getVersion());
             }
             dependencies.put(id,versions);
         }
-        else{
+        else {
             List<String> versions = new ArrayList<>();
             versions.add(dependencyNode.getArtifact().getVersion());
             dependencies.put(id, versions);

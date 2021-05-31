@@ -1,4 +1,4 @@
-package com.example.instrumentation.poc;
+package com.example.instrumentation_poc;
 
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
@@ -18,13 +18,15 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class DependenciesGatherer {
-    private MavenProject project;
+    private final MavenProject project;
     String TMP_DIR = "./tmp";
     String LIB_DIR = "./tmp/BOOT-INF/lib";
     String INSTRUMENTED = "./instrumented";
+    private final String agentPath;
 
-    public DependenciesGatherer(MavenProject project){
+    public DependenciesGatherer(MavenProject project, String agentPath){
         this.project = project;
+        this.agentPath = agentPath;
     }
 
     public void instrumentMain() throws Exception {
@@ -38,9 +40,9 @@ public class DependenciesGatherer {
         String pattern = Pattern.quote(System.getProperty("file.separator"));
         String[] outFileNameParts = jarFile.getName().split(pattern);
         final String outFileName = outFileNameParts[outFileNameParts.length - 1];
-        String mainPath = outFileName+File.pathSeparator+"opentelemetry-javaagent-static-all.jar";
+        String mainPath = outFileName + File.pathSeparator + agentPath;
         Process process = new ProcessBuilder("java", "-Dota.static.instrumenter=true",
-                "-javaagent:opentelemetry-javaagent-static-all.jar", "-cp", String.format("%s", mainPath),
+                String.format("-javaagent:%s", agentPath), "-cp", String.format("%s", mainPath),
                 "io.opentelemetry.javaagent.bootstrap.StaticInstrumenter",
                 INSTRUMENTED).inheritIO().start();
         int ret = process.waitFor();
@@ -74,7 +76,9 @@ public class DependenciesGatherer {
             final File outFile = new File(outFileName);
             final ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(outFile));
 
-            String COMMAND = "java -Dota.static.instrumenter=true -javaagent:opentelemetry-javaagent-static-all.jar -cp %to_instrument% io.opentelemetry.javaagent.bootstrap.StaticInstrumenter %dir%";
+            String COMMAND = "java -Dota.static.instrumenter=true "
+                    + String.format("-javaagent:%s", agentPath)
+                    + " -cp %to_instrument% io.opentelemetry.javaagent.bootstrap.StaticInstrumenter %dir%";
 
             StringBuilder libFiles = new StringBuilder();
             for (Enumeration<JarEntry> enums = jarFile.entries(); enums.hasMoreElements(); ) {
@@ -94,12 +98,11 @@ public class DependenciesGatherer {
                     zout.closeEntry();
                 }
             }
-            String opentelemetry = "opentelemetry-javaagent-static-all.jar";
 
-            libFiles.append(opentelemetry).append(File.pathSeparator);
+            libFiles.append(agentPath).append(File.pathSeparator);
 
             Process process = new ProcessBuilder("java", "-Dota.static.instrumenter=true",
-                    "-javaagent:opentelemetry-javaagent-static-all.jar", "-cp", String.format("%s", libFiles),
+                    String.format("-javaagent:%s", agentPath), "-cp", String.format("%s", libFiles),
                     "io.opentelemetry.javaagent.bootstrap.StaticInstrumenter",
                     LIB_DIR).inheritIO().start();
             int ret = process.waitFor();
@@ -112,7 +115,7 @@ public class DependenciesGatherer {
 
             zout.close();
             jarFile.close();
-        }finally{
+        } finally {
             FileUtils.deleteDirectory(TMP_DIR);
         }
     }

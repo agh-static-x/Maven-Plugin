@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>counter-maven-plugin</artifactId>
+    <artifactId>dependency-inspector-maven-plugin</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
 
-    <name>counter-maven-plugin Maven Mojo</name>
+    <name>dependency-inspector-maven-plugin Maven Mojo</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -85,7 +85,7 @@
                 <artifactId>maven-plugin-plugin</artifactId>
                 <version>3.6.1</version>
                 <configuration>
-                    <goalPrefix>counter-maven-plugin</goalPrefix>
+                    <goalPrefix>dependency-inspector-maven-plugin</goalPrefix>
                 </configuration>
             </plugin>
         </plugins>
