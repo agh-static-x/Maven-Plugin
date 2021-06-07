@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.util.List;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -20,6 +21,7 @@ public class OpenTelemetryLoader {
     public String otelJarPath;
 
     public final String OTEL_AGENT_NAME = "io.opentelemetry.javaagent.OpenTelemetryAgent";
+    String TMP_DIR = "./tmpOtel";
 
     public OpenTelemetryLoader(String otelJarPath) {
         this.otelJarPath = otelJarPath;
@@ -27,8 +29,12 @@ public class OpenTelemetryLoader {
 
     public void instrument() throws IOException {
         loadOtel(new File(otelJarPath));
-        instrumentOpenTelemetryAgent();
-        injectClasses();
+        File tmpDir = new File(TMP_DIR);
+        tmpDir.mkdir();
+        File copyFile = new File(TMP_DIR+"/"+otelJarPath);
+        Files.copy(new File(otelJarPath).toPath(), copyFile.toPath());
+        instrumentOpenTelemetryAgent(copyFile);
+        injectClasses(copyFile);
     }
 
     public synchronized void loadOtel(File otelJar){
@@ -40,12 +46,12 @@ public class OpenTelemetryLoader {
 
             openTelemetryAgentClass = Class.forName(OTEL_AGENT_NAME, true, otelClassLoader);
             System.out.println("Loaded OpenTelemetryAgent: " + openTelemetryAgentClass);
-        } catch (MalformedURLException | ClassNotFoundException e) {
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void instrumentOpenTelemetryAgent() throws IOException {
+    public void instrumentOpenTelemetryAgent(File jarFile) throws IOException {
         new ByteBuddy()
             .rebase(openTelemetryAgentClass)
             .visit(Advice.to(PrintingAdvices.class).on(isMethod()))
@@ -56,12 +62,12 @@ public class OpenTelemetryLoader {
                 )
             )
             .make()
-            .inject(new File(otelJarPath));
+            .inject(jarFile);
 //                .load(ClassLoader.getSystemClassLoader())
 //                .getLoaded();
     }
 
-    public void injectClasses() throws IOException {
+    public void injectClasses(File jarFile) throws IOException {
         List<Class<?>> classesToInject = List.of(
             BytesAndName.class,
             PreTransformer.class,
@@ -77,7 +83,7 @@ public class OpenTelemetryLoader {
                 .rebase(clazz)
                 .name("io.opentelemetry.javaagent." + clazzName)
                 .make()
-                .inject(new File(otelJarPath));
+                .inject(jarFile);
             System.out.println("Instrumented " + clazzName);
         }
     }
