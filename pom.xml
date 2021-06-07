@@ -76,6 +76,11 @@
             <artifactId>maven-resolver-transport-http</artifactId>
             <version>1.6.2</version>
         </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-dep</artifactId>
+            <version>1.11.0</version>
+        </dependency>
     </dependencies>
 
     <build>

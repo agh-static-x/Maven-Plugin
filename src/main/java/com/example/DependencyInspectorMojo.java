@@ -1,5 +1,6 @@
 package com.example;
 
+import com.example.agent_instrumentation.OpenTelemetryLoader;
 import com.example.instrumentation_poc.DependenciesGatherer;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -9,17 +10,25 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
+import java.io.IOException;
+
 @Mojo(name = "dependency-inspection", defaultPhase = LifecyclePhase.PACKAGE)
 public class DependencyInspectorMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     MavenProject project;
 
-    @Parameter(property = "agentPath", defaultValue = "opentelemetry-javaagent-static-all.jar")
+    @Parameter(property = "agentPath", defaultValue = "opentelemetry-javaagent-all.jar")
     private String agentPath;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        OpenTelemetryLoader loader = new OpenTelemetryLoader(agentPath);
+        try {
+            loader.instrument();
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
         DependenciesGatherer gatherer = new DependenciesGatherer(project, agentPath);
         try {
             gatherer.instrumentDependencies();

@@ -24,6 +24,8 @@ public class DependenciesGatherer {
     String INSTRUMENTED = "./instrumented";
     private final String agentPath;
 
+    private final String STATIC_INSTRUMENTER_CLASS = "io.opentelemetry.javaagent.StaticInstrumenter";
+
     public DependenciesGatherer(MavenProject project, String agentPath){
         this.project = project;
         this.agentPath = agentPath;
@@ -43,7 +45,7 @@ public class DependenciesGatherer {
         String mainPath = outFileName + File.pathSeparator + agentPath;
         Process process = new ProcessBuilder("java", "-Dota.static.instrumenter=true",
                 String.format("-javaagent:%s", agentPath), "-cp", String.format("%s", mainPath),
-                "io.opentelemetry.javaagent.bootstrap.StaticInstrumenter",
+                STATIC_INSTRUMENTER_CLASS,
                 INSTRUMENTED).inheritIO().start();
         int ret = process.waitFor();
     }
@@ -78,7 +80,7 @@ public class DependenciesGatherer {
 
             String COMMAND = "java -Dota.static.instrumenter=true "
                     + String.format("-javaagent:%s", agentPath)
-                    + " -cp %to_instrument% io.opentelemetry.javaagent.bootstrap.StaticInstrumenter %dir%";
+                    + " -cp %to_instrument% " + STATIC_INSTRUMENTER_CLASS + " %dir%";
 
             StringBuilder libFiles = new StringBuilder();
             for (Enumeration<JarEntry> enums = jarFile.entries(); enums.hasMoreElements(); ) {
@@ -103,7 +105,7 @@ public class DependenciesGatherer {
 
             Process process = new ProcessBuilder("java", "-Dota.static.instrumenter=true",
                     String.format("-javaagent:%s", agentPath), "-cp", String.format("%s", libFiles),
-                    "io.opentelemetry.javaagent.bootstrap.StaticInstrumenter",
+                    STATIC_INSTRUMENTER_CLASS,
                     LIB_DIR).inheritIO().start();
             int ret = process.waitFor();
 
