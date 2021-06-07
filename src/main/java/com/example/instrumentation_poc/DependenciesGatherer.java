@@ -20,32 +20,41 @@ import java.util.zip.ZipOutputStream;
 public class DependenciesGatherer {
     private final MavenProject project;
     String TMP_DIR = "./tmp";
+    String OTEL_TMP = "./tmpOtel";
     String LIB_DIR = "./tmp/BOOT-INF/lib";
     String INSTRUMENTED = "./instrumented";
     private final String agentPath;
 
+    private final String STATIC_INSTRUMENTER_CLASS = "io.opentelemetry.javaagent.StaticInstrumenter";
+
     public DependenciesGatherer(MavenProject project, String agentPath){
         this.project = project;
-        this.agentPath = agentPath;
+        this.agentPath = OTEL_TMP+"/"+agentPath;
     }
 
     public void instrumentMain() throws Exception {
-        File mainJar = project.getArtifact().getFile();
-        JarFile jarFile = null;
         try {
-            jarFile = new JarFile(mainJar);
-        } catch (IOException e) {
-            e.printStackTrace();
+            File mainJar = project.getArtifact().getFile();
+            JarFile jarFile = null;
+            try {
+                jarFile = new JarFile(mainJar);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            String pattern = Pattern.quote(System.getProperty("file.separator"));
+            assert jarFile != null;
+            String[] outFileNameParts = jarFile.getName().split(pattern);
+            final String outFileName = outFileNameParts[outFileNameParts.length - 1];
+            String mainPath = outFileName + File.pathSeparator + agentPath;
+            Process process = new ProcessBuilder("java", "-Dota.static.instrumenter=true",
+                    String.format("-javaagent:%s", agentPath), "-cp", String.format("%s", mainPath),
+                    STATIC_INSTRUMENTER_CLASS,
+                    INSTRUMENTED).inheritIO().start();
+            int ret = process.waitFor();
         }
-        String pattern = Pattern.quote(System.getProperty("file.separator"));
-        String[] outFileNameParts = jarFile.getName().split(pattern);
-        final String outFileName = outFileNameParts[outFileNameParts.length - 1];
-        String mainPath = outFileName + File.pathSeparator + agentPath;
-        Process process = new ProcessBuilder("java", "-Dota.static.instrumenter=true",
-                String.format("-javaagent:%s", agentPath), "-cp", String.format("%s", mainPath),
-                "io.opentelemetry.javaagent.bootstrap.StaticInstrumenter",
-                INSTRUMENTED).inheritIO().start();
-        int ret = process.waitFor();
+        finally {
+            FileUtils.deleteDirectory(OTEL_TMP);
+        }
     }
 
     public void instrumentDependencies() throws Exception {
@@ -78,7 +87,7 @@ public class DependenciesGatherer {
 
             String COMMAND = "java -Dota.static.instrumenter=true "
                     + String.format("-javaagent:%s", agentPath)
-                    + " -cp %to_instrument% io.opentelemetry.javaagent.bootstrap.StaticInstrumenter %dir%";
+                    + " -cp %to_instrument% " + STATIC_INSTRUMENTER_CLASS + " %dir%";
 
             StringBuilder libFiles = new StringBuilder();
             for (Enumeration<JarEntry> enums = jarFile.entries(); enums.hasMoreElements(); ) {
@@ -103,7 +112,7 @@ public class DependenciesGatherer {
 
             Process process = new ProcessBuilder("java", "-Dota.static.instrumenter=true",
                     String.format("-javaagent:%s", agentPath), "-cp", String.format("%s", libFiles),
-                    "io.opentelemetry.javaagent.bootstrap.StaticInstrumenter",
+                    STATIC_INSTRUMENTER_CLASS,
                     LIB_DIR).inheritIO().start();
             int ret = process.waitFor();
 
