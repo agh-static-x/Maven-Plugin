@@ -1,13 +1,14 @@
 package com.example.agent_instrumentation;
 
 import com.example.agent_instrumentation.advices.*;
-import com.example.agent_instrumentation.instrumentation.*;
+import io.opentelemetry.javaagent.BytesAndName;
+import io.opentelemetry.javaagent.PostTransformer;
+import io.opentelemetry.javaagent.PreTransformer;
+import io.opentelemetry.javaagent.StaticInstrumenter;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.asm.Advice;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;

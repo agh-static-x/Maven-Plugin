@@ -1,6 +1,6 @@
 package com.example.agent_instrumentation.advices;
 
-import com.example.agent_instrumentation.instrumentation.StaticInstrumenter;
+import io.opentelemetry.javaagent.StaticInstrumenter;
 import net.bytebuddy.asm.Advice;
 
 import java.lang.instrument.Instrumentation;
