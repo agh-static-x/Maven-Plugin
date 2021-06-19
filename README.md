@@ -22,6 +22,48 @@ Add the following code to the `pom.xml` file of the project where you want to ex
 		<version>1.0-SNAPSHOT</version>
 		<configuration>
 			<agentPath>opentelemetry-javaagent-static-all.jar</agentPath>
+			
+			<exporterType>OTLP</exporterType>
+			<metricExporterEndpoint></metricExporterEndpoint>
+			<traceExporterEndpoint></traceExporterEndpoint>
+			<exporterHeader>
+			    <key1>value1</key1>
+			    <key2>value2</key2>
+			</exporterHeader>
+			<exporterTimeout></exporterTimeout>
+			<zipkinPort></zipkinPort>
+			<zipkinHost></zipkinHost>
+			<metricExporterOn>true</metricExporterOn>
+			<traceExporterOn>true</traceExporterOn>
+			<spanNamePrefix></spanNamePrefix>
+			
+			<propagator>
+			    <param>TraceContext</param>
+			    <param>Baggage</param>
+			</propagator>
+			
+			<openTelemetryResource>
+			    <key1>value1</key1>
+			    <key2>value2</key2>
+			</openTelemetryResource>
+			
+			<spanPacketProcessorDelay>5000</spanPacketProcessorDelay>
+			<spanPacketProcessorMaxQueueSize>2048</spanPacketProcessorMaxQueueSize>
+			<spanPacketProcessorMaxPacketSize>512</spanPacketProcessorMaxPacketSize>
+			<spanPacketProcessorMaxExportTime>3000</spanPacketProcessorMaxExportTime>
+			
+			<samplerAlwaysOn></samplerAlwaysOn>
+			<samplerAlwaysOf></samplerAlwaysOf>
+			<samplerTraceIdRatio></samplerTraceIdRatio>
+			<samplerParentBasedAlwaysOn></samplerParentBasedAlwaysOn>
+			<samplerParentBasedAlwaysOff></samplerParentBasedAlwaysOff>
+			<samplerParentBasedTraceIdRatio></samplerParentBasedTraceIdRatio>
+			
+			<maxSpanAttributeNumber>128</maxSpanAttributeNumber>
+			<maxSpanEventNumber>128</maxSpanEventNumber>
+			<maxSpanLinkNumber>128</maxSpanLinkNumber>
+			
+			<intervalMetricReader>60000</intervalMetricReader>
 		</configuration>
 		<executions>
 			<execution>
