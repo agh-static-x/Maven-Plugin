@@ -1,4 +1,4 @@
-package com.example.agent_instrumentation.instrumentation;
+package io.opentelemetry.javaagent;
 
 public class BytesAndName {
     public byte[] bytes;

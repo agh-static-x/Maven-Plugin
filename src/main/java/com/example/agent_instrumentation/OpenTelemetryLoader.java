@@ -1,13 +1,14 @@
 package com.example.agent_instrumentation;
 
 import com.example.agent_instrumentation.advices.*;
-import com.example.agent_instrumentation.instrumentation.*;
+import io.opentelemetry.javaagent.BytesAndName;
+import io.opentelemetry.javaagent.PostTransformer;
+import io.opentelemetry.javaagent.PreTransformer;
+import io.opentelemetry.javaagent.StaticInstrumenter;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.asm.Advice;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -21,7 +22,7 @@ public class OpenTelemetryLoader {
     public String otelJarPath;
 
     public final String OTEL_AGENT_NAME = "io.opentelemetry.javaagent.OpenTelemetryAgent";
-    String TMP_DIR = "./tmpOtel";
+    public final String TMP_DIR = "tmpOtel";
 
     public OpenTelemetryLoader(String otelJarPath) {
         this.otelJarPath = otelJarPath;
@@ -31,8 +32,9 @@ public class OpenTelemetryLoader {
         loadOtel(new File(otelJarPath));
         File tmpDir = new File(TMP_DIR);
         tmpDir.mkdir();
-        File copyFile = new File(TMP_DIR+"/"+otelJarPath);
+        File copyFile = new File(TMP_DIR+ System.getProperty("file.separator")+otelJarPath);
         Files.copy(new File(otelJarPath).toPath(), copyFile.toPath());
+        System.out.println("Copied OTEL to " + TMP_DIR);
         instrumentOpenTelemetryAgent(copyFile);
         injectClasses(copyFile);
     }
@@ -53,18 +55,21 @@ public class OpenTelemetryLoader {
 
     public void instrumentOpenTelemetryAgent(File jarFile) throws IOException {
         new ByteBuddy()
-            .rebase(openTelemetryAgentClass)
-            .visit(Advice.to(PrintingAdvices.class).on(isMethod()))
-            .visit(Advice.to(OpenTelemetryAgentAdvices.class).on(
-                isMethod()
-                    .and(named("agentmain"))
-                    .and(takesArguments(2))
+                .rebase(openTelemetryAgentClass)
+//            .visit(Advice.to(PrintingAdvices.class).on(isMethod()))
+                .visit(Advice.to(OpenTelemetryAgentAdvices.class).on(
+                        isMethod()
+                                .and(named("agentmain"))
+//                                .and(takesArguments(2))
+                        )
                 )
-            )
-            .make()
-            .inject(jarFile);
-//                .load(ClassLoader.getSystemClassLoader())
-//                .getLoaded();
+                .visit(Advice.to(InstallBootstrapJarAdvice.class).on(
+                        isMethod()
+                                .and(named("installBootstrapJar"))
+                        )
+                )
+                .make()
+                .inject(jarFile);
     }
 
     public void injectClasses(File jarFile) throws IOException {
@@ -79,12 +84,14 @@ public class OpenTelemetryLoader {
             String[] clazzNameParts = clazz.getName().split("\\.");
             String clazzName = clazzNameParts[clazzNameParts.length - 1];
 
+            String fullclazzName =  "io.opentelemetry.javaagent." + clazzName;
+
             new ByteBuddy()
                 .rebase(clazz)
-                .name("io.opentelemetry.javaagent." + clazzName)
+                .name(fullclazzName)
                 .make()
                 .inject(jarFile);
-            System.out.println("Instrumented " + clazzName);
+            System.out.println("Instrumented " + fullclazzName);
         }
     }
 }

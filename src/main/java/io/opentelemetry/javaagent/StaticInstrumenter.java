@@ -1,4 +1,4 @@
-package com.example.agent_instrumentation.instrumentation;
+package io.opentelemetry.javaagent;
 
 import java.io.*;
 import java.lang.instrument.ClassFileTransformer;
@@ -72,6 +72,7 @@ public class StaticInstrumenter {
         try {
           final Class c = Class.forName(className, false, ClassLoader.getSystemClassLoader());
           final byte[] modified = InstrumentedClasses.get(className.replace('.', '/'));
+          System.out.println("[modified] " + modified);
           if (modified == null) {
             entryIn = in.getInputStream(ent);
           } else {

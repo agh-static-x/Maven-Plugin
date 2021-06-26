@@ -1,4 +1,4 @@
-package com.example.agent_instrumentation.instrumentation;
+package io.opentelemetry.javaagent;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
