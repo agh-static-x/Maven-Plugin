@@ -1,4 +1,4 @@
-package com.example.instrumentation_poc;
+package agh.edu.pl.dependency;
 
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;

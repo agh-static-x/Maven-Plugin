@@ -1,4 +1,4 @@
-package com.example.dependency_tree;
+package agh.edu.pl.dependency.tree;
 
 import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.graph.DependencyVisitor;

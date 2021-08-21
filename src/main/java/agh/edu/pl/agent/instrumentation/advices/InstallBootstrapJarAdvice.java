@@ -1,4 +1,4 @@
-package com.example.agent_instrumentation.advices;
+package agh.edu.pl.agent.instrumentation.advices;
 
 import io.opentelemetry.javaagent.StaticInstrumenter;
 import net.bytebuddy.asm.Advice;
