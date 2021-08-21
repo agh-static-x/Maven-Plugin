@@ -2,6 +2,8 @@
 ## Execution
 Run `mvn package` directly in the current project to run this plugin.
 
+!!! Try it out with [this](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.1.0/opentelemetry-javaagent-all.jar) distribution of OTEL. !!!
+
 Add `opentelemetry-javaagent-all.jar` to your project folder. You can get recent release on https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases. 
 
 Run `mvn package` in *Maven Plugin* project and install it to your local repository with comment:
