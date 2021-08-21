@@ -9,7 +9,6 @@ public class OpenTelemetryAgentAdvices {
 
   @Advice.OnMethodExit(suppress = Throwable.class)
   static long exit(
-      @Advice.Origin String origin,
       @Advice.Origin("#t #m") String detailedOrigin,
       @Advice.Argument(value = 1, readOnly = false) Instrumentation inst) {
 

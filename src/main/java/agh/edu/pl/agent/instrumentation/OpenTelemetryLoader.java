@@ -1,7 +1,8 @@
 /* (C)2021 */
 package agh.edu.pl.agent.instrumentation;
 
-import static net.bytebuddy.matcher.ElementMatchers.*;
+import static net.bytebuddy.matcher.ElementMatchers.isMethod;
+import static net.bytebuddy.matcher.ElementMatchers.named;
 
 import agh.edu.pl.agent.instrumentation.advices.InstallBootstrapJarAdvice;
 import agh.edu.pl.agent.instrumentation.advices.OpenTelemetryAgentAdvices;
@@ -11,52 +12,32 @@ import io.opentelemetry.javaagent.PreTransformer;
 import io.opentelemetry.javaagent.StaticInstrumenter;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.util.List;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.asm.Advice;
 
 public class OpenTelemetryLoader {
-  public URLClassLoader otelClassLoader;
-  public Class<?> openTelemetryAgentClass;
-  public String otelJarPath;
 
-  public final String OTEL_AGENT_NAME = "io.opentelemetry.javaagent.OpenTelemetryAgent";
-  public final String TMP_DIR = "tmpOtel";
+  private Class<?> otelAgentClass;
+
+  private final String otelJarPath;
+  private static final String OTEL_AGENT_NAME = "io.opentelemetry.javaagent.OpenTelemetryAgent";
+  private static final String TMP_DIR = "tmpOtel";
 
   public OpenTelemetryLoader(String otelJarPath) {
     this.otelJarPath = otelJarPath;
   }
 
   public void instrument() throws IOException {
-    loadOtel(new File(otelJarPath));
-    File tmpDir = new File(TMP_DIR);
-    tmpDir.mkdir();
-    File copyFile = new File(TMP_DIR + System.getProperty("file.separator") + otelJarPath);
-    Files.copy(new File(otelJarPath).toPath(), copyFile.toPath());
-    System.out.println("Copied OTEL to " + TMP_DIR);
-    instrumentOpenTelemetryAgent(copyFile);
-    injectClasses(copyFile);
-  }
-
-  public synchronized void loadOtel(File otelJar) {
-    try {
-      otelClassLoader =
-          new URLClassLoader(
-              new URL[] {otelJar.toURI().toURL()}, OpenTelemetryLoader.class.getClassLoader());
-
-      openTelemetryAgentClass = Class.forName(OTEL_AGENT_NAME, true, otelClassLoader);
-      System.out.println("Loaded OpenTelemetryAgent: " + openTelemetryAgentClass);
-    } catch (ClassNotFoundException | IOException e) {
-      e.printStackTrace();
-    }
+    otelAgentClass = JarUtils.loadClassFromJar(otelJarPath, OTEL_AGENT_NAME);
+    File copiedOtel = JarUtils.copyFile(otelJarPath, TMP_DIR);
+    instrumentOpenTelemetryAgent(copiedOtel);
+    injectClasses(copiedOtel);
   }
 
   public void instrumentOpenTelemetryAgent(File jarFile) throws IOException {
     new ByteBuddy()
-        .rebase(openTelemetryAgentClass)
+        .rebase(otelAgentClass)
         //            .visit(Advice.to(PrintingAdvices.class).on(isMethod()))
         .visit(
             Advice.to(OpenTelemetryAgentAdvices.class)
