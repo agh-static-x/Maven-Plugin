@@ -1,3 +1,4 @@
+/* (C)2021 */
 package io.opentelemetry.javaagent;
 
 import java.io.*;
@@ -30,17 +31,17 @@ public class StaticInstrumenter {
 
     System.out.println("[CLASSPATH] " + System.getProperty("java.class.path"));
 
-
     // FIXME error handling, user niceties, etc.
     final File outDir = new File(args[0]);
     if (!outDir.exists()) {
       outDir.mkdir();
     }
 
-    for (final String pathItem : System.getProperty("java.class.path")
-        .split(System.getProperty("path.separator"))) {
+    for (final String pathItem :
+        System.getProperty("java.class.path").split(System.getProperty("path.separator"))) {
       System.out.println("[PATH_ITEM] " + pathItem);
-      // FIXME java 9 / jmod support, proper handling of directories, just generally better and more resilient stuff
+      // FIXME java 9 / jmod support, proper handling of directories, just generally better and more
+      // resilient stuff
       // FIXME jmod in particular introduces weirdness with adding helpers to the dependencies
       if (pathItem.endsWith(".jar")) {
         processJar(new File(pathItem), outDir);
@@ -105,5 +106,4 @@ public class StaticInstrumenter {
       read = in.read(buf);
     }
   }
-
 }
