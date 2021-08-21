@@ -1,7 +1,7 @@
-package com.example;
+package agh.edu.pl;
 
-import com.example.agent_instrumentation.OpenTelemetryLoader;
-import com.example.instrumentation_poc.DependenciesGatherer;
+import agh.edu.pl.dependency.DependenciesGatherer;
+import agh.edu.pl.agent.instrumentation.OpenTelemetryLoader;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;

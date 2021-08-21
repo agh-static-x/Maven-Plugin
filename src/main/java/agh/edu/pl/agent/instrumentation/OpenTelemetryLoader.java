@@ -1,6 +1,7 @@
-package com.example.agent_instrumentation;
+package agh.edu.pl.agent.instrumentation;
 
-import com.example.agent_instrumentation.advices.*;
+import agh.edu.pl.agent.instrumentation.advices.InstallBootstrapJarAdvice;
+import agh.edu.pl.agent.instrumentation.advices.OpenTelemetryAgentAdvices;
 import io.opentelemetry.javaagent.BytesAndName;
 import io.opentelemetry.javaagent.PostTransformer;
 import io.opentelemetry.javaagent.PreTransformer;
