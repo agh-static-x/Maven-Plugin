@@ -1,4 +1,4 @@
-package com.example.config;
+package agh.edu.pl.config;
 
 public enum Propagator {
     TraceContext,
