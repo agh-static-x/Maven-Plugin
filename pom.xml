@@ -13,8 +13,8 @@
     <url>http://maven.apache.org</url>
 
     <properties>
-        <maven.compiler.source>14</maven.compiler.source>
-        <maven.compiler.target>14</maven.compiler.target>
+        <maven.compiler.source>15</maven.compiler.source>
+        <maven.compiler.target>15</maven.compiler.target>
 
         <maven-plugin-api.version>3.6.2</maven-plugin-api.version>
         <maven-plugin-annotations.version>3.6.0</maven-plugin-annotations.version>
@@ -79,7 +79,30 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy-dep</artifactId>
-            <version>1.11.0</version>
+            <version>1.11.5</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>io.opentelemetry.javaagent</groupId>
+            <artifactId>opentelemetry-javaagent-tooling</artifactId>
+            <version>1.1.0-alpha</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-api</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-zipkin</artifactId>
+            <version>1.2.0</version>
         </dependency>
     </dependencies>
 
@@ -91,6 +114,59 @@
                 <version>3.6.1</version>
                 <configuration>
                     <goalPrefix>dependency-inspector-maven-plugin</goalPrefix>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.12.3</version>
+                <configuration>
+                    <formats>
+                        <!-- you can define as many formats as you want, each is independent -->
+                        <format>
+                            <!-- define the files to apply to -->
+                            <includes>
+                                <include>*.md</include>
+                                <include>.gitignore</include>
+                            </includes>
+                            <!-- define the steps to apply to those files -->
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
+                            <indent>
+                                <tabs>true</tabs>
+                                <spacesPerTab>4</spacesPerTab>
+                            </indent>
+                        </format>
+                    </formats>
+                    <!-- define a language-specific format -->
+                    <java>
+                        <includes>
+                            <include>src/main/java/**/*.java</include>
+                            <include>src/test/java/**/*.java</include>
+                        </includes>
+
+                        <importOrder/> <!-- standard import order -->
+                        <importOrder>  <!-- or a custom ordering -->
+                            <order>java,javax,org,com,com.diffplug,
+                            </order>  <!-- or use <file>${basedir}/eclipse.importorder</file> -->
+                            <!-- You probably want an empty string at the end - all of the
+                                 imports you didn't specify explicitly will go there. -->
+                        </importOrder>
+
+                        <removeUnusedImports/> <!-- self-explanatory -->
+
+                        <googleJavaFormat>
+                            <version>1.8</version>
+                            <style>GOOGLE</style>
+                        </googleJavaFormat>
+                        <!--                        <eclipse/>          &lt;!&ndash; has its own section below &ndash;&gt;-->
+                        <!--                        <prettier/>         &lt;!&ndash; has its own section below &ndash;&gt;-->
+
+                        <licenseHeader>
+                            <content>/* (C)$YEAR */</content>  <!-- or <file>${basedir}/license-header</file> -->
+                        </licenseHeader>
+                    </java>
                 </configuration>
             </plugin>
         </plugins>
