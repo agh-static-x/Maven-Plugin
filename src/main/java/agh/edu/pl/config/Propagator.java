@@ -1,11 +1,12 @@
+/* (C)2021 */
 package agh.edu.pl.config;
 
 public enum Propagator {
-    TraceContext,
-    Baggage,
-    B3Single,
-    B3Multi,
-    Jaeger,
-    XRay,
-    OTTrace
+  TraceContext,
+  Baggage,
+  B3Single,
+  B3Multi,
+  Jaeger,
+  XRay,
+  OTTrace
 }

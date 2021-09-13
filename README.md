@@ -53,7 +53,7 @@ Add the following code to the `pom.xml` file of the project where you want to ex
 			<spanPacketProcessorMaxExportTime>3000</spanPacketProcessorMaxExportTime>
 
 			<samplerAlwaysOn></samplerAlwaysOn>
-			<samplerAlwaysOff></samplerAlwaysOff>
+			<samplerAlwaysOff></samplerAlwaysOf>
 			<samplerTraceIdRatio></samplerTraceIdRatio>
 			<samplerParentBasedAlwaysOn></samplerParentBasedAlwaysOn>
 			<samplerParentBasedAlwaysOff></samplerParentBasedAlwaysOff>

@@ -7,7 +7,6 @@ import agh.edu.pl.config.Propagator;
 import agh.edu.pl.dependency.DependenciesGatherer;
 import java.io.IOException;
 import java.util.Map;
-
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -22,14 +21,10 @@ public class DependencyInspectorMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project}", required = true, readonly = true)
   private MavenProject project;
 
-
-
   // agent path
 
   @Parameter(property = "agentPath", defaultValue = "opentelemetry-javaagent-all.jar")
   private String agentPath;
-
-
 
   // exporter
 
@@ -63,21 +58,15 @@ public class DependencyInspectorMojo extends AbstractMojo {
   @Parameter(property = "spanNamePrefix")
   private String spanNamePrefix;
 
-
-
   // propagator
 
   @Parameter(property = "propagator")
   private Propagator[] propagator;
 
-
-
   // OpenTelemetry Resource
 
   @Parameter(property = "openTelemetryResource")
   private Map openTelemetryResource;
-
-
 
   // span packet processor
 
@@ -92,8 +81,6 @@ public class DependencyInspectorMojo extends AbstractMojo {
 
   @Parameter(property = "spanPacketProcessorMaxExportTime", defaultValue = "3000")
   private Long spanPacketProcessorMaxExportTime;
-
-
 
   // sampler
 
@@ -115,8 +102,6 @@ public class DependencyInspectorMojo extends AbstractMojo {
   @Parameter(property = "samplerParentBasedTraceIdRatio")
   private double samplerParentBasedTraceIdRatio;
 
-
-
   // span limits
 
   @Parameter(property = "maxSpanAttributeNumber", defaultValue = "128")
@@ -128,14 +113,10 @@ public class DependencyInspectorMojo extends AbstractMojo {
   @Parameter(property = "maxSpanLinkNumber", defaultValue = "128")
   private int maxSpanLinkNumber;
 
-
-
   // Interval Metric Reader
 
   @Parameter(property = "intervalMetricReader", defaultValue = "60000")
   private Long intervalMetricReader;
-
-
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
