@@ -100,8 +100,8 @@ public class DependencyInspectorMojo extends AbstractMojo {
   @Parameter(property = "samplerAlwaysOn")
   private boolean samplerAlwaysOn;
 
-  @Parameter(property = "samplerAlwaysOf")
-  private boolean samplerAlwaysOf;
+  @Parameter(property = "samplerAlwaysOff")
+  private boolean samplerAlwaysOff;
 
   @Parameter(property = "samplerTraceIdRatio")
   private double samplerTraceIdRatio;
