@@ -24,14 +24,14 @@ public class DependencyInspectorMojo extends AbstractMojo {
 
 
 
-  // agent path ↓
+  // agent path
 
   @Parameter(property = "agentPath", defaultValue = "opentelemetry-javaagent-all.jar")
   private String agentPath;
 
 
 
-  // exporter ↓
+  // exporter
 
   @Parameter(property = "exporterType", defaultValue = "OTLP")
   private Exporter exporterType;
@@ -65,21 +65,21 @@ public class DependencyInspectorMojo extends AbstractMojo {
 
 
 
-  // propagator ↓
+  // propagator
 
   @Parameter(property = "propagator")
   private Propagator[] propagator;
 
 
 
-  // OpenTelemetry Resource ↓
+  // OpenTelemetry Resource
 
   @Parameter(property = "openTelemetryResource")
   private Map openTelemetryResource;
 
 
 
-  // span packet processor ↓
+  // span packet processor
 
   @Parameter(property = "spanPacketProcessorDelay", defaultValue = "5000")
   private Long spanPacketProcessorDelay;
@@ -95,7 +95,7 @@ public class DependencyInspectorMojo extends AbstractMojo {
 
 
 
-  // sampler ↓
+  // sampler
 
   @Parameter(property = "samplerAlwaysOn")
   private boolean samplerAlwaysOn;
@@ -117,7 +117,7 @@ public class DependencyInspectorMojo extends AbstractMojo {
 
 
 
-  // span limits ↓
+  // span limits
 
   @Parameter(property = "maxSpanAttributeNumber", defaultValue = "128")
   private int maxSpanAttributeNumber;
@@ -130,7 +130,7 @@ public class DependencyInspectorMojo extends AbstractMojo {
 
 
 
-  // Interval Metric Reader ↓
+  // Interval Metric Reader
 
   @Parameter(property = "intervalMetricReader", defaultValue = "60000")
   private Long intervalMetricReader;
