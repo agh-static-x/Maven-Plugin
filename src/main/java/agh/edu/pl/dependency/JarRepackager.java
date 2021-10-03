@@ -3,43 +3,71 @@ package agh.edu.pl.dependency;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.Enumeration;
-import java.util.Objects;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 
-public class DependenciesGatherer {
+public class JarRepackager {
   private final MavenProject project;
-  String TMP_DIR = "./tmp";
-  String OTEL_TMP = "./tmpOtel";
-  String LIB_DIR = "./tmp/BOOT-INF/lib";
-  String INSTRUMENTED = "./instrumented";
+  String TMP_DIR = "./TMP";
+  String OTEL_TMP = "./INSTRUMENTED_OTEL";
+  String INSTRUMENTED_FILE_DIR = "./INSTRUMENTED_FILE";
+  String INSTRUMENTED = "./INSTRUMENTED_JAR";
   private final String agentPath;
+  private File jarFile;
 
   private final String STATIC_INSTRUMENTER_CLASS = "io.opentelemetry.javaagent.StaticInstrumenter";
 
-  public DependenciesGatherer(MavenProject project, String agentPath) {
+  public JarRepackager(MavenProject project, String agentPath) {
     this.project = project;
     this.agentPath = OTEL_TMP + "/" + agentPath;
   }
 
+  public void listArtifacts() {
+    ArrayList<File> artifacts = new ArrayList<>();
+    artifacts.add(project.getArtifact().getFile());
+    List<Artifact> attachedArtifacts = project.getAttachedArtifacts();
+    if (attachedArtifacts.isEmpty()){
+      this.jarFile = artifacts.get(0);
+      return;
+    }
+    else {
+      attachedArtifacts.forEach((Artifact artifact) -> artifacts.add(artifact.getFile()));
+    }
+    System.out.println("Choose the JAR file you want to add telemetry to:");
+    for(int i=0;i<artifacts.size();i++){
+      System.out.println(i+" - "+artifacts.get(i).getName());
+    }
+    Scanner scanner = new Scanner(System.in);
+    int number = scanner.nextInt();
+    while(number < 0 || number > artifacts.size()-1) {
+      System.out.println("Number is out of scope. Please enter another number.");
+      number = scanner.nextInt();
+    }
+    this.jarFile = artifacts.get(number);
+  }
+
   public void instrumentMain() throws Exception {
     try {
-      File mainJar = project.getArtifact().getFile();
       JarFile jarFile = null;
       try {
-        jarFile = new JarFile(mainJar);
+        jarFile = new JarFile(this.jarFile);
       } catch (IOException e) {
         e.printStackTrace();
       }
       String pattern = Pattern.quote(System.getProperty("file.separator"));
-      assert jarFile != null;
+      if (jarFile == null) {
+        System.err.println("No JAR for project found.");
+        return;
+      }
       String[] outFileNameParts = jarFile.getName().split(pattern);
       final String outFileName = outFileNameParts[outFileNameParts.length - 1];
       String mainPath = outFileName + File.pathSeparator + agentPath;
@@ -62,48 +90,58 @@ public class DependenciesGatherer {
 
   public void instrumentDependencies() throws Exception {
     try {
-      /*Set<Artifact> dependencies = project.getDependencyArtifacts();*/
       File tmpDir = new File(TMP_DIR);
       tmpDir.mkdir();
-      File tmpBoot = new File(TMP_DIR + "/BOOT-INF");
-      tmpBoot.mkdir();
-      File tmpLib = new File(TMP_DIR + "/BOOT-INF/lib");
-      tmpLib.mkdir();
       File instrumentedDir = new File(INSTRUMENTED);
       instrumentedDir.mkdir();
+      File instrumentedFileDirectory = new File(INSTRUMENTED_FILE_DIR);
+      instrumentedFileDirectory.mkdir();
 
-      File mainJar = project.getArtifact().getFile();
       JarFile jarFile = null;
       try {
-        jarFile = new JarFile(mainJar);
+        jarFile = new JarFile(this.jarFile);
       } catch (IOException e) {
         e.printStackTrace();
       }
 
-      assert jarFile != null;
+      if (jarFile == null){
+        System.err.println("Error while getting project jar file.");
+        return;
+      }
       String pattern = Pattern.quote(System.getProperty("file.separator"));
       String[] outFileNameParts = jarFile.getName().split(pattern);
       final String outFileName = outFileNameParts[outFileNameParts.length - 1];
-      // final File outFile = new File(INSTRUMENTED, outFileName);
-      final File outFile = new File(outFileName);
+      final File outFile = new File(INSTRUMENTED, outFileName);
       final ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(outFile));
+      zout.setMethod(ZipOutputStream.STORED);
 
-      String COMMAND =
-          "java -Dota.static.instrumenter=true "
-              + String.format("-javaagent:%s", agentPath)
-              + " -cp %to_instrument% "
-              + STATIC_INSTRUMENTER_CLASS
-              + " %dir%";
-
-      StringBuilder libFiles = new StringBuilder();
       for (Enumeration<JarEntry> enums = jarFile.entries(); enums.hasMoreElements(); ) {
         JarEntry entry = enums.nextElement();
         if (entry.getName().endsWith(".jar")) {
-          String[] nameParts = entry.getName().split("/");
-          String fileName = TMP_DIR + "/" + nameParts[nameParts.length - 1];
+          StringBuilder classpath = new StringBuilder();
+          String fileName = TMP_DIR + "/" + entry.getName();
+          System.out.println("FILE NAME: "+fileName);
           File f = new File(fileName);
+          f.getParentFile().mkdirs();
           Files.copy(jarFile.getInputStream(entry), f.toPath());
-          libFiles.append(fileName).append(File.pathSeparator);
+          classpath.append(fileName).append(File.pathSeparator);
+          System.out.println(classpath);
+          Process process =
+                  new ProcessBuilder(
+                          "java",
+                          "-Dota.static.instrumenter=true",
+                          String.format("-javaagent:%s", agentPath),
+                          "-cp",
+                          String.format("%s", classpath),
+                          STATIC_INSTRUMENTER_CLASS,
+                          INSTRUMENTED_FILE_DIR)
+                          .inheritIO()
+                          .start();
+          int ret = process.waitFor();
+          String[] fileNameParts = entry.getName().split("/");
+          createZipEntry(zout, new File(INSTRUMENTED_FILE_DIR+"/"+fileNameParts[fileNameParts.length - 1]), entry.getName());
+          FileUtils.cleanDirectory(TMP_DIR);
+          FileUtils.cleanDirectory(INSTRUMENTED_FILE_DIR);
         } else {
           ZipEntry outEntry = new ZipEntry(entry);
           zout.putNextEntry(outEntry);
@@ -113,39 +151,17 @@ public class DependenciesGatherer {
           zout.closeEntry();
         }
       }
-
-      libFiles.append(agentPath).append(File.pathSeparator);
-
-      Process process =
-          new ProcessBuilder(
-                  "java",
-                  "-Dota.static.instrumenter=true",
-                  String.format("-javaagent:%s", agentPath),
-                  "-cp",
-                  String.format("%s", libFiles),
-                  STATIC_INSTRUMENTER_CLASS,
-                  LIB_DIR)
-              .inheritIO()
-              .start();
-      int ret = process.waitFor();
-
-      zout.setMethod(ZipOutputStream.STORED);
-
-      for (final File jar : Objects.requireNonNull(tmpLib.listFiles())) {
-        createZipEntry(zout, jar);
-      }
-
       zout.close();
       jarFile.close();
     } finally {
       FileUtils.deleteDirectory(TMP_DIR);
+      FileUtils.deleteDirectory(INSTRUMENTED_FILE_DIR);
     }
   }
 
-  private void createZipEntry(ZipOutputStream zout, File file) throws IOException {
+  private void createZipEntry(ZipOutputStream zout, File file, String pathToFile) throws IOException {
     InputStream is = new FileInputStream(file);
-    String[] nameParts = file.getName().split("/");
-    ZipEntry entry = new ZipEntry("BOOT-INF/lib/" + nameParts[nameParts.length - 1]);
+    ZipEntry entry = new ZipEntry(pathToFile);
     byte[] bytes = Files.readAllBytes(file.toPath());
     entry.setCompressedSize(file.length());
     entry.setSize(file.length());
