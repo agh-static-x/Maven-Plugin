@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
@@ -35,20 +34,19 @@ public class JarRepackager {
     ArrayList<File> artifacts = new ArrayList<>();
     artifacts.add(project.getArtifact().getFile());
     List<Artifact> attachedArtifacts = project.getAttachedArtifacts();
-    if (attachedArtifacts.isEmpty()){
+    if (attachedArtifacts.isEmpty()) {
       this.jarFile = artifacts.get(0);
       return;
-    }
-    else {
+    } else {
       attachedArtifacts.forEach((Artifact artifact) -> artifacts.add(artifact.getFile()));
     }
     System.out.println("Choose the JAR file you want to add telemetry to:");
-    for(int i=0;i<artifacts.size();i++){
-      System.out.println(i+" - "+artifacts.get(i).getName());
+    for (int i = 0; i < artifacts.size(); i++) {
+      System.out.println(i + " - " + artifacts.get(i).getName());
     }
     Scanner scanner = new Scanner(System.in);
     int number = scanner.nextInt();
-    while(number < 0 || number > artifacts.size()-1) {
+    while (number < 0 || number > artifacts.size() - 1) {
       System.out.println("Number is out of scope. Please enter another number.");
       number = scanner.nextInt();
     }
@@ -104,7 +102,7 @@ public class JarRepackager {
         e.printStackTrace();
       }
 
-      if (jarFile == null){
+      if (jarFile == null) {
         System.err.println("Error while getting project jar file.");
         return;
       }
@@ -120,26 +118,29 @@ public class JarRepackager {
         if (entry.getName().endsWith(".jar")) {
           StringBuilder classpath = new StringBuilder();
           String fileName = TMP_DIR + "/" + entry.getName();
-          System.out.println("FILE NAME: "+fileName);
+          System.out.println("FILE NAME: " + fileName);
           File f = new File(fileName);
           f.getParentFile().mkdirs();
           Files.copy(jarFile.getInputStream(entry), f.toPath());
           classpath.append(fileName).append(File.pathSeparator);
           System.out.println(classpath);
           Process process =
-                  new ProcessBuilder(
-                          "java",
-                          "-Dota.static.instrumenter=true",
-                          String.format("-javaagent:%s", agentPath),
-                          "-cp",
-                          String.format("%s", classpath),
-                          STATIC_INSTRUMENTER_CLASS,
-                          INSTRUMENTED_FILE_DIR)
-                          .inheritIO()
-                          .start();
+              new ProcessBuilder(
+                      "java",
+                      "-Dota.static.instrumenter=true",
+                      String.format("-javaagent:%s", agentPath),
+                      "-cp",
+                      String.format("%s", classpath),
+                      STATIC_INSTRUMENTER_CLASS,
+                      INSTRUMENTED_FILE_DIR)
+                  .inheritIO()
+                  .start();
           int ret = process.waitFor();
           String[] fileNameParts = entry.getName().split("/");
-          createZipEntry(zout, new File(INSTRUMENTED_FILE_DIR+"/"+fileNameParts[fileNameParts.length - 1]), entry.getName());
+          createZipEntry(
+              zout,
+              new File(INSTRUMENTED_FILE_DIR + "/" + fileNameParts[fileNameParts.length - 1]),
+              entry.getName());
           FileUtils.cleanDirectory(TMP_DIR);
           FileUtils.cleanDirectory(INSTRUMENTED_FILE_DIR);
         } else {
@@ -159,7 +160,8 @@ public class JarRepackager {
     }
   }
 
-  private void createZipEntry(ZipOutputStream zout, File file, String pathToFile) throws IOException {
+  private void createZipEntry(ZipOutputStream zout, File file, String pathToFile)
+      throws IOException {
     InputStream is = new FileInputStream(file);
     ZipEntry entry = new ZipEntry(pathToFile);
     byte[] bytes = Files.readAllBytes(file.toPath());
