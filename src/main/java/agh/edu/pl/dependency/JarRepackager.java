@@ -74,6 +74,7 @@ public class JarRepackager {
           new ProcessBuilder(
                   "java",
                   "-Dota.static.instrumenter=true",
+                  "-Dotel.javaagent.experimental.field-injection.enabled=false",
                   String.format("-javaagent:%s", agentPath),
                   "-cp",
                   String.format("%s", mainPath),
@@ -82,7 +83,6 @@ public class JarRepackager {
               .inheritIO()
               .start();
       int ret = process.waitFor();
-      System.out.println("RET: " + ret);
     } finally {
       FileUtils.deleteDirectory(OTEL_TMP);
       FileUtils.deleteDirectory(INSTRUMENTED);
@@ -131,6 +131,7 @@ public class JarRepackager {
               new ProcessBuilder(
                       "java",
                       "-Dota.static.instrumenter=true",
+                      "-Dotel.javaagent.experimental.field-injection.enabled=false",
                       String.format("-javaagent:%s", agentPath),
                       "-cp",
                       String.format("%s", classpath),
