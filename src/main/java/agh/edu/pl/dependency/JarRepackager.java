@@ -20,6 +20,7 @@ public class JarRepackager {
   String OTEL_TMP = "./INSTRUMENTED_OTEL";
   String INSTRUMENTED_FILE_DIR = "./INSTRUMENTED_FILE";
   String INSTRUMENTED = "./INSTRUMENTED_JAR";
+  String FINAL = "./INSTRUMENTED_FINAL";
   private final String agentPath;
   private File jarFile;
 
@@ -67,8 +68,8 @@ public class JarRepackager {
         return;
       }
       String[] outFileNameParts = jarFile.getName().split(pattern);
-      final String outFileName = outFileNameParts[outFileNameParts.length - 1];
-      String mainPath = outFileName + File.pathSeparator + agentPath;
+      final String outFileName = INSTRUMENTED + "/" + outFileNameParts[outFileNameParts.length - 1];
+      String mainPath = outFileName + File.pathSeparator;
       Process process =
           new ProcessBuilder(
                   "java",
@@ -77,12 +78,14 @@ public class JarRepackager {
                   "-cp",
                   String.format("%s", mainPath),
                   STATIC_INSTRUMENTER_CLASS,
-                  INSTRUMENTED)
+                  FINAL)
               .inheritIO()
               .start();
       int ret = process.waitFor();
+      System.out.println("RET: " + ret);
     } finally {
       FileUtils.deleteDirectory(OTEL_TMP);
+      FileUtils.deleteDirectory(INSTRUMENTED);
     }
   }
 
