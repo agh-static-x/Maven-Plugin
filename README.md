@@ -23,47 +23,85 @@ Add the following code to the `pom.xml` file of the project where you want to ex
 		<configuration>
 			<agentPath>{path_to_opentelemetry-javaagent-all.jar}</agentPath>
 
-			<exporterType>OTLP</exporterType>
-			<metricExporterEndpoint></metricExporterEndpoint>
-			<traceExporterEndpoint></traceExporterEndpoint>
-			<exporterHeader>
-				<key1>value1</key1>
-				<key2>value2</key2>
-			</exporterHeader>
-			<exporterTimeout></exporterTimeout>
-			<zipkinPort></zipkinPort>
-			<zipkinHost></zipkinHost>
-			<metricExporterOn>true</metricExporterOn>
-			<traceExporterOn>true</traceExporterOn>
-			<spanNamePrefix></spanNamePrefix>
+			<exporter>
+				<otlpExporter>
+					<tracesExporter>otlp</tracesExporter>
+					<metricExporter>otlp</metricExporter>
+
+					<exporterOtlpEndpoint></exporterOtlpEndpoint>
+					<exporterOtlpTracesEndpoint></exporterOtlpTracesEndpoint>
+					<exporterOtlpMetricsEndpoint></exporterOtlpMetricsEndpoint>
+
+					<exporterOtlpHeaders></exporterOtlpHeaders>
+					<exporterOtlpTracesHeaders></exporterOtlpTracesHeaders>
+					<exporterOtlpMetricsHeaders></exporterOtlpMetricsHeaders>
+
+					<exporterOtlpTimeout></exporterOtlpTimeout>
+					<exporterOtlpTracesTimeout></exporterOtlpTracesTimeout>
+					<exporterOtlpMetricsTimeout></exporterOtlpMetricsTimeout>
+				</otlpExporter>
+				<jaegerExporter>
+					<tracesExporter>jaeger</tracesExporter>
+
+					<exporterJaegerEndpoint></exporterJaegerEndpoint>
+					<exporterJaegerTimeout></exporterJaegerTimeout>
+				</jaegerExporter>
+				<zipkinExporter>
+					<tracesExporter>zipkin</tracesExporter>
+
+					<exporterZipkinEndpoint></exporterZipkinEndpoint>
+				</zipkinExporter>
+				<prometheusExporter>
+					<metricExporter>prometheus</metricExporter>
+
+					<prometheusPort></prometheusPort>
+					<prometheusHost></prometheusHost>
+				</prometheusExporter>
+				<loggingExporter>
+					<tracesExporter>logging</tracesExporter>
+					<metricExporter>logging</metricExporter>
+
+					<exporterLoggingPrefix></exporterLoggingPrefix>
+				</loggingExporter>
+			</exporter>
 
 			<propagator>
-				<param>TraceContext</param>
-				<param>Baggage</param>
+				<propagator>tracecontext</propagator>
+				<propagator>baggage</propagator>
 			</propagator>
 
 			<openTelemetryResource>
-				<key1>value1</key1>
-				<key2>value2</key2>
+					<attributes>
+						<key1>value1</key1>
+						<key2>value2</key2>
+					</attributes>
+					<serviceName></serviceName>
 			</openTelemetryResource>
 
-			<spanPacketProcessorDelay>5000</spanPacketProcessorDelay>
-			<spanPacketProcessorMaxQueueSize>2048</spanPacketProcessorMaxQueueSize>
-			<spanPacketProcessorMaxPacketSize>512</spanPacketProcessorMaxPacketSize>
-			<spanPacketProcessorMaxExportTime>3000</spanPacketProcessorMaxExportTime>
+			<batchSpanProcessor>
+				<bspScheduleDelay>5000</bspScheduleDelay>
+				<bspMaxQueueSize>2048</bspMaxQueueSize>
+				<bspMaxExportBatchSize>512</bspMaxExportBatchSize>
+				<bspExportTimeout>30000</bspExportTimeout>
+			</batchSpanProcessor>
 
-			<samplerAlwaysOn></samplerAlwaysOn>
-			<samplerAlwaysOff></samplerAlwaysOf>
-			<samplerTraceIdRatio></samplerTraceIdRatio>
-			<samplerParentBasedAlwaysOn></samplerParentBasedAlwaysOn>
-			<samplerParentBasedAlwaysOff></samplerParentBasedAlwaysOff>
-			<samplerParentBasedTraceIdRatio></samplerParentBasedTraceIdRatio>
+			<sampler>
+				<alwaysOn></alwaysOn>
+				<alwaysOff></alwaysOff>
+				<traceIdRatio></traceIdRatio>
+				<parentBasedAlwaysOn></parentBasedAlwaysOn>
+				<parentBasedAlwaysOff></parentBasedAlwaysOff>
+				<parentBasedTraceIdRatio></parentBasedTraceIdRatio>
+			</sampler>
 
-			<maxSpanAttributeNumber>128</maxSpanAttributeNumber>
-			<maxSpanEventNumber>128</maxSpanEventNumber>
-			<maxSpanLinkNumber>128</maxSpanLinkNumber>
+			<spanLimits>
+				<spanAttributeValueLengthLimit></spanAttributeValueLengthLimit>
+				<spanAttributeCountLimit>128</spanAttributeCountLimit>
+				<spanEventCountLimit>128</spanEventCountLimit>
+				<spanLinkCountLimit>128</spanLinkCountLimit>
+			</spanLimits>
 
-			<intervalMetricReader>60000</intervalMetricReader>
+			<imrExportInterval>60000</imrExportInterval>
 		</configuration>
 		<executions>
 			<execution>
@@ -78,3 +116,6 @@ Add the following code to the `pom.xml` file of the project where you want to ex
 ```
 
 Run `mvn package` directly in the current project to run this plugin.
+
+## Spotless
+To apply Spotless run `mvn spotless:apply`.
