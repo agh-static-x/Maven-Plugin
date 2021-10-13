@@ -34,6 +34,7 @@ public class DependencyInspectorMojo extends AbstractMojo {
       repackager.listArtifacts();
       repackager.instrumentDependencies();
       repackager.instrumentMain();
+      repackager.addOpenTelemetryClasses();
     } catch (Exception e) {
       e.printStackTrace();
     }

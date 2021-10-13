@@ -1,6 +1,7 @@
 /* (C)2021 */
 package agh.edu.pl.dependency;
 
+import agh.edu.pl.dependency.JarRepackageClasses.OpenTelemetryClasses;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
@@ -17,7 +18,7 @@ import org.codehaus.plexus.util.FileUtils;
 public class JarRepackager {
   private final MavenProject project;
   String TMP_DIR = "./TMP";
-  String OTEL_TMP = "./INSTRUMENTED_OTEL";
+  public static final String OTEL_TMP = "./INSTRUMENTED_OTEL";
   String INSTRUMENTED_FILE_DIR = "./INSTRUMENTED_FILE";
   String INSTRUMENTED = "./INSTRUMENTED_JAR";
   String FINAL = "./INSTRUMENTED_FINAL";
@@ -121,7 +122,6 @@ public class JarRepackager {
         if (entry.getName().endsWith(".jar")) {
           StringBuilder classpath = new StringBuilder();
           String fileName = TMP_DIR + "/" + entry.getName();
-          System.out.println("FILE NAME: " + fileName);
           File f = new File(fileName);
           f.getParentFile().mkdirs();
           Files.copy(jarFile.getInputStream(entry), f.toPath());
@@ -164,7 +164,25 @@ public class JarRepackager {
     }
   }
 
+  public void addOpenTelemetryClasses() {
+    String pattern = Pattern.quote(System.getProperty("file.separator"));
+    String[] outFileNameParts = jarFile.getName().split(pattern);
+    final String outFileName = FINAL + "/" + outFileNameParts[outFileNameParts.length - 1];
+    OpenTelemetryClasses openTelemetryClasses =
+        new OpenTelemetryClasses(new File(outFileName), agentPath, FINAL);
+    try {
+      openTelemetryClasses.addOpenTelemetryFolders();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
   private void createZipEntry(ZipOutputStream zout, File file, String pathToFile)
+      throws IOException {
+    createZipEntryFromFile(zout, file, pathToFile);
+  }
+
+  public static void createZipEntryFromFile(ZipOutputStream zout, File file, String pathToFile)
       throws IOException {
     InputStream is = new FileInputStream(file);
     ZipEntry entry = new ZipEntry(pathToFile);
