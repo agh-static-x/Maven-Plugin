@@ -76,8 +76,7 @@ public class OpenTelemetryClasses {
         JarEntry entry = enums.nextElement();
         if ((entry.getName().startsWith("inst/") || entry.getName().startsWith("io/"))
             && !entry.isDirectory()) {
-          if (entry.getName().startsWith("inst/io/opentelemetry/javaagent/instrumentation/")
-              && entry.getName().endsWith(".classdata")) {
+          if (entry.getName().endsWith(".classdata")) {
             File tmpFile = new File(TMP_FOLDER + '/' + entry.getName());
             tmpFile.getParentFile().mkdirs();
             Files.copy(agentJar.getInputStream(entry), tmpFile.toPath());
