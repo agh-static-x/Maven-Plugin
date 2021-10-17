@@ -24,7 +24,7 @@ public class OpenTelemetryLoader {
   public String otelJarPath;
 
   public final String OTEL_AGENT_NAME = "io.opentelemetry.javaagent.OpenTelemetryAgent";
-  public final String TMP_DIR = "tmpOtel";
+  public final String TMP_DIR = "INSTRUMENTED_OTEL";
 
   public OpenTelemetryLoader(String otelJarPath) {
     this.otelJarPath = otelJarPath;
