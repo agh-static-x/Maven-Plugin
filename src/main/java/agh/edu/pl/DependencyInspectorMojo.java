@@ -5,6 +5,7 @@ import agh.edu.pl.agent.instrumentation.OpenTelemetryLoader;
 import agh.edu.pl.config.*;
 import agh.edu.pl.config.exporter.Exporter;
 import agh.edu.pl.dependency.DependenciesGatherer;
+import agh.edu.pl.dependency.JarRepackager;
 import java.io.IOException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -55,10 +56,12 @@ public class DependencyInspectorMojo extends AbstractMojo {
     } catch (IOException exception) {
       exception.printStackTrace();
     }
-    DependenciesGatherer gatherer = new DependenciesGatherer(project, agentPath);
+    JarRepackager repackager = new JarRepackager(project, agentPath);
     try {
-      gatherer.instrumentDependencies();
-      gatherer.instrumentMain();
+      repackager.listArtifacts();
+      repackager.instrumentDependencies();
+      repackager.instrumentMain();
+      repackager.addOpenTelemetryClasses();
     } catch (Exception e) {
       e.printStackTrace();
     }
