@@ -2,6 +2,8 @@
 package agh.edu.pl;
 
 import agh.edu.pl.agent.instrumentation.OpenTelemetryLoader;
+import agh.edu.pl.config.*;
+import agh.edu.pl.config.exporter.Exporter;
 import agh.edu.pl.dependency.JarRepackager;
 import java.io.IOException;
 import org.apache.maven.plugin.AbstractMojo;
@@ -16,10 +18,34 @@ import org.apache.maven.project.MavenProject;
 public class DependencyInspectorMojo extends AbstractMojo {
 
   @Parameter(defaultValue = "${project}", required = true, readonly = true)
-  MavenProject project;
+  private MavenProject project;
 
   @Parameter(property = "agentPath", defaultValue = "opentelemetry-javaagent-all.jar")
   private String agentPath;
+
+  @Parameter(property = "exporter")
+  private Exporter exporter;
+
+  @Parameter(property = "propagators")
+  private Propagator[] propagators;
+
+  @Parameter(property = "openTelemetryResource")
+  private OpenTelemetryResource openTelemetryResource;
+
+  @Parameter(property = "batchSpanProcessor")
+  private BatchSpanProcessor batchSpanProcessor;
+
+  @Parameter(property = "sampler")
+  private Sampler sampler;
+
+  @Parameter(property = "spanLimits")
+  private SpanLimits spanLimits;
+
+  @Parameter(property = "metricsExemplarFilter", defaultValue = "WITH_SAMPLED_TRACE")
+  private ExemplarFilter metricsExemplarFilter;
+
+  @Parameter(property = "imrExportInterval", defaultValue = "60000")
+  private Long imrExportInterval;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
