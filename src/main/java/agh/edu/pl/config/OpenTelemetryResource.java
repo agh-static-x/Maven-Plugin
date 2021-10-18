@@ -11,4 +11,7 @@ public class OpenTelemetryResource {
 
   @Parameter(property = "serviceName")
   public String serviceName;
+
+  @Parameter(property = "javaDisabledResourceProviders")
+  public String[] javaDisabledResourceProviders;
 }

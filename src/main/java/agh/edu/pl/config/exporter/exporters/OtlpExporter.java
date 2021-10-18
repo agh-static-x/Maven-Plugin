@@ -22,6 +22,15 @@ public class OtlpExporter implements IExporter {
   @Parameter(property = "exporterOtlpMetricsEndpoint")
   public String exporterOtlpMetricsEndpoint;
 
+  @Parameter(property = "exporterOtlpCertificate")
+  public String exporterOtlpCertificate;
+
+  @Parameter(property = "exporterOtlpTracesCertificate")
+  public String exporterOtlpTracesCertificate;
+
+  @Parameter(property = "exporterOtlpMetricsCertificate")
+  public String exporterOtlpMetricsCertificate;
+
   @Parameter(property = "exporterOtlpHeaders")
   public Map exporterOtlpHeaders;
 
@@ -31,6 +40,15 @@ public class OtlpExporter implements IExporter {
   @Parameter(property = "exporterOtlpMetricsHeaders")
   public Map exporterOtlpMetricsHeaders;
 
+  @Parameter(property = "exporterOtlpCompression")
+  public String exporterOtlpCompression;
+
+  @Parameter(property = "exporterOtlpTracesCompression")
+  public String exporterOtlpTracesCompression;
+
+  @Parameter(property = "exporterOtlpMetricsCompression")
+  public String exporterOtlpMetricsCompression;
+
   @Parameter(property = "exporterOtlpTimeout")
   public Long exporterOtlpTimeout;
 
@@ -39,4 +57,13 @@ public class OtlpExporter implements IExporter {
 
   @Parameter(property = "exporterOtlpMetricsTimeout")
   public Long exporterOtlpMetricsTimeout;
+
+  @Parameter(property = "exporterOtlpProtocol", defaultValue = "grpc")
+  public String exporterOtlpProtocol;
+
+  @Parameter(property = "exporterOtlpTracesProtocol", defaultValue = "grpc")
+  public String exporterOtlpTracesProtocol;
+
+  @Parameter(property = "exporterOtlpMetricsProtocol", defaultValue = "grpc")
+  public String exporterOtlpMetricsProtocol;
 }

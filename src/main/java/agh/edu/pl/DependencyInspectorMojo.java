@@ -26,8 +26,8 @@ public class DependencyInspectorMojo extends AbstractMojo {
   @Parameter(property = "exporter")
   private Exporter exporter;
 
-  @Parameter(property = "propagator")
-  private Propagator[] propagator;
+  @Parameter(property = "propagators")
+  private Propagator[] propagators;
 
   @Parameter(property = "openTelemetryResource")
   private OpenTelemetryResource openTelemetryResource;
@@ -40,6 +40,9 @@ public class DependencyInspectorMojo extends AbstractMojo {
 
   @Parameter(property = "spanLimits")
   private SpanLimits spanLimits;
+
+  @Parameter(property = "metricsExemplarFilter", defaultValue = "WITH_SAMPLED_TRACE")
+  private ExemplarFilter metricsExemplarFilter;
 
   @Parameter(property = "imrExportInterval", defaultValue = "60000")
   private Long imrExportInterval;
