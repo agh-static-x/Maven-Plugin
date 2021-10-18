@@ -4,7 +4,6 @@ package agh.edu.pl;
 import agh.edu.pl.agent.instrumentation.OpenTelemetryLoader;
 import agh.edu.pl.config.*;
 import agh.edu.pl.config.exporter.Exporter;
-import agh.edu.pl.dependency.DependenciesGatherer;
 import agh.edu.pl.dependency.JarRepackager;
 import java.io.IOException;
 import org.apache.maven.plugin.AbstractMojo;
