@@ -5,6 +5,8 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 import agh.edu.pl.agent.instrumentation.advices.InstallBootstrapJarAdvice;
 import agh.edu.pl.agent.instrumentation.advices.OpenTelemetryAgentAdvices;
+import agh.edu.pl.repackaging.config.FolderNames;
+import agh.edu.pl.repackaging.config.InstrumentationConstants;
 import io.opentelemetry.javaagent.BytesAndName;
 import io.opentelemetry.javaagent.PostTransformer;
 import io.opentelemetry.javaagent.PreTransformer;
@@ -23,20 +25,21 @@ public class OpenTelemetryLoader {
   public Class<?> openTelemetryAgentClass;
   public String otelJarPath;
 
-  public final String OTEL_AGENT_NAME = "io.opentelemetry.javaagent.OpenTelemetryAgent";
-  public final String TMP_DIR = "INSTRUMENTED_OTEL";
-
   public OpenTelemetryLoader(String otelJarPath) {
     this.otelJarPath = otelJarPath;
   }
 
   public void instrument() throws IOException {
     loadOtel(new File(otelJarPath));
-    File tmpDir = new File(TMP_DIR);
+    File tmpDir = new File(FolderNames.INSTRUMENTED_OTEL_JAR_PACKAGE_NAME);
     tmpDir.mkdir();
-    File copyFile = new File(TMP_DIR + System.getProperty("file.separator") + otelJarPath);
+    File copyFile =
+        new File(
+            FolderNames.INSTRUMENTED_OTEL_JAR_PACKAGE_NAME
+                + System.getProperty("file.separator")
+                + otelJarPath);
     Files.copy(new File(otelJarPath).toPath(), copyFile.toPath());
-    System.out.println("Copied OTEL to " + TMP_DIR);
+    System.out.println("Copied OTEL to " + FolderNames.INSTRUMENTED_OTEL_JAR_PACKAGE_NAME);
     instrumentOpenTelemetryAgent(copyFile);
     injectClasses(copyFile);
   }
@@ -47,7 +50,8 @@ public class OpenTelemetryLoader {
           new URLClassLoader(
               new URL[] {otelJar.toURI().toURL()}, OpenTelemetryLoader.class.getClassLoader());
 
-      openTelemetryAgentClass = Class.forName(OTEL_AGENT_NAME, true, otelClassLoader);
+      openTelemetryAgentClass =
+          Class.forName(InstrumentationConstants.OTEL_AGENT_NAME, true, otelClassLoader);
       System.out.println("Loaded OpenTelemetryAgent: " + openTelemetryAgentClass);
     } catch (ClassNotFoundException | IOException e) {
       e.printStackTrace();

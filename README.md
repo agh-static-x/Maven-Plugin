@@ -9,7 +9,7 @@ Add `opentelemetry-javaagent-all.jar` to your project folder. You can get recent
 Run `mvn package` in *Maven Plugin* project and install it to your local repository with comment:
 
 ```
-mvn install:install-file -Dfile=./target/dependency-inspector-maven-plugin-1.0-SNAPSHOT.jar -DgroupId=agh.edu.pl -DartifactId=dependency-inspector-maven-plugin -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true
+mvn install:install-file -Dfile=./target/opentelemetry-java-instrumenter-maven-plugin-1.0-SNAPSHOT.jar -DgroupId=agh.edu.pl -DartifactId=opentelemetry-java-instrumenter-maven-plugin -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true
 ```
 
 Add the following code to the `pom.xml` file of the project where you want to execute the plugin:
@@ -18,7 +18,7 @@ Add the following code to the `pom.xml` file of the project where you want to ex
 	<plugins>
 		<plugin>
 		<groupId>agh.edu.pl</groupId>
-		<artifactId>dependency-inspector-maven-plugin</artifactId>
+		<artifactId>opentelemetry-java-instrumenter-maven-plugin</artifactId>
 		<version>1.0-SNAPSHOT</version>
 		<configuration>
 			<agentPath>{path_to_opentelemetry-javaagent-all.jar}</agentPath>
@@ -124,7 +124,7 @@ Add the following code to the `pom.xml` file of the project where you want to ex
 		<executions>
 			<execution>
 				<goals>
-					<goal>dependency-inspection</goal>
+					<goal>instrument-with-opentelemetry</goal>
 				</goals>
 			</execution>
 		</executions>
