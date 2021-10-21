@@ -15,22 +15,22 @@ public class FolderNames {
 
   private FolderNames() {
     INSTRUMENTED_OTEL_JAR_PACKAGE_NAME =
-        String.format("%s%s", "INSTRUMENTED_OTEL_JAR_", RandomStringUtils.randomAlphanumeric(8));
+        String.format("%s_%s", "INSTRUMENTED_OTEL_JAR", RandomStringUtils.randomAlphanumeric(8));
     INSTRUMENTED_OTEL_JAR_PACKAGE_NAME =
-        String.format("%s%s", "INSTRUMENTED_OTEL_JAR_", RandomStringUtils.randomAlphanumeric(8));
+        String.format("%s_%s", "INSTRUMENTED_OTEL_JAR", RandomStringUtils.randomAlphanumeric(8));
     MAIN_JAR_INITIAL_COPY =
-        String.format("%s%s", "./MAIN_JAR_INITIAL_COPY_", RandomStringUtils.randomAlphanumeric(8));
+        String.format("%s_%s", "./MAIN_JAR_INITIAL_COPY", RandomStringUtils.randomAlphanumeric(8));
     INSTRUMENTED_DEPENDENCY =
         String.format(
-            "%s%s", "./INSTRUMENTED_DEPENDENCY_", RandomStringUtils.randomAlphanumeric(8));
+            "%s_%s", "./INSTRUMENTED_DEPENDENCY", RandomStringUtils.randomAlphanumeric(8));
     JAR_WITH_INSTRUMENTED_DEPENDENCIES =
         String.format(
-            "%s%s",
-            "./JAR_WITH_INSTRUMENTED_DEPENDENCIES_", RandomStringUtils.randomAlphanumeric(8));
+            "%s_%s",
+            "./JAR_WITH_INSTRUMENTED_DEPENDENCIES", RandomStringUtils.randomAlphanumeric(8));
     INSTRUMENTED_JAR =
-        String.format("%s%s", "./INSTRUMENTED_JAR_", RandomStringUtils.randomAlphanumeric(8));
+        String.format("%s_%s", "./INSTRUMENTED_JAR", RandomStringUtils.randomAlphanumeric(8));
     OPENTELEMETRY_CLASSES =
-        String.format("%s%s", "./OPENTELEMETRY_CLASSES_", RandomStringUtils.randomAlphanumeric(8));
+        String.format("%s_%s", "./OPENTELEMETRY_CLASSES", RandomStringUtils.randomAlphanumeric(8));
   }
 
   public static FolderNames getInstance() {
