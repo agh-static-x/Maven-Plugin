@@ -15,16 +15,19 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
 import org.codehaus.plexus.util.FileUtils;
 
-public class OpenTelemetryClasses {
+public class AgentClassesExtractor {
   private final File mainFile;
   private JarFile agentJar;
   private final String lastFolder;
+  private final FolderNames folderNames = FolderNames.getInstance();
 
-  public OpenTelemetryClasses(File mainFile, String agentPath, String lastFolder) {
+  public AgentClassesExtractor(File mainFile, String agentPath, String lastFolder) {
     this.mainFile = mainFile;
     this.lastFolder = lastFolder;
     try {
-      agentJar = new JarFile(agentPath.replace(FolderNames.INSTRUMENTED_OTEL_JAR + '/', ""));
+      agentJar =
+          new JarFile(
+              agentPath.replace(folderNames.getInstrumentedOtelJarPackage() + File.separator, ""));
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -61,32 +64,26 @@ public class OpenTelemetryClasses {
 
   public void addOpenTelemetryFolders() throws IOException {
     try {
-      File finalDir = new File(FolderNames.FINAL);
+      File finalDir = new File(folderNames.getFinalFolder());
       finalDir.mkdir();
+
       String pattern = Pattern.quote(System.getProperty("file.separator"));
       String[] outFileNameParts = mainFile.getName().split(pattern);
       final File outFile =
-          new File(FolderNames.FINAL, outFileNameParts[outFileNameParts.length - 1]);
+          new File(folderNames.getFinalFolder(), outFileNameParts[outFileNameParts.length - 1]);
       final ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(outFile));
       zout.setMethod(ZipOutputStream.STORED);
       copyMainFile(zout);
+
       for (Enumeration<JarEntry> enums = agentJar.entries(); enums.hasMoreElements(); ) {
         JarEntry entry = enums.nextElement();
-        if ((entry.getName().startsWith("inst/") || entry.getName().startsWith("io/"))
+        String entryName = entry.getName();
+        if ((entryName.startsWith("inst/") || entryName.startsWith("io/"))
             && !entry.isDirectory()) {
-          if (entry.getName().endsWith(".classdata")) {
-            File tmpFile = new File(FolderNames.OPENTELEMETRY_CLASSES + '/' + entry.getName());
-            tmpFile.getParentFile().mkdirs();
-            Files.copy(agentJar.getInputStream(entry), tmpFile.toPath());
-            String newEntryPath =
-                entry.getName().replace(".classdata", ".class").replace("inst/", "");
-            createZipEntry(zout, tmpFile, newEntryPath);
-          } else if (entry.getName().startsWith("inst/")) {
-            File tmpFile = new File(FolderNames.OPENTELEMETRY_CLASSES + '/' + entry.getName());
-            tmpFile.getParentFile().mkdirs();
-            Files.copy(agentJar.getInputStream(entry), tmpFile.toPath());
-            String newEntryPath = entry.getName().replace("inst/", "");
-            createZipEntry(zout, tmpFile, newEntryPath);
+          if (entryName.endsWith(".classdata")) {
+            copySingleClassdataFile(entry, zout);
+          } else if (entryName.startsWith("inst/")) {
+            copySingleInstFolderFile(entry, zout);
           } else {
             ZipEntry outEntry = new ZipEntry(entry);
             try {
@@ -110,8 +107,27 @@ public class OpenTelemetryClasses {
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
-      FileUtils.deleteDirectory(FolderNames.OPENTELEMETRY_CLASSES);
+      FileUtils.deleteDirectory(folderNames.getOpenTelemetryClassesPackage());
     }
+  }
+
+  private void copySingleInstFolderFile(JarEntry entry, ZipOutputStream zout) throws IOException {
+    File tmpFile = copySingleEntryFromAgentFile(entry);
+    String newEntryPath = entry.getName().replace("inst/", "");
+    createZipEntry(zout, tmpFile, newEntryPath);
+  }
+
+  private void copySingleClassdataFile(JarEntry entry, ZipOutputStream zout) throws IOException {
+    File tmpFile = copySingleEntryFromAgentFile(entry);
+    String newEntryPath = entry.getName().replace(".classdata", ".class").replace("inst/", "");
+    createZipEntry(zout, tmpFile, newEntryPath);
+  }
+
+  private File copySingleEntryFromAgentFile(JarEntry entry) throws IOException {
+    File tmpFile = new File(folderNames.getOpenTelemetryClassesPackage() + '/' + entry.getName());
+    tmpFile.getParentFile().mkdirs();
+    Files.copy(agentJar.getInputStream(entry), tmpFile.toPath());
+    return tmpFile;
   }
 
   private void createZipEntry(ZipOutputStream zout, File file, String pathToFile)

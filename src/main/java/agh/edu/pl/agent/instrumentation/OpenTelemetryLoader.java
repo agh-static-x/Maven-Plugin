@@ -24,6 +24,7 @@ public class OpenTelemetryLoader {
   public URLClassLoader otelClassLoader;
   public Class<?> openTelemetryAgentClass;
   public String otelJarPath;
+  private FolderNames folderNames = FolderNames.getInstance();
 
   public OpenTelemetryLoader(String otelJarPath) {
     this.otelJarPath = otelJarPath;
@@ -31,15 +32,15 @@ public class OpenTelemetryLoader {
 
   public void instrument() throws IOException {
     loadOtel(new File(otelJarPath));
-    File tmpDir = new File(FolderNames.INSTRUMENTED_OTEL_JAR_PACKAGE_NAME);
+    File tmpDir = new File(folderNames.getInstrumentedOtelJarPackageName());
     tmpDir.mkdir();
     File copyFile =
         new File(
-            FolderNames.INSTRUMENTED_OTEL_JAR_PACKAGE_NAME
+            folderNames.getInstrumentedOtelJarPackageName()
                 + System.getProperty("file.separator")
                 + otelJarPath);
     Files.copy(new File(otelJarPath).toPath(), copyFile.toPath());
-    System.out.println("Copied OTEL to " + FolderNames.INSTRUMENTED_OTEL_JAR_PACKAGE_NAME);
+    System.out.println("Copied OTEL to " + folderNames.getInstrumentedOtelJarPackageName());
     instrumentOpenTelemetryAgent(copyFile);
     injectClasses(copyFile);
   }

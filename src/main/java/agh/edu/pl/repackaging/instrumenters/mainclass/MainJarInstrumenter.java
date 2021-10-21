@@ -13,6 +13,7 @@ public class MainJarInstrumenter {
 
   private final File file;
   private final String agentPath;
+  private final FolderNames folderNames = FolderNames.getInstance();
 
   public MainJarInstrumenter(File file, String agentPath) {
     this.file = file;
@@ -34,19 +35,19 @@ public class MainJarInstrumenter {
       }
       String[] outFileNameParts = jarFile.getName().split(pattern);
       final String outFileName =
-          FolderNames.JAR_WITH_INSTRUMENTED_DEPENDENCIES
-              + "/"
+          folderNames.getJARWithInstrumentedDependenciesPackage()
+              + File.separator
               + outFileNameParts[outFileNameParts.length - 1];
       String mainPath = outFileName + File.pathSeparator;
       Process process =
           InstrumentationConstants.getInstrumentationProcess(
-                  agentPath, mainPath, FolderNames.INSTRUMENTED_JAR)
+                  agentPath, mainPath, folderNames.getInstrumentedJARPackage())
               .inheritIO()
               .start();
       int ret = process.waitFor();
     } finally {
-      FileUtils.deleteDirectory(FolderNames.INSTRUMENTED_OTEL_JAR);
-      FileUtils.deleteDirectory(FolderNames.JAR_WITH_INSTRUMENTED_DEPENDENCIES);
+      FileUtils.deleteDirectory(folderNames.getInstrumentedOtelJarPackage());
+      FileUtils.deleteDirectory(folderNames.getJARWithInstrumentedDependenciesPackage());
     }
   }
 }

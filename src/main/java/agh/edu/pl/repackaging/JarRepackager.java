@@ -1,7 +1,7 @@
 /* (C)2021 */
 package agh.edu.pl.repackaging;
 
-import agh.edu.pl.repackaging.classes.OpenTelemetryClasses;
+import agh.edu.pl.repackaging.classes.AgentClassesExtractor;
 import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.repackaging.instrumenters.dependencies.DependenciesInstrumenter;
 import agh.edu.pl.repackaging.instrumenters.mainclass.MainJarInstrumenter;
@@ -11,9 +11,10 @@ import java.util.regex.Pattern;
 public class JarRepackager {
   private final String agentPath;
   private File jarFile;
+  private FolderNames folderNames = FolderNames.getInstance();
 
   public JarRepackager(String agentPath) {
-    this.agentPath = FolderNames.INSTRUMENTED_OTEL_JAR + "/" + agentPath;
+    this.agentPath = folderNames.getInstrumentedOtelJarPackage() + File.separator + agentPath;
   }
 
   public void setJarFile(File jarFile) {
@@ -29,11 +30,14 @@ public class JarRepackager {
     String pattern = Pattern.quote(System.getProperty("file.separator"));
     String[] outFileNameParts = jarFile.getName().split(pattern);
     final String outFileName =
-        FolderNames.INSTRUMENTED_JAR + "/" + outFileNameParts[outFileNameParts.length - 1];
-    OpenTelemetryClasses openTelemetryClasses =
-        new OpenTelemetryClasses(new File(outFileName), agentPath, FolderNames.INSTRUMENTED_JAR);
+        folderNames.getInstrumentedJARPackage()
+            + File.separator
+            + outFileNameParts[outFileNameParts.length - 1];
+    AgentClassesExtractor agentClassesExtractor =
+        new AgentClassesExtractor(
+            new File(outFileName), agentPath, folderNames.getInstrumentedJARPackage());
     try {
-      openTelemetryClasses.addOpenTelemetryFolders();
+      agentClassesExtractor.addOpenTelemetryFolders();
     } catch (IOException e) {
       e.printStackTrace();
     }
