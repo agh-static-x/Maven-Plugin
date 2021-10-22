@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>agh.edu.pl</groupId>
-    <artifactId>dependency-inspector-maven-plugin</artifactId>
+    <artifactId>opentelemetry-java-instrumenter-maven-plugin</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
 
-    <name>dependency-inspector-maven-plugin Maven Mojo</name>
+    <name>opentelemetry-java-instrumenter-maven-plugin Maven Mojo</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -103,6 +103,11 @@
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-exporter-zipkin</artifactId>
             <version>1.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
         </dependency>
     </dependencies>
 

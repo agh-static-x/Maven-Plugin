@@ -2,9 +2,10 @@
 package agh.edu.pl;
 
 import agh.edu.pl.agent.instrumentation.OpenTelemetryLoader;
+import agh.edu.pl.artifact.ArtifactChooser;
 import agh.edu.pl.config.*;
 import agh.edu.pl.config.exporter.Exporter;
-import agh.edu.pl.dependency.JarRepackager;
+import agh.edu.pl.repackaging.JarRepackager;
 import java.io.IOException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -14,8 +15,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-@Mojo(name = "dependency-inspection", defaultPhase = LifecyclePhase.PACKAGE)
-public class DependencyInspectorMojo extends AbstractMojo {
+@Mojo(name = "instrument-with-opentelemetry", defaultPhase = LifecyclePhase.PACKAGE)
+public class OpentelemetryInstrumenterMojo extends AbstractMojo {
 
   @Parameter(defaultValue = "${project}", required = true, readonly = true)
   private MavenProject project;
@@ -55,11 +56,10 @@ public class DependencyInspectorMojo extends AbstractMojo {
     } catch (IOException exception) {
       exception.printStackTrace();
     }
-    JarRepackager repackager = new JarRepackager(project, agentPath);
+    JarRepackager repackager = new JarRepackager(agentPath);
     try {
-      repackager.listArtifacts();
-      repackager.instrumentDependencies();
-      repackager.instrumentMain();
+      repackager.setJarFile(new ArtifactChooser(project).chooseArtifacts());
+      repackager.repackageJar();
       repackager.addOpenTelemetryClasses();
     } catch (Exception e) {
       e.printStackTrace();
