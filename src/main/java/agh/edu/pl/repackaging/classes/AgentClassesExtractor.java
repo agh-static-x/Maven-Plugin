@@ -6,7 +6,9 @@ import static agh.edu.pl.utils.ZipEntryCreator.createZipEntryFromFile;
 import agh.edu.pl.repackaging.config.FolderNames;
 import java.io.*;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
@@ -20,6 +22,7 @@ public class AgentClassesExtractor {
   private JarFile agentJar;
   private final String lastFolder;
   private final FolderNames folderNames = FolderNames.getInstance();
+  private List<String> excludedEntriesPrefixes = new ArrayList<>();
 
   public AgentClassesExtractor(File mainFile, String agentPath, String lastFolder) {
     this.mainFile = mainFile;
@@ -62,6 +65,10 @@ public class AgentClassesExtractor {
     }
   }
 
+  private boolean shouldIncludeEntry(String entryName) {
+    return excludedEntriesPrefixes.stream().noneMatch(entryName::startsWith);
+  }
+
   public void addOpenTelemetryFolders() throws IOException {
     try {
       File finalDir = new File(folderNames.getFinalFolder());
@@ -79,7 +86,8 @@ public class AgentClassesExtractor {
         JarEntry entry = enums.nextElement();
         String entryName = entry.getName();
         if ((entryName.startsWith("inst/") || entryName.startsWith("io/"))
-            && !entry.isDirectory()) {
+            && !entry.isDirectory()
+            && shouldIncludeEntry(entryName)) {
           if (entryName.endsWith(".classdata")) {
             copySingleClassdataFile(entry, zout);
           } else if (entryName.startsWith("inst/")) {
