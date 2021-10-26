@@ -3,18 +3,43 @@ package agh.edu.pl.repackaging;
 
 import agh.edu.pl.repackaging.classes.AgentClassesExtractor;
 import agh.edu.pl.repackaging.config.FolderNames;
+import agh.edu.pl.repackaging.config.InstrumentationConstants;
 import agh.edu.pl.repackaging.instrumenters.dependencies.DependenciesInstrumenter;
 import agh.edu.pl.repackaging.instrumenters.mainclass.MainJarInstrumenter;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.regex.Pattern;
 
 public class JarRepackager {
-  private final String agentPath;
+  private String agentPath;
   private File jarFile;
   private FolderNames folderNames = FolderNames.getInstance();
 
-  public JarRepackager(String agentPath) {
-    this.agentPath = folderNames.getInstrumentedOtelJarPackage() + File.separator + agentPath;
+  public JarRepackager() {
+    this.copyInstrumentedOtelJar();
+  }
+
+  public void copyInstrumentedOtelJar() {
+    this.agentPath =
+        FolderNames.getInstance().getInstrumentedOtelJarPackage()
+            + File.separator
+            + InstrumentationConstants.OTEL_AGENT_JAR_FILENAME;
+
+    try {
+      Path path = Paths.get(this.agentPath);
+      Files.createDirectories(path.getParent());
+      Files.copy(
+          JarRepackager.class
+              .getClassLoader()
+              .getResourceAsStream(InstrumentationConstants.OTEL_AGENT_JAR_FILENAME),
+          path,
+          StandardCopyOption.REPLACE_EXISTING);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   public void setJarFile(File jarFile) {
