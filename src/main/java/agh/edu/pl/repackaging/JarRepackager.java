@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class JarRepackager {
   private final String agentPath;
   private File jarFile;
-  private FolderNames folderNames = FolderNames.getInstance();
+  private final FolderNames folderNames = FolderNames.getInstance();
 
   public JarRepackager(String agentPath) {
     this.agentPath = folderNames.getInstrumentedOtelJarPackage() + File.separator + agentPath;
@@ -21,7 +21,7 @@ public class JarRepackager {
     this.jarFile = jarFile;
   }
 
-  public void repackageJar() throws Exception {
+  public void repackageJar() {
     new DependenciesInstrumenter(jarFile, agentPath).instrumentDependencies();
     new MainJarInstrumenter(jarFile, agentPath).instrumentMain();
   }
@@ -36,10 +36,6 @@ public class JarRepackager {
     AgentClassesExtractor agentClassesExtractor =
         new AgentClassesExtractor(
             new File(outFileName), agentPath, folderNames.getInstrumentedJARPackage());
-    try {
-      agentClassesExtractor.addOpenTelemetryFolders();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    agentClassesExtractor.addOpenTelemetryFolders();
   }
 }

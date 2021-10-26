@@ -6,7 +6,6 @@ import agh.edu.pl.artifact.ArtifactChooser;
 import agh.edu.pl.config.*;
 import agh.edu.pl.config.exporter.Exporter;
 import agh.edu.pl.repackaging.JarRepackager;
-import java.io.IOException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -51,11 +50,7 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     OpenTelemetryLoader loader = new OpenTelemetryLoader(agentPath);
-    try {
-      loader.instrument();
-    } catch (IOException exception) {
-      exception.printStackTrace();
-    }
+    loader.instrument();
     JarRepackager repackager = new JarRepackager(agentPath);
     try {
       repackager.setJarFile(new ArtifactChooser(project).chooseArtifacts());

@@ -24,25 +24,47 @@ public class OpenTelemetryLoader {
   public URLClassLoader otelClassLoader;
   public Class<?> openTelemetryAgentClass;
   public String otelJarPath;
-  private FolderNames folderNames = FolderNames.getInstance();
+  private final FolderNames folderNames = FolderNames.getInstance();
 
   public OpenTelemetryLoader(String otelJarPath) {
     this.otelJarPath = otelJarPath;
   }
 
-  public void instrument() throws IOException {
+  public void instrument() {
     loadOtel(new File(otelJarPath));
     File tmpDir = new File(folderNames.getInstrumentedOtelJarPackageName());
-    tmpDir.mkdir();
+
+    if (!tmpDir.mkdir()) {
+      System.err.println(
+          "The directory for OpenTelemetry Agent JAR instrumentation could not be created. Please make sure you have permissions required to create a directory.");
+      return;
+    }
+
     File copyFile =
         new File(
             folderNames.getInstrumentedOtelJarPackageName()
                 + System.getProperty("file.separator")
                 + otelJarPath);
-    Files.copy(new File(otelJarPath).toPath(), copyFile.toPath());
+    try {
+      Files.copy(new File(otelJarPath).toPath(), copyFile.toPath());
+    } catch (IOException exception) {
+      System.err.println(
+          "OpenTelemetry Agent JAR could not be copied to instrumentation directory.");
+      return;
+    }
     System.out.println("Copied OTEL to " + folderNames.getInstrumentedOtelJarPackageName());
-    instrumentOpenTelemetryAgent(copyFile);
-    injectClasses(copyFile);
+    try {
+      instrumentOpenTelemetryAgent(copyFile);
+    } catch (IOException exception) {
+      System.err.println("Problem occurred during OpenTelemetry Agent instrumentation.");
+      return;
+    }
+    try {
+      injectClasses(copyFile);
+    } catch (IOException exception) {
+      System.err.println(
+          "The classes required for static instrumentation with OpenTelemetry Agent were not added properly.");
+    }
   }
 
   public synchronized void loadOtel(File otelJar) {

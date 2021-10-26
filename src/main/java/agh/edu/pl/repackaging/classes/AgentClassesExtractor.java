@@ -33,36 +33,45 @@ public class AgentClassesExtractor {
     }
   }
 
-  private void copyMainFile(ZipOutputStream zout) throws IOException {
-    JarFile jarFile = null;
+  private void copyMainFile(ZipOutputStream zout) {
+    JarFile jarFile;
     try {
       jarFile = new JarFile(this.mainFile);
     } catch (IOException e) {
-      e.printStackTrace();
-    }
-    if (jarFile == null) {
-      System.err.println("Error while getting project jar file.");
+      System.err.println("Problem occurred while getting project JAR file.");
       return;
     }
     try {
       for (Enumeration<JarEntry> enums = jarFile.entries(); enums.hasMoreElements(); ) {
         JarEntry entry = enums.nextElement();
         ZipEntry outEntry = new ZipEntry(entry);
-        zout.putNextEntry(outEntry);
-        InputStream in = jarFile.getInputStream(entry);
-        in.transferTo(zout);
-        in.close();
-        zout.closeEntry();
+        try {
+          zout.putNextEntry(outEntry);
+          InputStream in = jarFile.getInputStream(entry);
+          in.transferTo(zout);
+          in.close();
+          zout.closeEntry();
+        } catch (IOException exception) {
+          System.err.println(
+              "Error while copying entry " + entry.getName() + " from main JAR to temporary file.");
+        }
+        try {
+          jarFile.close();
+        } catch (IOException exception) {
+          System.err.println("Main JAR was not closed properly.");
+        }
       }
-      jarFile.close();
-    } catch (IOException e) {
-      e.printStackTrace();
     } finally {
-      FileUtils.deleteDirectory(lastFolder);
+      try {
+        FileUtils.deleteDirectory(lastFolder);
+      } catch (IOException exception) {
+        System.err.println(
+            "Temporary directory required for adding Agent classes process was not deleted properly.");
+      }
     }
   }
 
-  public void addOpenTelemetryFolders() throws IOException {
+  public void addOpenTelemetryFolders() {
     try {
       File finalDir = new File(folderNames.getFinalFolder());
       finalDir.mkdir();
@@ -71,7 +80,14 @@ public class AgentClassesExtractor {
       String[] outFileNameParts = mainFile.getName().split(pattern);
       final File outFile =
           new File(folderNames.getFinalFolder(), outFileNameParts[outFileNameParts.length - 1]);
-      final ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(outFile));
+      ZipOutputStream zout;
+      try {
+        zout = new ZipOutputStream(new FileOutputStream(outFile));
+      } catch (FileNotFoundException exception) {
+        System.err.println(
+            "Could not create output stream for JAR file, because file does not exist.");
+        return;
+      }
       zout.setMethod(ZipOutputStream.STORED);
       copyMainFile(zout);
 
@@ -80,34 +96,48 @@ public class AgentClassesExtractor {
         String entryName = entry.getName();
         if ((entryName.startsWith("inst/") || entryName.startsWith("io/"))
             && !entry.isDirectory()) {
-          if (entryName.endsWith(".classdata")) {
-            copySingleClassdataFile(entry, zout);
-          } else if (entryName.startsWith("inst/")) {
-            copySingleInstFolderFile(entry, zout);
-          } else {
-            ZipEntry outEntry = new ZipEntry(entry);
-            try {
-              zout.putNextEntry(outEntry);
-            } catch (ZipException e) {
-              if (e.getMessage().contains("duplicate")) continue;
-              else {
-                System.err.println("Error while copying OpenTelemetry classes to JAR.");
-                return;
+          try {
+            if (entryName.endsWith(".classdata")) {
+              copySingleClassdataFile(entry, zout);
+            } else if (entryName.startsWith("inst/")) {
+              copySingleInstFolderFile(entry, zout);
+            } else {
+              ZipEntry outEntry = new ZipEntry(entry);
+              try {
+                zout.putNextEntry(outEntry);
+              } catch (ZipException e) {
+                if (e.getMessage().contains("duplicate")) continue;
+                else {
+                  System.err.println(
+                      "Error while copying OpenTelemetry file " + entryName + "to main JAR.");
+                  return;
+                }
               }
+              InputStream in = agentJar.getInputStream(entry);
+              in.transferTo(zout);
+              in.close();
+              zout.closeEntry();
             }
-            InputStream in = agentJar.getInputStream(entry);
-            in.transferTo(zout);
-            in.close();
-            zout.closeEntry();
+          } catch (IOException exception) {
+            System.err.println(
+                "Error while copying OpenTelemetry file " + entryName + "to main JAR.");
+            return;
           }
         }
       }
-      zout.close();
-      agentJar.close();
-    } catch (IOException e) {
-      e.printStackTrace();
+      try {
+        zout.close();
+        agentJar.close();
+      } catch (IOException exception) {
+        System.err.println("Agent JAR file/output stream was not closed properly.");
+      }
     } finally {
-      FileUtils.deleteDirectory(folderNames.getOpenTelemetryClassesPackage());
+      try {
+        FileUtils.deleteDirectory(folderNames.getOpenTelemetryClassesPackage());
+      } catch (IOException exception) {
+        System.err.println(
+            "Temporary directory required for adding Agent classes to main JAR process was not deleted properly.");
+      }
     }
   }
 
@@ -125,7 +155,10 @@ public class AgentClassesExtractor {
 
   private File copySingleEntryFromAgentFile(JarEntry entry) throws IOException {
     File tmpFile = new File(folderNames.getOpenTelemetryClassesPackage() + '/' + entry.getName());
-    tmpFile.getParentFile().mkdirs();
+    if (!tmpFile.getParentFile().mkdirs()) {
+      System.err.println(
+          "Temporary directory for " + entry.getName() + " was not created properly.");
+    }
     Files.copy(agentJar.getInputStream(entry), tmpFile.toPath());
     return tmpFile;
   }
