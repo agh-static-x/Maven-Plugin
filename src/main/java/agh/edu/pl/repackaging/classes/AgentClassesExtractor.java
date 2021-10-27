@@ -4,7 +4,10 @@ package agh.edu.pl.repackaging.classes;
 import static agh.edu.pl.utils.ZipEntryCreator.createZipEntryFromFile;
 
 import agh.edu.pl.repackaging.config.FolderNames;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
@@ -150,7 +153,14 @@ public class AgentClassesExtractor {
 
   private void copySingleClassdataFile(JarEntry entry, ZipOutputStream zout) throws IOException {
     File tmpFile = copySingleEntryFromAgentFile(entry);
-    String newEntryPath = entry.getName().replace(".classdata", ".class").replace("inst/", "");
+    String newEntryPath = entry.getName().replace(".classdata", ".class");
+    if (entry.getName().startsWith("inst/io/opentelemetry/")) {
+      // opentelemetry sdk, autoconfigure and exporters
+      newEntryPath = newEntryPath.replace("inst/", "io/opentelemetry/javaagent/shaded/");
+    } else {
+      // instrumentation modules
+      newEntryPath = entry.getName().replace("inst/", "");
+    }
     createZipEntry(zout, tmpFile, newEntryPath);
   }
 
