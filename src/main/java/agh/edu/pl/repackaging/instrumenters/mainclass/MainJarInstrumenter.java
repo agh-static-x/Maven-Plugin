@@ -27,7 +27,8 @@ public class MainJarInstrumenter {
       try {
         jarFile = new JarFile(this.file);
       } catch (IOException e) {
-        System.err.println("Problem occurred while getting project JAR file.");
+        System.err.println(
+            "Problem occurred while getting project JAR file. Make sure you have defined JAR packaging in pom.xml.");
         return;
       }
 
