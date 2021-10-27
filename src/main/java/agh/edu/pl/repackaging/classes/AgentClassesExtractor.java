@@ -56,11 +56,11 @@ public class AgentClassesExtractor {
           System.err.println(
               "Error while copying entry " + entry.getName() + " from main JAR to temporary file.");
         }
-        try {
-          jarFile.close();
-        } catch (IOException exception) {
-          System.err.println("Main JAR was not closed properly.");
-        }
+      }
+      try {
+        jarFile.close();
+      } catch (IOException exception) {
+        System.err.println("Main JAR was not closed properly.");
       }
     } finally {
       try {
@@ -75,7 +75,7 @@ public class AgentClassesExtractor {
   public void addOpenTelemetryFolders() {
     try {
       File finalDir = new File(folderNames.getFinalFolder());
-      if (!finalDir.mkdir()) {
+      if (!finalDir.mkdir() && !finalDir.exists()) {
         System.err.println(
             "The output directory could not be created. Please make sure you have permissions required to create a directory.");
         return;
@@ -95,7 +95,6 @@ public class AgentClassesExtractor {
       }
       zout.setMethod(ZipOutputStream.STORED);
       copyMainFile(zout);
-
       for (Enumeration<JarEntry> enums = agentJar.entries(); enums.hasMoreElements(); ) {
         JarEntry entry = enums.nextElement();
         String entryName = entry.getName();
@@ -167,7 +166,7 @@ public class AgentClassesExtractor {
 
   private File copySingleEntryFromAgentFile(JarEntry entry) throws IOException {
     File tmpFile = new File(folderNames.getOpenTelemetryClassesPackage() + '/' + entry.getName());
-    if (!tmpFile.getParentFile().mkdirs()) {
+    if (!tmpFile.getParentFile().mkdirs() && !tmpFile.getParentFile().exists()) {
       System.err.println(
           "Temporary directory for " + entry.getName() + " was not created properly.");
     }
