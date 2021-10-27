@@ -4,10 +4,7 @@ package agh.edu.pl.repackaging.classes;
 import static agh.edu.pl.utils.ZipEntryCreator.createZipEntryFromFile;
 
 import agh.edu.pl.repackaging.config.FolderNames;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
@@ -78,7 +75,11 @@ public class AgentClassesExtractor {
   public void addOpenTelemetryFolders() {
     try {
       File finalDir = new File(folderNames.getFinalFolder());
-      finalDir.mkdir();
+      if (!finalDir.mkdir()) {
+        System.err.println(
+            "The output directory could not be created. Please make sure you have permissions required to create a directory.");
+        return;
+      }
 
       String pattern = Pattern.quote(System.getProperty("file.separator"));
       String[] outFileNameParts = mainFile.getName().split(pattern);
