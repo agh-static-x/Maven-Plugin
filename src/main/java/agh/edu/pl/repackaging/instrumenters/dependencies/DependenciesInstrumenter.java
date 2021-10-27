@@ -157,7 +157,7 @@ public class DependenciesInstrumenter {
               + " was interrupted.");
       return;
     }
-    String[] fileNameParts = entry.getName().split(File.separator);
+    String[] fileNameParts = entry.getName().split("/");
     try {
       createZipEntryFromFile(
           zout,
