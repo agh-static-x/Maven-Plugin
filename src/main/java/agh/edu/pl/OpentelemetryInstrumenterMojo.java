@@ -6,7 +6,6 @@ import agh.edu.pl.artifact.ArtifactChooser;
 import agh.edu.pl.config.*;
 import agh.edu.pl.config.exporter.Exporter;
 import agh.edu.pl.repackaging.JarRepackager;
-import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.utils.Cleanup;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -58,7 +57,7 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
       repackager.setJarFile(new ArtifactChooser(project).chooseArtifacts());
       repackager.repackageJar();
       repackager.addOpenTelemetryClasses();
-    }finally{
+    } finally {
       new Cleanup().deleteAllTemporaryFolders();
     }
   }
