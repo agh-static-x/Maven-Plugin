@@ -5,8 +5,6 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 import agh.edu.pl.agent.instrumentation.advices.InstallBootstrapJarAdvice;
 import agh.edu.pl.agent.instrumentation.advices.OpenTelemetryAgentAdvices;
-import agh.edu.pl.repackaging.config.FolderNames;
-import agh.edu.pl.repackaging.config.InstrumentationConstants;
 import io.opentelemetry.javaagent.BytesAndName;
 import io.opentelemetry.javaagent.PostTransformer;
 import io.opentelemetry.javaagent.PreTransformer;
@@ -24,23 +22,24 @@ public class OpenTelemetryLoader {
   public URLClassLoader otelClassLoader;
   public Class<?> openTelemetryAgentClass;
   public String otelJarPath;
-  private FolderNames folderNames = FolderNames.getInstance();
+  private String pluginResourcesPath;
+  private final String OTEL_AGENT_NAME = "io.opentelemetry.javaagent.OpenTelemetryAgent";
 
-  public OpenTelemetryLoader(String otelJarPath) {
+  public OpenTelemetryLoader(String otelJarPath, String pluginResourcesPath) {
     this.otelJarPath = otelJarPath;
+    this.pluginResourcesPath = pluginResourcesPath;
   }
 
   public void instrument() throws IOException {
     loadOtel(new File(otelJarPath));
-    File tmpDir = new File(folderNames.getInstrumentedOtelJarPackageName());
+    File tmpDir = new File(pluginResourcesPath);
     tmpDir.mkdir();
+    File otelJarFile = new File(otelJarPath);
     File copyFile =
         new File(
-            folderNames.getInstrumentedOtelJarPackageName()
-                + System.getProperty("file.separator")
-                + otelJarPath);
-    Files.copy(new File(otelJarPath).toPath(), copyFile.toPath());
-    System.out.println("Copied OTEL to " + folderNames.getInstrumentedOtelJarPackageName());
+            pluginResourcesPath + System.getProperty("file.separator") + otelJarFile.getName());
+    Files.copy(otelJarFile.toPath(), copyFile.toPath());
+    System.out.println("Copied OTEL to " + pluginResourcesPath);
     instrumentOpenTelemetryAgent(copyFile);
     injectClasses(copyFile);
   }
@@ -51,8 +50,7 @@ public class OpenTelemetryLoader {
           new URLClassLoader(
               new URL[] {otelJar.toURI().toURL()}, OpenTelemetryLoader.class.getClassLoader());
 
-      openTelemetryAgentClass =
-          Class.forName(InstrumentationConstants.OTEL_AGENT_NAME, true, otelClassLoader);
+      openTelemetryAgentClass = Class.forName(OTEL_AGENT_NAME, true, otelClassLoader);
       System.out.println("Loaded OpenTelemetryAgent: " + openTelemetryAgentClass);
     } catch (ClassNotFoundException | IOException e) {
       e.printStackTrace();

@@ -1,10 +1,9 @@
 /* (C)2021 */
 package agh.edu.pl.repackaging.instrumenters.dependencies;
 
-import static agh.edu.pl.utils.ZipEntryCreator.createZipEntryFromFile;
-
 import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.repackaging.config.InstrumentationConstants;
+import agh.edu.pl.utils.ZipEntryCreator;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -104,7 +103,7 @@ public class DependenciesInstrumenter {
             .start();
     int ret = process.waitFor();
     String[] fileNameParts = entry.getName().split(File.separator);
-    createZipEntryFromFile(
+    ZipEntryCreator.createZipEntryFromFile(
         zout,
         new File(
             folderNames.getInstrumentedDependencyPackage()

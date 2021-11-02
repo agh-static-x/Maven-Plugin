@@ -9,7 +9,7 @@ Add `opentelemetry-javaagent-all.jar` to your project folder. You can get recent
 Run `mvn package` in *Maven Plugin* project and install it to your local repository with comment:
 
 ```
-mvn install:install-file -Dfile=./target/opentelemetry-java-instrumenter-maven-plugin-1.0-SNAPSHOT.jar -DgroupId=agh.edu.pl -DartifactId=opentelemetry-java-instrumenter-maven-plugin -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true
+mvn --projects app-instrumenter install:install-file -Dfile=./target/opentelemetry-java-instrumenter-maven-plugin-1.0-SNAPSHOT.jar -DgroupId=agh.edu.pl -DartifactId=opentelemetry-java-instrumenter-maven-plugin -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true
 ```
 
 Add the following code to the `pom.xml` file of the project where you want to execute the plugin:
@@ -136,4 +136,4 @@ Add the following code to the `pom.xml` file of the project where you want to ex
 Run `mvn package` directly in the current project to run this plugin.
 
 ## Spotless
-To apply Spotless run `mvn spotless:apply`.
+To apply Spotless run `mvn --projects agent-instrumenter,app-instrumenter spotless:apply`.
