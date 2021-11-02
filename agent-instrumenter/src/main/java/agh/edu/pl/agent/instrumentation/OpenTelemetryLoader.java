@@ -5,8 +5,6 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 import agh.edu.pl.agent.instrumentation.advices.InstallBootstrapJarAdvice;
 import agh.edu.pl.agent.instrumentation.advices.OpenTelemetryAgentAdvices;
-import agh.edu.pl.repackaging.config.FolderNames;
-import agh.edu.pl.repackaging.config.InstrumentationConstants;
 import io.opentelemetry.javaagent.BytesAndName;
 import io.opentelemetry.javaagent.PostTransformer;
 import io.opentelemetry.javaagent.PreTransformer;
@@ -24,35 +22,30 @@ public class OpenTelemetryLoader {
   public URLClassLoader otelClassLoader;
   public Class<?> openTelemetryAgentClass;
   public String otelJarPath;
-  private final FolderNames folderNames = FolderNames.getInstance();
+  private String pluginResourcesPath;
+  private final String OTEL_AGENT_NAME = "io.opentelemetry.javaagent.OpenTelemetryAgent";
 
-  public OpenTelemetryLoader(String otelJarPath) {
+  public OpenTelemetryLoader(String otelJarPath, String pluginResourcesPath) {
     this.otelJarPath = otelJarPath;
+    this.pluginResourcesPath = pluginResourcesPath;
   }
 
   public void instrument() {
     loadOtel(new File(otelJarPath));
-    File tmpDir = new File(folderNames.getInstrumentedOtelJarPackageName());
-
-    if (!tmpDir.mkdir()) {
-      System.err.println(
-          "The directory for OpenTelemetry Agent JAR instrumentation could not be created. Please make sure you have permissions required to create a directory.");
-      return;
-    }
-
+    File otelJarFile = new File(otelJarPath);
     File copyFile =
         new File(
-            folderNames.getInstrumentedOtelJarPackageName()
+            pluginResourcesPath
                 + System.getProperty("file.separator")
-                + otelJarPath);
+                + otelJarFile.getName());
     try {
-      Files.copy(new File(otelJarPath).toPath(), copyFile.toPath());
+      Files.copy(otelJarFile.toPath(), copyFile.toPath());
     } catch (IOException exception) {
       System.err.println(
           "OpenTelemetry Agent JAR could not be copied to instrumentation directory.");
       return;
     }
-    System.out.println("Copied OTEL to " + folderNames.getInstrumentedOtelJarPackageName());
+    System.out.println("Copied OTEL to " + pluginResourcesPath);
     try {
       instrumentOpenTelemetryAgent(copyFile);
     } catch (IOException exception) {
@@ -73,8 +66,7 @@ public class OpenTelemetryLoader {
           new URLClassLoader(
               new URL[] {otelJar.toURI().toURL()}, OpenTelemetryLoader.class.getClassLoader());
 
-      openTelemetryAgentClass =
-          Class.forName(InstrumentationConstants.OTEL_AGENT_NAME, true, otelClassLoader);
+      openTelemetryAgentClass = Class.forName(OTEL_AGENT_NAME, true, otelClassLoader);
       System.out.println("Loaded OpenTelemetryAgent: " + openTelemetryAgentClass);
     } catch (ClassNotFoundException | IOException e) {
       e.printStackTrace();
