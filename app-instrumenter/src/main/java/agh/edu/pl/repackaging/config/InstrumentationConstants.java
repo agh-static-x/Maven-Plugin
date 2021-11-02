@@ -4,7 +4,6 @@ package agh.edu.pl.repackaging.config;
 public class InstrumentationConstants {
   public static final String STATIC_INSTRUMENTER_CLASS =
       "io.opentelemetry.javaagent.StaticInstrumenter";
-  public static final String OTEL_AGENT_NAME = "io.opentelemetry.javaagent.OpenTelemetryAgent";
   public static final String OTEL_AGENT_JAR_FILENAME = "opentelemetry-javaagent-all.jar";
 
   public static ProcessBuilder getInstrumentationProcess(

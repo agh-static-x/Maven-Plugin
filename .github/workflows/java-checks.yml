@@ -20,5 +20,5 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Spotless check
-        run: mvn --batch-mode --update-snapshots spotless:check
+        run: mvn --projects agent-instrumenter,app-instrumenter --batch-mode --update-snapshots spotless:check
 
