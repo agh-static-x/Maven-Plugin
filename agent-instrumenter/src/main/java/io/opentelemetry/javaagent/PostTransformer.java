@@ -16,12 +16,13 @@ public class PostTransformer implements ClassFileTransformer {
       final byte[] classfileBuffer)
       throws IllegalClassFormatException {
     final BytesAndName pre = StaticInstrumenter.CurrentClass.get();
-    System.out.println("[PostTransformer] " + className);
-    if (pre != null) {
-      System.out.println("classname equal: " + (pre.name.equals(className) ? "YES" : "NO"));
-      System.out.println(
-          "bytecode modified: " + (!Arrays.equals(pre.bytes, classfileBuffer) ? "YES" : "NO"));
-    }
+    //    System.out.println("[PostTransformer] " + className);
+    //    if (pre != null) {
+    //      System.out.println("classname equal: " + (pre.name.equals(className) ? "YES" : "NO"));
+    //      System.out.println(
+    //          "bytecode modified: " + (!Arrays.equals(pre.bytes, classfileBuffer) ? "YES" :
+    // "NO"));
+    //    }
 
     if (pre != null && pre.name.equals(className) && !Arrays.equals(pre.bytes, classfileBuffer)) {
       StaticInstrumenter.InstrumentedClasses.put(className, classfileBuffer);

@@ -54,7 +54,7 @@ public class StaticInstrumenter {
   }
 
   private static void processJar(final File jar, final File outDir) throws Exception {
-    System.out.println("[processJar] " + jar.getName());
+    //    System.out.println("[processJar] " + jar.getName());
     // FIXME don't "instrument" our agent jar.
     final File outFile = new File(outDir, jar.getName()); // FIXME multiple jars with same name
     // FIXME detect and warn on signed jars (and drop the signing bits)
@@ -69,11 +69,11 @@ public class StaticInstrumenter {
       InputStream entryIn = null;
       if (name.endsWith(".class") && !shouldSkip(name)) {
         final String className = name.substring(0, name.indexOf(".class")).replace('/', '.');
-        System.out.println("[className] " + className);
+        //        System.out.println("[className] " + className);
         try {
           final Class c = Class.forName(className, false, ClassLoader.getSystemClassLoader());
           final byte[] modified = InstrumentedClasses.get(className.replace('.', '/'));
-          System.out.println("[modified] " + modified);
+          //          System.out.println("[modified] " + modified);
           if (modified == null) {
             entryIn = in.getInputStream(ent);
           } else {
