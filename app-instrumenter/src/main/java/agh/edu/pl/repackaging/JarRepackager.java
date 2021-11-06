@@ -6,7 +6,8 @@ import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.repackaging.config.InstrumentationConstants;
 import agh.edu.pl.repackaging.instrumenters.dependencies.DependenciesInstrumenter;
 import agh.edu.pl.repackaging.instrumenters.mainclass.MainJarInstrumenter;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,9 +25,10 @@ public class JarRepackager {
 
   public void copyInstrumentedOtelJar() {
     this.agentPath =
-        FolderNames.getInstance().getInstrumentedOtelJarPackage()
-            + File.separator
-            + InstrumentationConstants.OTEL_AGENT_JAR_FILENAME;
+        this.getClass()
+            .getClassLoader()
+            .getResource(InstrumentationConstants.OTEL_AGENT_JAR_FILENAME)
+            .getPath();
 
     try {
       Path path = Paths.get(this.agentPath);
