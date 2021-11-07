@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
+import static java.nio.file.StandardCopyOption.*;
 import java.util.List;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.asm.Advice;
@@ -39,7 +40,7 @@ public class OpenTelemetryLoader {
                 + System.getProperty("file.separator")
                 + otelJarFile.getName());
     try {
-      Files.copy(otelJarFile.toPath(), copyFile.toPath());
+      Files.copy(otelJarFile.toPath(), copyFile.toPath(), REPLACE_EXISTING);
     } catch (IOException exception) {
       System.err.println(
           "OpenTelemetry Agent JAR could not be copied to instrumentation directory.");
