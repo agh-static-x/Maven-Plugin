@@ -20,6 +20,8 @@ public class AgentClassesExtractor {
   private JarFile agentJar;
   private final String lastFolder;
   private final FolderNames folderNames = FolderNames.getInstance();
+  private boolean isSpringUsedInProject = false;
+  private final String replacementPrefix = isSpringUsedInProject ? "BOOT-INF/classes/" : "";
 
   public AgentClassesExtractor(File mainFile, String agentPath, String lastFolder) {
     this.mainFile = mainFile;
@@ -42,6 +44,9 @@ public class AgentClassesExtractor {
           "Problem occurred while getting project JAR file. Make sure you have defined JAR packaging in pom.xml.");
       return;
     }
+    FilenameFilter filter = (f, name) -> name.startsWith("BOOT-INF/");
+    System.out.println("TUTAJ SPRAWDZ: "+(this.mainFile.listFiles(filter) != null));
+    this.isSpringUsedInProject = this.mainFile.listFiles(filter) != null;
     try {
       for (Enumeration<JarEntry> enums = jarFile.entries(); enums.hasMoreElements(); ) {
         JarEntry entry = enums.nextElement();
@@ -105,6 +110,9 @@ public class AgentClassesExtractor {
               copySingleClassdataFile(entry, zout);
             } else if (entryName.startsWith("inst/")) {
               copySingleInstFolderFile(entry, zout);
+            }
+            else if (isSpringUsedInProject) {
+              copySingleEntryWithSpring(entry, zout);
             } else {
               ZipEntry outEntry = new ZipEntry(entry);
               try {
@@ -145,9 +153,15 @@ public class AgentClassesExtractor {
     }
   }
 
+  private void copySingleEntryWithSpring(JarEntry entry, ZipOutputStream zout) throws IOException {
+    File tmpFile = copySingleEntryFromAgentFile(entry);
+    String newEntryPath = replacementPrefix + entry.getName();
+    createZipEntry(zout, tmpFile, newEntryPath);
+  }
+
   private void copySingleInstFolderFile(JarEntry entry, ZipOutputStream zout) throws IOException {
     File tmpFile = copySingleEntryFromAgentFile(entry);
-    String newEntryPath = entry.getName().replace("inst/", "");
+    String newEntryPath = entry.getName().replace("inst/", replacementPrefix+"");
     createZipEntry(zout, tmpFile, newEntryPath);
   }
 
@@ -156,7 +170,7 @@ public class AgentClassesExtractor {
     String newEntryPath = entry.getName().replace(".classdata", ".class");
     if (entry.getName().startsWith("inst/io/opentelemetry/")) {
       // opentelemetry sdk, autoconfigure and exporters
-      newEntryPath = newEntryPath.replace("inst/", "io/opentelemetry/javaagent/shaded/");
+      newEntryPath = newEntryPath.replace("inst/", replacementPrefix+"io/opentelemetry/javaagent/shaded/");
     } else {
       // instrumentation modules
       newEntryPath = entry.getName().replace("inst/", "");
