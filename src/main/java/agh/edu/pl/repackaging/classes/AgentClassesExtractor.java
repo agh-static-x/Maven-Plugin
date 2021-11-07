@@ -4,6 +4,7 @@ package agh.edu.pl.repackaging.classes;
 import static agh.edu.pl.utils.ZipEntryCreator.createZipEntryFromFile;
 
 import agh.edu.pl.repackaging.config.FolderNames;
+import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Enumeration;
@@ -20,8 +21,7 @@ public class AgentClassesExtractor {
   private JarFile agentJar;
   private final String lastFolder;
   private final FolderNames folderNames = FolderNames.getInstance();
-  private boolean isSpringUsedInProject = false;
-  private final String replacementPrefix = isSpringUsedInProject ? "BOOT-INF/classes/" : "";
+  private FrameworkSupport frameworkSupport;
 
   public AgentClassesExtractor(File mainFile, String agentPath, String lastFolder) {
     this.mainFile = mainFile;
@@ -44,9 +44,6 @@ public class AgentClassesExtractor {
           "Problem occurred while getting project JAR file. Make sure you have defined JAR packaging in pom.xml.");
       return;
     }
-    FilenameFilter filter = (f, name) -> name.startsWith("BOOT-INF/");
-    System.out.println("TUTAJ SPRAWDZ: "+(this.mainFile.listFiles(filter) != null));
-    this.isSpringUsedInProject = this.mainFile.listFiles(filter) != null;
     try {
       for (Enumeration<JarEntry> enums = jarFile.entries(); enums.hasMoreElements(); ) {
         JarEntry entry = enums.nextElement();
@@ -77,9 +74,10 @@ public class AgentClassesExtractor {
     }
   }
 
-  public void addOpenTelemetryFolders() {
+  public void addOpenTelemetryFolders(FrameworkSupport frameworkSupport) {
     try {
       File finalDir = new File(folderNames.getFinalFolder());
+      this.frameworkSupport = frameworkSupport;
       if (!finalDir.mkdir() && !finalDir.exists()) {
         System.err.println(
             "The output directory could not be created. Please make sure you have permissions required to create a directory.");
@@ -110,9 +108,8 @@ public class AgentClassesExtractor {
               copySingleClassdataFile(entry, zout);
             } else if (entryName.startsWith("inst/")) {
               copySingleInstFolderFile(entry, zout);
-            }
-            else if (isSpringUsedInProject) {
-              copySingleEntryWithSpring(entry, zout);
+            } else if (frameworkSupport != null) {
+              copySingleEntryWithFrameworkSupport(entry, zout);
             } else {
               ZipEntry outEntry = new ZipEntry(entry);
               try {
@@ -153,27 +150,31 @@ public class AgentClassesExtractor {
     }
   }
 
-  private void copySingleEntryWithSpring(JarEntry entry, ZipOutputStream zout) throws IOException {
+  private void copySingleEntryWithFrameworkSupport(JarEntry entry, ZipOutputStream zout)
+      throws IOException {
     File tmpFile = copySingleEntryFromAgentFile(entry);
-    String newEntryPath = replacementPrefix + entry.getName();
+    String prefix = frameworkSupport.getPrefix();
+    String newEntryPath = prefix + entry.getName();
     createZipEntry(zout, tmpFile, newEntryPath);
   }
 
   private void copySingleInstFolderFile(JarEntry entry, ZipOutputStream zout) throws IOException {
     File tmpFile = copySingleEntryFromAgentFile(entry);
-    String newEntryPath = entry.getName().replace("inst/", replacementPrefix+"");
+    String prefix = frameworkSupport != null ? frameworkSupport.getPrefix() : "";
+    String newEntryPath = entry.getName().replace("inst/", prefix);
     createZipEntry(zout, tmpFile, newEntryPath);
   }
 
   private void copySingleClassdataFile(JarEntry entry, ZipOutputStream zout) throws IOException {
     File tmpFile = copySingleEntryFromAgentFile(entry);
+    String prefix = frameworkSupport != null ? frameworkSupport.getPrefix() : "";
     String newEntryPath = entry.getName().replace(".classdata", ".class");
-    if (entry.getName().startsWith("inst/io/opentelemetry/")) {
+    if (entry.getName().startsWith("/inst/io/opentelemetry/sdk")) {
       // opentelemetry sdk, autoconfigure and exporters
-      newEntryPath = newEntryPath.replace("inst/", replacementPrefix+"io/opentelemetry/javaagent/shaded/");
+      newEntryPath = newEntryPath.replace("inst/", prefix + "io/opentelemetry/javaagent/shaded/");
     } else {
       // instrumentation modules
-      newEntryPath = entry.getName().replace("inst/", "");
+      newEntryPath = newEntryPath.replace("inst/", prefix);
     }
     createZipEntry(zout, tmpFile, newEntryPath);
   }

@@ -4,6 +4,8 @@ package agh.edu.pl.repackaging;
 import agh.edu.pl.repackaging.classes.AgentClassesExtractor;
 import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.repackaging.config.InstrumentationConstants;
+import agh.edu.pl.repackaging.frameworks.AppFramework;
+import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
 import agh.edu.pl.repackaging.instrumenters.dependencies.DependenciesInstrumenter;
 import agh.edu.pl.repackaging.instrumenters.mainclass.MainJarInstrumenter;
 import java.io.*;
@@ -17,6 +19,7 @@ public class JarRepackager {
   private String agentPath;
   private File jarFile;
   private final FolderNames folderNames = FolderNames.getInstance();
+  private FrameworkSupport frameworkSupport;
 
   public JarRepackager() {
     this.copyInstrumentedOtelJar();
@@ -67,6 +70,10 @@ public class JarRepackager {
     AgentClassesExtractor agentClassesExtractor =
         new AgentClassesExtractor(
             new File(outFileName), agentPath, folderNames.getInstrumentedJARPackage());
-    agentClassesExtractor.addOpenTelemetryFolders();
+    agentClassesExtractor.addOpenTelemetryFolders(frameworkSupport);
+  }
+
+  public void checkFrameworkSupport() {
+    this.frameworkSupport = new AppFramework().getAppFramework(jarFile);
   }
 }

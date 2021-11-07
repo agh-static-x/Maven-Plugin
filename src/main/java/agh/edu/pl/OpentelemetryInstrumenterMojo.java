@@ -52,6 +52,7 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
     JarRepackager repackager = new JarRepackager();
     try {
       repackager.setJarFile(new ArtifactChooser(project).chooseArtifacts());
+      repackager.checkFrameworkSupport();
       repackager.repackageJar();
       repackager.addOpenTelemetryClasses();
     } finally {

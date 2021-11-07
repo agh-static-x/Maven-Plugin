@@ -107,7 +107,8 @@ public class DependenciesInstrumenter {
 
   private void instrumentSingleDependency(JarEntry entry, JarFile jarFile, ZipOutputStream zout) {
     StringBuilder classpath = new StringBuilder();
-    String fileName = String.format("%s/%s",folderNames.getMainJARInitialCopyPackage(), entry.getName());
+    String fileName =
+        String.format("%s/%s", folderNames.getMainJARInitialCopyPackage(), entry.getName());
     File f = new File(fileName);
     if (!f.getParentFile().mkdirs()) {
       System.err.println(
