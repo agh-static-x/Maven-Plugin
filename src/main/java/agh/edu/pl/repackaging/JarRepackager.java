@@ -28,17 +28,23 @@ public class JarRepackager {
             + File.separator
             + InstrumentationConstants.OTEL_AGENT_JAR_FILENAME;
 
+    Path path = Paths.get(this.agentPath);
     try {
-      Path path = Paths.get(this.agentPath);
       Files.createDirectories(path.getParent());
+    } catch (IOException exception) {
+      System.err.println(
+          "Error when creating temporary directories for agent JAR. Please make sure you have permissions required to create a directory.");
+    }
+
+    try {
       Files.copy(
           JarRepackager.class
               .getClassLoader()
               .getResourceAsStream(InstrumentationConstants.OTEL_AGENT_JAR_FILENAME),
           path,
           StandardCopyOption.REPLACE_EXISTING);
-    } catch (Exception e) {
-      e.printStackTrace();
+    } catch (IOException exception) {
+      System.err.println("Couldn't copy agent JAR from plugin resources.");
     }
   }
 
