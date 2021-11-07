@@ -16,8 +16,6 @@ public class FolderNames {
   private FolderNames() {
     INSTRUMENTED_OTEL_JAR_PACKAGE_NAME =
         String.format("%s_%s", "INSTRUMENTED_OTEL_JAR", RandomStringUtils.randomAlphanumeric(8));
-    INSTRUMENTED_OTEL_JAR_PACKAGE_NAME =
-        String.format("%s_%s", "INSTRUMENTED_OTEL_JAR", RandomStringUtils.randomAlphanumeric(8));
     MAIN_JAR_INITIAL_COPY =
         String.format("%s_%s", "./MAIN_JAR_INITIAL_COPY", RandomStringUtils.randomAlphanumeric(8));
     INSTRUMENTED_DEPENDENCY =
