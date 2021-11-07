@@ -1,7 +1,6 @@
 /* (C)2021 */
 package agh.edu.pl;
 
-import agh.edu.pl.agent.instrumentation.OpenTelemetryLoader;
 import agh.edu.pl.artifact.ArtifactChooser;
 import agh.edu.pl.config.*;
 import agh.edu.pl.config.exporter.Exporter;
@@ -50,10 +49,8 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    JarRepackager repackager = new JarRepackager();
     try {
-      OpenTelemetryLoader loader = new OpenTelemetryLoader(agentPath);
-      loader.instrument();
-      JarRepackager repackager = new JarRepackager(agentPath);
       repackager.setJarFile(new ArtifactChooser(project).chooseArtifacts());
       repackager.repackageJar();
       repackager.addOpenTelemetryClasses();
