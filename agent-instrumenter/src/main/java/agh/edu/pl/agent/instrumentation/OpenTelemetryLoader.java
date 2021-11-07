@@ -1,6 +1,7 @@
 /* (C)2021 */
 package agh.edu.pl.agent.instrumentation;
 
+import static java.nio.file.StandardCopyOption.*;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 import agh.edu.pl.agent.instrumentation.advices.InstallBootstrapJarAdvice;
@@ -35,11 +36,9 @@ public class OpenTelemetryLoader {
     File otelJarFile = new File(otelJarPath);
     File copyFile =
         new File(
-            pluginResourcesPath
-                + System.getProperty("file.separator")
-                + otelJarFile.getName());
+            pluginResourcesPath + System.getProperty("file.separator") + otelJarFile.getName());
     try {
-      Files.copy(otelJarFile.toPath(), copyFile.toPath());
+      Files.copy(otelJarFile.toPath(), copyFile.toPath(), REPLACE_EXISTING);
     } catch (IOException exception) {
       System.err.println(
           "OpenTelemetry Agent JAR could not be copied to instrumentation directory.");
