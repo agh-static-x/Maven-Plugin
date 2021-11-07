@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 public class JarRepackager {
   private String agentPath;
   private File jarFile;
-  private FolderNames folderNames = FolderNames.getInstance();
+  private final FolderNames folderNames = FolderNames.getInstance();
 
   public JarRepackager() {
     this.copyInstrumentedOtelJar();
@@ -28,17 +28,23 @@ public class JarRepackager {
             + File.separator
             + InstrumentationConstants.OTEL_AGENT_JAR_FILENAME;
 
+    Path path = Paths.get(this.agentPath);
     try {
-      Path path = Paths.get(this.agentPath);
       Files.createDirectories(path.getParent());
+    } catch (IOException exception) {
+      System.err.println(
+          "Error when creating temporary directories for agent JAR. Please make sure you have permissions required to create a directory.");
+    }
+
+    try {
       Files.copy(
           JarRepackager.class
               .getClassLoader()
               .getResourceAsStream(InstrumentationConstants.OTEL_AGENT_JAR_FILENAME),
           path,
           StandardCopyOption.REPLACE_EXISTING);
-    } catch (Exception e) {
-      e.printStackTrace();
+    } catch (IOException exception) {
+      System.err.println("Couldn't copy agent JAR from plugin resources.");
     }
   }
 
@@ -46,7 +52,7 @@ public class JarRepackager {
     this.jarFile = jarFile;
   }
 
-  public void repackageJar() throws Exception {
+  public void repackageJar() {
     new DependenciesInstrumenter(jarFile, agentPath).instrumentDependencies();
     new MainJarInstrumenter(jarFile, agentPath).instrumentMain();
   }
@@ -61,10 +67,6 @@ public class JarRepackager {
     AgentClassesExtractor agentClassesExtractor =
         new AgentClassesExtractor(
             new File(outFileName), agentPath, folderNames.getInstrumentedJARPackage());
-    try {
-      agentClassesExtractor.addOpenTelemetryFolders();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    agentClassesExtractor.addOpenTelemetryFolders();
   }
 }

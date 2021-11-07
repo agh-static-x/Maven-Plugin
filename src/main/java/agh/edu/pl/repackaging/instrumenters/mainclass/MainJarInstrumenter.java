@@ -20,34 +20,53 @@ public class MainJarInstrumenter {
     this.agentPath = agentPath;
   }
 
-  public void instrumentMain() throws Exception {
+  public void instrumentMain() {
     try {
-      JarFile jarFile = null;
+
+      JarFile jarFile;
       try {
         jarFile = new JarFile(this.file);
       } catch (IOException e) {
-        e.printStackTrace();
-      }
-      String pattern = Pattern.quote(System.getProperty("file.separator"));
-      if (jarFile == null) {
-        System.err.println("No JAR for project found.");
+        System.err.println(
+            "Problem occurred while getting project JAR file. Make sure you have defined JAR packaging in pom.xml.");
         return;
       }
+
+      String pattern = Pattern.quote(System.getProperty("file.separator"));
       String[] outFileNameParts = jarFile.getName().split(pattern);
       final String outFileName =
           folderNames.getJARWithInstrumentedDependenciesPackage()
               + File.separator
               + outFileNameParts[outFileNameParts.length - 1];
       String mainPath = outFileName + File.pathSeparator;
-      Process process =
-          InstrumentationConstants.getInstrumentationProcess(
-                  agentPath, mainPath, folderNames.getInstrumentedJARPackage())
-              .inheritIO()
-              .start();
-      int ret = process.waitFor();
+      Process process;
+      try {
+        process =
+            InstrumentationConstants.getInstrumentationProcess(
+                    agentPath, mainPath, folderNames.getInstrumentedJARPackage())
+                .inheritIO()
+                .start();
+      } catch (IOException exception) {
+        System.err.println("Error occurred during the instrumentation process for main JAR.");
+        return;
+      }
+      try {
+        int ret = process.waitFor();
+        if (ret != 0) {
+          System.err.println(
+              "The instrumentation process for main JAR finished with exit value " + ret + ".");
+        }
+      } catch (InterruptedException exception) {
+        System.err.println("The instrumentation process for main JAR was interrupted.");
+      }
     } finally {
-      FileUtils.deleteDirectory(folderNames.getInstrumentedOtelJarPackage());
-      FileUtils.deleteDirectory(folderNames.getJARWithInstrumentedDependenciesPackage());
+      try {
+        FileUtils.deleteDirectory(folderNames.getInstrumentedOtelJarPackage());
+        FileUtils.deleteDirectory(folderNames.getJARWithInstrumentedDependenciesPackage());
+      } catch (IOException exception) {
+        System.err.println(
+            "Temporary directories required for main JAR instrumentation process were not deleted properly.");
+      }
     }
   }
 }
