@@ -41,7 +41,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.example.CyclicGetter</mainClass>
+                            <mainClass>org.example.SingleGetter</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -59,9 +59,9 @@
                             <transformers>
                                 <transformer implementation=
                                                      "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.example.CyclicGetter</mainClass>
+                                    <mainClass>org.example.SingleGetter</mainClass>
                                     <manifestEntries>
-                                        <Main-Class>org.example.CyclicGetter</Main-Class>
+                                        <Main-Class>org.example.SingleGetter</Main-Class>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
@@ -81,12 +81,10 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <artifactName>apache-http-test-app-1.0-SNAPSHOT-shaded.jar</artifactName>
+                </configuration>
                 <dependencies>
-                    <dependency>
-                        <groupId>net.bytebuddy</groupId>
-                        <artifactId>byte-buddy-dep</artifactId>
-                        <version>1.11.5</version>
-                    </dependency>
                     <dependency>
                         <groupId>org.apache.commons</groupId>
                         <artifactId>commons-lang3</artifactId>
