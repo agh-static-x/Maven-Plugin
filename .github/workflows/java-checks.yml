@@ -21,4 +21,8 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: Spotless check
         run: mvn --projects agent-instrumenter,app-instrumenter --batch-mode --update-snapshots spotless:check
+      - name: Package and install plugin
+        run: mvn --projects app-instrumenter package && mvn install:install-file -Dfile=./app-instrumenter/target/opentelemetry-java-instrumenter-maven-plugin-1.0-SNAPSHOT.jar -DgroupId=agh.edu.pl -DartifactId=opentelemetry-java-instrumenter-maven-plugin -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true
+      - name: Test cyclic-getter app
+        run: mvn --projects instrumentation-tests/test-apps/cyclic-getter package && java -jar ./FINAL/apache-http-test-app-1.0-SNAPSHOT-shaded.jar
 
