@@ -1,8 +1,9 @@
 /* (C)2021 */
 package agh.edu.pl.agent.instrumentation;
 
-import static java.nio.file.StandardCopyOption.*;
-import static net.bytebuddy.matcher.ElementMatchers.*;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static net.bytebuddy.matcher.ElementMatchers.isMethod;
+import static net.bytebuddy.matcher.ElementMatchers.named;
 
 import agh.edu.pl.agent.instrumentation.advices.InstallBootstrapJarAdvice;
 import agh.edu.pl.agent.instrumentation.advices.OpenTelemetryAgentAdvices;
@@ -75,13 +76,7 @@ public class OpenTelemetryLoader {
   public void instrumentOpenTelemetryAgent(File jarFile) throws IOException {
     new ByteBuddy()
         .rebase(openTelemetryAgentClass)
-        //            .visit(Advice.to(PrintingAdvices.class).on(isMethod()))
-        .visit(
-            Advice.to(OpenTelemetryAgentAdvices.class)
-                .on(
-                    isMethod().and(named("agentmain"))
-                    //                                .and(takesArguments(2))
-                    ))
+        .visit(Advice.to(OpenTelemetryAgentAdvices.class).on(isMethod().and(named("agentmain"))))
         .visit(
             Advice.to(InstallBootstrapJarAdvice.class)
                 .on(isMethod().and(named("installBootstrapJar"))))
