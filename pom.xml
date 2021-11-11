@@ -10,6 +10,7 @@
     <modules>
         <module>agent-instrumenter</module>
         <module>app-instrumenter</module>
+        <module>instrumentation-tests/test-apps/apache-http-test-app</module>
     </modules>
     <packaging>pom</packaging>
 
