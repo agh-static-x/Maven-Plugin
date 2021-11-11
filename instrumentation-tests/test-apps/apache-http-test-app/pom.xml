@@ -73,7 +73,7 @@
 
             <plugin>
                 <groupId>agh.edu.pl</groupId>
-                <artifactId>opentelemetry-java-instrumenter-maven-plugin</artifactId>
+                <artifactId>app-instrumenter</artifactId>
                 <version>1.0-SNAPSHOT</version>
                 <executions>
                     <execution>
