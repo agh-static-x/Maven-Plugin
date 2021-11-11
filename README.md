@@ -1,4 +1,12 @@
 # Plugin
+
+## Parameters
+
+- `artifactName` - name of the artifact that should be instrumented. Plugin will search for
+  artifact with this exact name. If such artifact won't be found, plugin will default to
+  instrumenting all project artifacts.
+
+
 ## Execution
 Run `mvn package` directly in the current project to run this plugin.
 
