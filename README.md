@@ -50,4 +50,7 @@ Run `mvn package` directly in the current project to run this plugin.
 
 ## Spotless
 
-To apply Spotless run `mvn --projects agent-instrumenter,app-instrumenter spotless:apply`.
+To apply Spotless
+
+* to all modules run `mvn spotless:apply`
+* to a specific module run `mvn --projects <module-name> spotless:apply`
