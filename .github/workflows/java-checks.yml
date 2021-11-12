@@ -20,5 +20,9 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Spotless check
-        run: mvn --batch-mode --update-snapshots spotless:check
+        run: mvn --projects agent-instrumenter,app-instrumenter --batch-mode --update-snapshots spotless:check
+      - name: Package and install plugin
+        run: mvn --projects app-instrumenter package && mvn install:install-file -Dfile=./app-instrumenter/target/app-instrumenter-1.0-SNAPSHOT.jar -DgroupId=agh.edu.pl -DartifactId=app-instrumenter -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true
+      - name: Test cyclic-getter app
+        run: mvn --projects instrumentation-tests/test-apps/apache-http-test-app package && java -jar ./FINAL/apache-http-test-app-1.0-SNAPSHOT-shaded.jar
 

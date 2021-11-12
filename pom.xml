@@ -5,11 +5,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>agh.edu.pl</groupId>
-    <artifactId>opentelemetry-java-instrumenter-maven-plugin</artifactId>
+    <artifactId>opentelemetry-java-instrumenter</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>maven-plugin</packaging>
+    <modules>
+        <module>agent-instrumenter</module>
+        <module>app-instrumenter</module>
+        <module>instrumentation-tests/test-apps/apache-http-test-app</module>
+    </modules>
+    <packaging>pom</packaging>
 
-    <name>opentelemetry-java-instrumenter-maven-plugin Maven Mojo</name>
+    <name>opentelemetry-java-instrumenter</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -24,158 +29,5 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-plugin-api</artifactId>
-            <version>3.6.3</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.maven.plugin-tools</groupId>
-            <artifactId>maven-plugin-annotations</artifactId>
-            <version>3.6.0</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-project</artifactId>
-            <version>2.2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-core</artifactId>
-            <version>3.3.9</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver</artifactId>
-            <version>1.6.2</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-spi</artifactId>
-            <version>1.6.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-connector-basic</artifactId>
-            <version>1.6.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-transport-file</artifactId>
-            <version>1.6.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-transport-http</artifactId>
-            <version>1.6.2</version>
-        </dependency>
-        <dependency>
-            <groupId>net.bytebuddy</groupId>
-            <artifactId>byte-buddy-dep</artifactId>
-            <version>1.11.5</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>io.opentelemetry.javaagent</groupId>
-            <artifactId>opentelemetry-javaagent-tooling</artifactId>
-            <version>1.1.0-alpha</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-api</artifactId>
-            <version>1.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-sdk</artifactId>
-            <version>1.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-exporter-zipkin</artifactId>
-            <version>1.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.6.1</version>
-                <configuration>
-                    <goalPrefix>dependency-inspector-maven-plugin</goalPrefix>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>2.12.3</version>
-                <configuration>
-                    <formats>
-                        <!-- you can define as many formats as you want, each is independent -->
-                        <format>
-                            <!-- define the files to apply to -->
-                            <includes>
-                                <include>*.md</include>
-                                <include>.gitignore</include>
-                            </includes>
-                            <!-- define the steps to apply to those files -->
-                            <trimTrailingWhitespace/>
-                            <endWithNewline/>
-                            <indent>
-                                <tabs>true</tabs>
-                                <spacesPerTab>4</spacesPerTab>
-                            </indent>
-                        </format>
-                    </formats>
-                    <!-- define a language-specific format -->
-                    <java>
-                        <includes>
-                            <include>src/main/java/**/*.java</include>
-                            <include>src/test/java/**/*.java</include>
-                        </includes>
-
-                        <importOrder/> <!-- standard import order -->
-                        <importOrder>  <!-- or a custom ordering -->
-                            <order>java,javax,org,com,com.diffplug,
-                            </order>  <!-- or use <file>${basedir}/eclipse.importorder</file> -->
-                            <!-- You probably want an empty string at the end - all of the
-                                 imports you didn't specify explicitly will go there. -->
-                        </importOrder>
-
-                        <removeUnusedImports/> <!-- self-explanatory -->
-
-                        <googleJavaFormat>
-                            <version>1.8</version>
-                            <style>GOOGLE</style>
-                        </googleJavaFormat>
-                        <!--                        <eclipse/>          &lt;!&ndash; has its own section below &ndash;&gt;-->
-                        <!--                        <prettier/>         &lt;!&ndash; has its own section below &ndash;&gt;-->
-
-                        <licenseHeader>
-                            <content>/* (C)$YEAR */</content>  <!-- or <file>${basedir}/license-header</file> -->
-                        </licenseHeader>
-                    </java>
-                </configuration>
-            </plugin>
-        </plugins>
-
-    </build>
 
 </project>
