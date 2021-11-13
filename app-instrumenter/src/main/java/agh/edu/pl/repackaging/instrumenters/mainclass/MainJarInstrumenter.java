@@ -61,11 +61,10 @@ public class MainJarInstrumenter {
       }
     } finally {
       try {
-        FileUtils.deleteDirectory(folderNames.getInstrumentedOtelJarPackage());
         FileUtils.deleteDirectory(folderNames.getJARWithInstrumentedDependenciesPackage());
       } catch (IOException exception) {
         System.err.println(
-            "Temporary directories required for main JAR instrumentation process were not deleted properly.");
+            "Temporary directory required for main JAR instrumentation process was not deleted properly.");
       }
     }
   }

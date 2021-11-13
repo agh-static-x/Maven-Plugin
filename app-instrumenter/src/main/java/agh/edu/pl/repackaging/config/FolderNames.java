@@ -43,7 +43,7 @@ public class FolderNames {
   }
 
   public String getInstrumentedOtelJarPackage() {
-    return String.format("%s/%s", ".", INSTRUMENTED_OTEL_JAR_PACKAGE_NAME);
+    return String.format("./%s", INSTRUMENTED_OTEL_JAR_PACKAGE_NAME);
   }
 
   public String getMainJARInitialCopyPackage() {
