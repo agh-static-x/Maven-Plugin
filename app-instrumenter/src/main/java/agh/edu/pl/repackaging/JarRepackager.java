@@ -28,9 +28,9 @@ public class JarRepackager {
 
   public void copyInstrumentedOtelJar() {
     this.agentPath =
-            folderNames.getInstrumentedOtelJarPackage()
-                    + File.separator
-                    + InstrumentationConstants.OTEL_AGENT_JAR_FILENAME;
+        folderNames.getInstrumentedOtelJarPackage()
+            + File.separator
+            + InstrumentationConstants.OTEL_AGENT_JAR_FILENAME;
 
     Path path = Paths.get(this.agentPath);
     try {

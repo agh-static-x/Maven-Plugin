@@ -27,11 +27,9 @@ public class AgentClassesExtractor {
     this.mainFile = mainFile;
     this.lastFolder = lastFolder;
     try {
-      agentJar =
-          new JarFile(
-              agentPath.replace(folderNames.getInstrumentedOtelJarPackage() + File.separator, ""));
+      agentJar = new JarFile(agentPath);
     } catch (IOException e) {
-      e.printStackTrace();
+      System.err.println("Problem occurred while getting agent JAR file.");
     }
   }
 
