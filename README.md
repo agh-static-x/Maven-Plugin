@@ -6,7 +6,7 @@ Project consists of the following modules:
 
 - **app-instrumenter** - Maven plugin, which uses instrumented OpenTelemetry agent to statically instrument
   specified project's artifacts. Responsible for repackaging and injecting needed agent code to final jar.
-- **agent-instrumenter** - logic for instrumenting OpenTelemetry agent. Automatically injects instrumented 
+- **agent-instrumenter** - logic for instrumenting OpenTelemetry agent. Automatically injects instrumented
   agent to **app-instrumenter** module resources.
 - **instrumentation-tests** - tests, which verify whether instrumentation is actually applied. Configured
   with Github Actions.
@@ -49,7 +49,7 @@ Project consists of the following modules:
 
 Make sure that `opentelemetry-javaagent-all.jar` file is present in this repo root folder.
 
-1. If any changes to **agent-instrumenter** are made, *AgentInstrumenter* class must be run. It takes OpenTelemetry agent 
+1. If any changes to **agent-instrumenter** are made, *AgentInstrumenter* class must be run. It takes OpenTelemetry agent
 from resources, instruments it and injects to **app-instrumenter** resources.
 
 **NOTE:** If this step is omitted, pre-commit hook will fail.
