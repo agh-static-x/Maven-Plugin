@@ -58,7 +58,7 @@ public class JarRepackager {
 
   public void repackageJar() {
     new DependenciesInstrumenter(jarFile, agentPath).instrumentDependencies();
-    new MainJarInstrumenter(jarFile, agentPath).instrumentMain();
+    new MainJarInstrumenter(jarFile, agentPath, frameworkSupport).instrumentMain();
   }
 
   public void addOpenTelemetryClasses() {

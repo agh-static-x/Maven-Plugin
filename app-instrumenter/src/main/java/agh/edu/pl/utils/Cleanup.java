@@ -11,13 +11,14 @@ public class Cleanup {
 
   public void deleteAllTemporaryFolders() {
     FolderNames folderNames = FolderNames.getInstance();
+    String[] foldersToDelete = {folderNames.getInstrumentedOtelJarPackage(),
+            folderNames.getMainJARInitialCopyPackage(),
+            folderNames.getInstrumentedDependencyPackage(), folderNames.getInstrumentedJARPackage(), folderNames.getOpenTelemetryClassesPackage(),
+            folderNames.getJARWithInstrumentedDependenciesPackage(), folderNames.getFrameworkSupportMainClassAfterInstrumentation(), folderNames.getFrameworkSupportMainClassWithoutPrefix()};
     try {
-      FileUtils.deleteDirectory(folderNames.getInstrumentedOtelJarPackage());
-      FileUtils.deleteDirectory(folderNames.getMainJARInitialCopyPackage());
-      FileUtils.deleteDirectory(folderNames.getInstrumentedDependencyPackage());
-      FileUtils.deleteDirectory(folderNames.getInstrumentedJARPackage());
-      FileUtils.deleteDirectory(folderNames.getOpenTelemetryClassesPackage());
-      FileUtils.deleteDirectory(folderNames.getJARWithInstrumentedDependenciesPackage());
+      for(String folderName: foldersToDelete) {
+        FileUtils.deleteDirectory(folderName);
+      }
     } catch (IllegalArgumentException ignored) {
     } catch (IOException exception) {
       System.err.println("Temporary directories were not deleted properly.");

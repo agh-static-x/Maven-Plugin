@@ -3,6 +3,7 @@ package agh.edu.pl.repackaging.instrumenters.mainclass;
 
 import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.repackaging.config.InstrumentationConstants;
+import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
 import java.io.File;
 import java.io.IOException;
 import java.util.jar.JarFile;
@@ -14,15 +15,16 @@ public class MainJarInstrumenter {
   private final File file;
   private final String agentPath;
   private final FolderNames folderNames = FolderNames.getInstance();
+  private final FrameworkSupport frameworkSupport;
 
-  public MainJarInstrumenter(File file, String agentPath) {
+  public MainJarInstrumenter(File file, String agentPath, FrameworkSupport frameworkSupport) {
     this.file = file;
     this.agentPath = agentPath;
+    this.frameworkSupport = frameworkSupport;
   }
 
   public void instrumentMain() {
     try {
-
       JarFile jarFile;
       try {
         jarFile = new JarFile(this.file);
@@ -32,18 +34,23 @@ public class MainJarInstrumenter {
         return;
       }
 
+      if (frameworkSupport != null) {
+        frameworkSupport.copyMainClassesWithoutPrefix(jarFile, folderNames.getFrameworkSupportMainClassWithoutPrefix(), jarFile.getName());
+      }
+
       String pattern = Pattern.quote(System.getProperty("file.separator"));
       String[] outFileNameParts = jarFile.getName().split(pattern);
       final String outFileName =
-          folderNames.getJARWithInstrumentedDependenciesPackage()
+              frameworkSupport != null ? folderNames.getFrameworkSupportMainClassWithoutPrefix() : folderNames.getJARWithInstrumentedDependenciesPackage()
               + File.separator
               + outFileNameParts[outFileNameParts.length - 1];
       String mainPath = outFileName + File.pathSeparator;
       Process process;
+      final String outputFolder = frameworkSupport != null ? folderNames.getFrameworkSupportMainClassAfterInstrumentation() : folderNames.getInstrumentedJARPackage();
       try {
         process =
             InstrumentationConstants.getInstrumentationProcess(
-                    agentPath, mainPath, folderNames.getInstrumentedJARPackage())
+                    agentPath, mainPath, outputFolder)
                 .inheritIO()
                 .start();
       } catch (IOException exception) {

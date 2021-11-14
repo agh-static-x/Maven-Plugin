@@ -12,6 +12,8 @@ public class FolderNames {
   private final String JAR_WITH_INSTRUMENTED_DEPENDENCIES;
   private final String INSTRUMENTED_JAR;
   private final String OPENTELEMETRY_CLASSES;
+  private final String FRAMEWORK_SUPPORT_MAIN_CLASS_WITHOUT_PREFIX;
+  private final String FRAMEWORK_SUPPORT_MAIN_CLASS_AFTER_INSTRUMENTATION;
 
   private FolderNames() {
     INSTRUMENTED_OTEL_JAR_PACKAGE_NAME =
@@ -29,6 +31,10 @@ public class FolderNames {
         String.format("%s_%s", "./INSTRUMENTED_JAR", RandomStringUtils.randomAlphanumeric(8));
     OPENTELEMETRY_CLASSES =
         String.format("%s_%s", "./OPENTELEMETRY_CLASSES", RandomStringUtils.randomAlphanumeric(8));
+    FRAMEWORK_SUPPORT_MAIN_CLASS_AFTER_INSTRUMENTATION =
+        String.format("%s_%s", "./MAIN_CLASS_AFTER_INSTRUMENTATION", RandomStringUtils.randomAlphanumeric(8));
+    FRAMEWORK_SUPPORT_MAIN_CLASS_WITHOUT_PREFIX =
+            String.format("%s_%s", "./MAIN_CLASS_WITHOUT_PREFIX", RandomStringUtils.randomAlphanumeric(8));
   }
 
   public static FolderNames getInstance() {
@@ -64,6 +70,14 @@ public class FolderNames {
 
   public String getOpenTelemetryClassesPackage() {
     return OPENTELEMETRY_CLASSES;
+  }
+
+  public String getFrameworkSupportMainClassAfterInstrumentation() {
+    return FRAMEWORK_SUPPORT_MAIN_CLASS_AFTER_INSTRUMENTATION;
+  }
+
+  public String getFrameworkSupportMainClassWithoutPrefix() {
+    return FRAMEWORK_SUPPORT_MAIN_CLASS_WITHOUT_PREFIX;
   }
 
   public String getFinalFolder() {
