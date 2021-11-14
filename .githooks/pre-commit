@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+
+import os
+import re
+
+diff_result = os.popen('git diff --cached --name-only').read()
+
+is_agent_instrumenter_changed = False
+is_agent_jar_changed = False
+
+agent_instrumenter_classes_regex = re.compile(r"^agent-instrumenter\/\S+\.java$")
+agent_jar_path = "app-instrumenter/src/main/resources/opentelemetry-javaagent-all.jar"
+
+for changed_file in diff_result.strip().split("\n"):
+    if agent_instrumenter_classes_regex.match(changed_file):
+        is_agent_instrumenter_changed = True
+    elif changed_file == agent_jar_path:
+        is_agent_jar_changed = True
+
+if is_agent_instrumenter_changed and not is_agent_jar_changed:
+    print("Detected changes in agent-instrumenter classes but agent jar in app-instrumenter module wasn't updated.")
+    print("Please run AgentInstrumenter class to update agent jar")
+    exit(1)
