@@ -1,4 +1,15 @@
-# Plugin
+# OpenTelemetry Java static instrumentation
+
+## Project structure
+
+Project consists of the following modules:
+
+- **app-instrumenter** - Maven plugin, which uses instrumented OpenTelemetry agent to statically instrument
+  specified project's artifacts. Responsible for repackaging and injecting needed agent code to final jar.
+- **agent-instrumenter** - logic for instrumenting OpenTelemetry agent. Automatically injects instrumented 
+  agent to **app-instrumenter** module resources.
+- **instrumentation-tests** - tests, which verify whether instrumentation is actually applied. Configured
+  with Github Actions.
 
 ## Parameters
 
@@ -7,24 +18,10 @@
 
 ## Execution
 
-Run `mvn package` directly in the current project to run this plugin.
+### Add plugin to app
 
-!!! Try it out
-with [this](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.1.0/opentelemetry-javaagent-all.jar)
-distribution of OTEL. !!!
-
-Add `opentelemetry-javaagent-all.jar` to your project folder. You can get recent release
-on https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases.
-
-Run `mvn package` in *Maven Plugin* project and install it to your local repository with comment:
-
-```
-mvn --projects app-instrumenter install:install-file -Dfile=./target/app-instrumenter-1.0-SNAPSHOT.jar -DgroupId=agh.edu.pl -DartifactId=app-instrumenter -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true
-```
-
-Add the following code to the `pom.xml` file of the project where you want to execute the plugin:
-
-```
+1. Add following config to project's `pom.xml` file
+```xml
 <plugin>
     <groupId>agh.edu.pl</groupId>
     <artifactId>app-instrumenter</artifactId>
@@ -46,11 +43,23 @@ Add the following code to the `pom.xml` file of the project where you want to ex
 </plugin>
 ```
 
-Run `mvn package` directly in the current project to run this plugin.
+2. Run `mvn package` in project's folder.
 
-## Spotless
+### Build plugin
 
-To apply Spotless
+Make sure that `opentelemetry-javaagent-all.jar` file is present in this repo root folder.
+
+1. If any changes to **agent-instrumenter** are made, *AgentInstrumenter* class must be run. It takes OpenTelemetry agent 
+from resources, instruments it and injects to **app-instrumenter** resources.
+
+**NOTE:** If this step is omitted, pre-commit hook will fail.
+
+2. Run `mvn --projects app-instrumenter package`
+
+3. Run `mvn --projects app-instrumenter install:install-file -Dfile=./target/app-instrumenter-1.0-SNAPSHOT.jar -DgroupId=agh.edu.pl -DartifactId=app-instrumenter -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true`
+
+## Code quality
+Project uses Spotless. To apply Spotless
 
 * to all modules run `mvn spotless:apply`
 * to a specific module run `mvn --projects <module-name> spotless:apply`
