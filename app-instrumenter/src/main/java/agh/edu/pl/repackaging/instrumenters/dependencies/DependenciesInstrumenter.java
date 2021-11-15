@@ -101,7 +101,9 @@ public class DependenciesInstrumenter {
 
   private void storeSingleJAREntry(JarEntry entry, JarFile jarFile, ZipOutputStream zout)
       throws IOException {
-    if (frameworkSupport != null && entry.getName().startsWith(frameworkSupport.getPrefix()) && !entry.isDirectory()) {
+    if (frameworkSupport != null
+        && entry.getName().startsWith(frameworkSupport.getPrefix())
+        && !entry.isDirectory()) {
       copyMainClassWithoutPrefix(entry, zout, jarFile);
     } else {
       ZipEntry outEntry = new ZipEntry(entry);
