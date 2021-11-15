@@ -12,7 +12,10 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
+
+import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
 import org.codehaus.plexus.util.FileUtils;
 
 public class DependenciesInstrumenter {
@@ -20,10 +23,12 @@ public class DependenciesInstrumenter {
   private final File file;
   private final String agentPath;
   private final FolderNames folderNames = FolderNames.getInstance();
+  private final FrameworkSupport frameworkSupport;
 
-  public DependenciesInstrumenter(File file, String agentPath) {
+  public DependenciesInstrumenter(File file, String agentPath, FrameworkSupport frameworkSupport) {
     this.file = file;
     this.agentPath = agentPath;
+    this.frameworkSupport = frameworkSupport;
   }
 
   public void instrumentDependencies() {
@@ -97,12 +102,17 @@ public class DependenciesInstrumenter {
 
   private void storeSingleJAREntry(JarEntry entry, JarFile jarFile, ZipOutputStream zout)
       throws IOException {
-    ZipEntry outEntry = new ZipEntry(entry);
-    zout.putNextEntry(outEntry);
-    InputStream in = jarFile.getInputStream(entry);
-    in.transferTo(zout);
-    in.close();
-    zout.closeEntry();
+    if (entry.getName().startsWith(frameworkSupport.getPrefix()) && !entry.isDirectory()) {
+      copyMainClassWithoutPrefix(entry, zout, jarFile);
+    }
+    else {
+      ZipEntry outEntry = new ZipEntry(entry);
+      zout.putNextEntry(outEntry);
+      InputStream in = jarFile.getInputStream(entry);
+      in.transferTo(zout);
+      in.close();
+      zout.closeEntry();
+    }
   }
 
   private void instrumentSingleDependency(JarEntry entry, JarFile jarFile, ZipOutputStream zout) {
@@ -125,7 +135,6 @@ public class DependenciesInstrumenter {
       return;
     }
     classpath.append(fileName).append(File.pathSeparator);
-    System.out.println(classpath);
     Process process;
     try {
       process =
@@ -182,6 +191,37 @@ public class DependenciesInstrumenter {
           "Error while cleaning temporary directories after dependency "
               + entry.getName()
               + " was instrumented.");
+    }
+  }
+
+  private void copyMainClassWithoutPrefix(JarEntry entry, ZipOutputStream zout, JarFile jarFile)
+          throws IOException {
+    File tmpFile = copySingleEntry(entry, jarFile);
+    String newEntryPath = entry.getName().replace(frameworkSupport.getPrefix(), "");
+    frameworkSupport.addFileToRepackage(newEntryPath);
+    createZipEntry(zout, tmpFile, newEntryPath);
+  }
+
+  private File copySingleEntry(JarEntry entry, JarFile jarFile) throws IOException {
+    File tmpFile =
+            new File(
+                    folderNames.getFrameworkSupportFolder(), entry.getName());
+    if (!tmpFile.getParentFile().mkdirs() && !tmpFile.getParentFile().exists()) {
+      System.err.println(
+              "Temporary directory for " + entry.getName() + " was not created properly.");
+    }
+    Files.copy(jarFile.getInputStream(entry), tmpFile.toPath());
+    return tmpFile;
+  }
+
+  private void createZipEntry(ZipOutputStream zout, File file, String pathToFile)
+          throws IOException {
+    try {
+      createZipEntryFromFile(zout, file, pathToFile);
+    } catch (ZipException e) {
+      if (!e.getMessage().contains("duplicate")) {
+        System.err.println("Error while copying OpenTelemetry classes to JAR.");
+      }
     }
   }
 }

@@ -34,23 +34,16 @@ public class MainJarInstrumenter {
         return;
       }
 
-      if (frameworkSupport != null) {
-        frameworkSupport.copyMainClassesWithoutPrefix(jarFile, folderNames.getFrameworkSupportMainClassWithoutPrefix(), jarFile.getName());
-      }
-
       String pattern = Pattern.quote(System.getProperty("file.separator"));
-      String[] outFileNameParts = jarFile.getName().split(pattern);
-      final String outFileName =
-              frameworkSupport != null ? folderNames.getFrameworkSupportMainClassWithoutPrefix() : folderNames.getJARWithInstrumentedDependenciesPackage()
-              + File.separator
-              + outFileNameParts[outFileNameParts.length - 1];
-      String mainPath = outFileName + File.pathSeparator;
+      String[] fileNameParts = jarFile.getName().split(pattern);
+      String inputFolder = folderNames.getJARWithInstrumentedDependenciesPackage();
+      final String inputFileName = String.format("%s/%s", inputFolder, fileNameParts[fileNameParts.length - 1]);
+      String mainPath = inputFileName + File.pathSeparator;
       Process process;
-      final String outputFolder = frameworkSupport != null ? folderNames.getFrameworkSupportMainClassAfterInstrumentation() : folderNames.getInstrumentedJARPackage();
+      final String outputFolder = folderNames.getInstrumentedJARPackage();
       try {
         process =
-            InstrumentationConstants.getInstrumentationProcess(
-                    agentPath, mainPath, outputFolder)
+            InstrumentationConstants.getInstrumentationProcess(agentPath, mainPath, outputFolder)
                 .inheritIO()
                 .start();
       } catch (IOException exception) {
@@ -66,12 +59,13 @@ public class MainJarInstrumenter {
       } catch (InterruptedException exception) {
         System.err.println("The instrumentation process for main JAR was interrupted.");
       }
-    } finally {
+    }
+    finally {
       try {
         FileUtils.deleteDirectory(folderNames.getJARWithInstrumentedDependenciesPackage());
       } catch (IOException exception) {
         System.err.println(
-            "Temporary directory required for main JAR instrumentation process was not deleted properly.");
+                "Temporary directory required for main JAR instrumentation process was not deleted properly.");
       }
     }
   }

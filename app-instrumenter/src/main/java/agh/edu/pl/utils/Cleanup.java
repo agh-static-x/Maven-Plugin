@@ -11,12 +11,17 @@ public class Cleanup {
 
   public void deleteAllTemporaryFolders() {
     FolderNames folderNames = FolderNames.getInstance();
-    String[] foldersToDelete = {folderNames.getInstrumentedOtelJarPackage(),
-            folderNames.getMainJARInitialCopyPackage(),
-            folderNames.getInstrumentedDependencyPackage(), folderNames.getInstrumentedJARPackage(), folderNames.getOpenTelemetryClassesPackage(),
-            folderNames.getJARWithInstrumentedDependenciesPackage(), folderNames.getFrameworkSupportMainClassAfterInstrumentation(), folderNames.getFrameworkSupportMainClassWithoutPrefix()};
+    String[] foldersToDelete = {
+      folderNames.getInstrumentedOtelJarPackage(),
+      folderNames.getMainJARInitialCopyPackage(),
+      folderNames.getInstrumentedDependencyPackage(),
+      folderNames.getInstrumentedJARPackage(),
+      folderNames.getOpenTelemetryClassesPackage(),
+      folderNames.getJARWithInstrumentedDependenciesPackage(),
+      folderNames.getFrameworkSupportFolder()
+    };
     try {
-      for(String folderName: foldersToDelete) {
+      for (String folderName : foldersToDelete) {
         FileUtils.deleteDirectory(folderName);
       }
     } catch (IllegalArgumentException ignored) {
