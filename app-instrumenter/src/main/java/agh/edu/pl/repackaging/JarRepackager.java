@@ -64,7 +64,7 @@ public class JarRepackager {
             folderNames.getJARWithInstrumentedDependenciesPackage()
                     + File.separator
                     + fileNameParts[fileNameParts.length - 1];
-    new MainJarInstrumenter(new File(fileName), agentPath, frameworkSupport).instrumentMain();
+    new MainJarInstrumenter(new File(fileName), agentPath).instrumentMain();
   }
 
   public void addOpenTelemetryClasses() {
