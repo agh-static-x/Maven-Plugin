@@ -8,8 +8,7 @@ import net.bytebuddy.asm.Advice;
 public class InstallBootstrapJarAdvice {
 
   @Advice.OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
-  static void exit(
-      @Advice.Origin String origin,
+  static void addInstrumentationEnter(
       @Advice.Origin("#t #m") String detailedOrigin,
       @Advice.Argument(value = 0, readOnly = false) Instrumentation inst) {
 

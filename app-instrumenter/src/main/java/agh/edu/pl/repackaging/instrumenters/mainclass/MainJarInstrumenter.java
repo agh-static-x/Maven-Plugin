@@ -15,12 +15,10 @@ public class MainJarInstrumenter {
   private final File file;
   private final String agentPath;
   private final FolderNames folderNames = FolderNames.getInstance();
-  private final FrameworkSupport frameworkSupport;
 
-  public MainJarInstrumenter(File file, String agentPath, FrameworkSupport frameworkSupport) {
+  public MainJarInstrumenter(File file, String agentPath) {
     this.file = file;
     this.agentPath = agentPath;
-    this.frameworkSupport = frameworkSupport;
   }
 
   public void instrumentMain() {
