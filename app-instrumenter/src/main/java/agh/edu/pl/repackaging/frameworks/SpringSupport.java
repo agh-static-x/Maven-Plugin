@@ -1,7 +1,6 @@
 /* (C)2021 */
 package agh.edu.pl.repackaging.frameworks;
 
-import agh.edu.pl.repackaging.config.FolderNames;
 import java.util.HashSet;
 
 public class SpringSupport implements FrameworkSupport {

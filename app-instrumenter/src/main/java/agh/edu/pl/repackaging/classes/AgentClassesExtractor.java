@@ -39,7 +39,7 @@ public class AgentClassesExtractor {
       jarFile = new JarFile(this.mainFile);
     } catch (IOException e) {
       System.err.println(
-              "Problem occurred while getting project JAR file. Make sure you have defined JAR packaging in pom.xml.");
+          "Problem occurred while getting project JAR file. Make sure you have defined JAR packaging in pom.xml.");
       return;
     }
     try {
@@ -47,7 +47,9 @@ public class AgentClassesExtractor {
         JarEntry entry = enums.nextElement();
         ZipEntry outEntry = new ZipEntry(entry);
         try {
-          if (frameworkSupport != null && !entry.isDirectory() && frameworkSupport.getFilesToRepackage().contains(entry.getName())) {
+          if (frameworkSupport != null
+              && !entry.isDirectory()
+              && frameworkSupport.getFilesToRepackage().contains(entry.getName())) {
             copyMainClassWithPrefix(entry, zout, jarFile, frameworkSupport);
           } else {
             zout.putNextEntry(outEntry);
@@ -58,7 +60,7 @@ public class AgentClassesExtractor {
           }
         } catch (IOException exception) {
           System.err.println(
-                  "Error while copying entry " + entry.getName() + " from main JAR to temporary file.");
+              "Error while copying entry " + entry.getName() + " from main JAR to temporary file.");
         }
       }
       try {
@@ -71,7 +73,7 @@ public class AgentClassesExtractor {
         FileUtils.deleteDirectory(lastFolder);
       } catch (IOException exception) {
         System.err.println(
-                "Temporary directory required for adding Agent classes process was not deleted properly.");
+            "Temporary directory required for adding Agent classes process was not deleted properly.");
       }
     }
   }
@@ -82,20 +84,20 @@ public class AgentClassesExtractor {
       this.frameworkSupport = frameworkSupport;
       if (!finalDir.mkdir() && !finalDir.exists()) {
         System.err.println(
-                "The output directory could not be created. Please make sure you have permissions required to create a directory.");
+            "The output directory could not be created. Please make sure you have permissions required to create a directory.");
         return;
       }
 
       String pattern = Pattern.quote(System.getProperty("file.separator"));
       String[] outFileNameParts = mainFile.getName().split(pattern);
       final File outFile =
-              new File(folderNames.getFinalFolder(), outFileNameParts[outFileNameParts.length - 1]);
+          new File(folderNames.getFinalFolder(), outFileNameParts[outFileNameParts.length - 1]);
       ZipOutputStream zout;
       try {
         zout = new ZipOutputStream(new FileOutputStream(outFile));
       } catch (FileNotFoundException exception) {
         System.err.println(
-                "Could not create output stream for JAR file, because file does not exist.");
+            "Could not create output stream for JAR file, because file does not exist.");
         return;
       }
       zout.setMethod(ZipOutputStream.STORED);
@@ -104,7 +106,7 @@ public class AgentClassesExtractor {
         JarEntry entry = enums.nextElement();
         String entryName = entry.getName();
         if ((entryName.startsWith("inst/") || entryName.startsWith("io/"))
-                && !entry.isDirectory()) {
+            && !entry.isDirectory()) {
           try {
             if (entryName.endsWith(".classdata")) {
               copySingleClassdataFile(entry, zout);
@@ -120,7 +122,7 @@ public class AgentClassesExtractor {
                 if (e.getMessage().contains("duplicate")) continue;
                 else {
                   System.err.println(
-                          "Error while copying OpenTelemetry file " + entryName + "to main JAR.");
+                      "Error while copying OpenTelemetry file " + entryName + "to main JAR.");
                   return;
                 }
               }
@@ -131,7 +133,7 @@ public class AgentClassesExtractor {
             }
           } catch (IOException exception) {
             System.err.println(
-                    "Error while copying OpenTelemetry file " + entryName + "to main JAR.");
+                "Error while copying OpenTelemetry file " + entryName + "to main JAR.");
             return;
           }
         }
@@ -148,13 +150,13 @@ public class AgentClassesExtractor {
         FileUtils.deleteDirectory(folderNames.getFrameworkSupportFolder());
       } catch (IOException exception) {
         System.err.println(
-                "Temporary directory required for adding Agent classes to main JAR process was not deleted properly.");
+            "Temporary directory required for adding Agent classes to main JAR process was not deleted properly.");
       }
     }
   }
 
   private void copySingleEntryWithFrameworkSupport(JarEntry entry, ZipOutputStream zout)
-          throws IOException {
+      throws IOException {
     File tmpFile = copySingleEntryFromJar(entry, agentJar);
     String prefix = frameworkSupport.getPrefix();
     String newEntryPath = prefix + entry.getName();
@@ -168,8 +170,9 @@ public class AgentClassesExtractor {
     createZipEntry(zout, tmpFile, newEntryPath);
   }
 
-  private void copyMainClassWithPrefix(JarEntry entry, ZipOutputStream zout, JarFile jarFile, FrameworkSupport frameworkSupport)
-          throws IOException {
+  private void copyMainClassWithPrefix(
+      JarEntry entry, ZipOutputStream zout, JarFile jarFile, FrameworkSupport frameworkSupport)
+      throws IOException {
     File tmpFile = copySingleEntryFromJar(entry, jarFile);
     String newEntryPath = frameworkSupport.getPrefix() + entry.getName();
     createZipEntry(zout, tmpFile, newEntryPath);
@@ -193,14 +196,14 @@ public class AgentClassesExtractor {
     File tmpFile = new File(folderNames.getOpenTelemetryClassesPackage() + '/' + entry.getName());
     if (!tmpFile.getParentFile().mkdirs() && !tmpFile.getParentFile().exists()) {
       System.err.println(
-              "Temporary directory for " + entry.getName() + " was not created properly.");
+          "Temporary directory for " + entry.getName() + " was not created properly.");
     }
     Files.copy(jarFile.getInputStream(entry), tmpFile.toPath());
     return tmpFile;
   }
 
   private void createZipEntry(ZipOutputStream zout, File file, String pathToFile)
-          throws IOException {
+      throws IOException {
     try {
       createZipEntryFromFile(zout, file, pathToFile);
     } catch (ZipException e) {

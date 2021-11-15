@@ -5,6 +5,7 @@ import static agh.edu.pl.utils.ZipEntryCreator.createZipEntryFromFile;
 
 import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.repackaging.config.InstrumentationConstants;
+import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Enumeration;
@@ -14,8 +15,6 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
-
-import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
 import org.codehaus.plexus.util.FileUtils;
 
 public class DependenciesInstrumenter {
@@ -104,8 +103,7 @@ public class DependenciesInstrumenter {
       throws IOException {
     if (entry.getName().startsWith(frameworkSupport.getPrefix()) && !entry.isDirectory()) {
       copyMainClassWithoutPrefix(entry, zout, jarFile);
-    }
-    else {
+    } else {
       ZipEntry outEntry = new ZipEntry(entry);
       zout.putNextEntry(outEntry);
       InputStream in = jarFile.getInputStream(entry);
@@ -195,7 +193,7 @@ public class DependenciesInstrumenter {
   }
 
   private void copyMainClassWithoutPrefix(JarEntry entry, ZipOutputStream zout, JarFile jarFile)
-          throws IOException {
+      throws IOException {
     File tmpFile = copySingleEntry(entry, jarFile);
     String newEntryPath = entry.getName().replace(frameworkSupport.getPrefix(), "");
     frameworkSupport.addFileToRepackage(newEntryPath);
@@ -203,19 +201,17 @@ public class DependenciesInstrumenter {
   }
 
   private File copySingleEntry(JarEntry entry, JarFile jarFile) throws IOException {
-    File tmpFile =
-            new File(
-                    folderNames.getFrameworkSupportFolder(), entry.getName());
+    File tmpFile = new File(folderNames.getFrameworkSupportFolder(), entry.getName());
     if (!tmpFile.getParentFile().mkdirs() && !tmpFile.getParentFile().exists()) {
       System.err.println(
-              "Temporary directory for " + entry.getName() + " was not created properly.");
+          "Temporary directory for " + entry.getName() + " was not created properly.");
     }
     Files.copy(jarFile.getInputStream(entry), tmpFile.toPath());
     return tmpFile;
   }
 
   private void createZipEntry(ZipOutputStream zout, File file, String pathToFile)
-          throws IOException {
+      throws IOException {
     try {
       createZipEntryFromFile(zout, file, pathToFile);
     } catch (ZipException e) {

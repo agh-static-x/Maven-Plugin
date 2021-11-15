@@ -3,7 +3,6 @@ package agh.edu.pl.repackaging.instrumenters.mainclass;
 
 import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.repackaging.config.InstrumentationConstants;
-import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
 import java.io.File;
 import java.io.IOException;
 import java.util.jar.JarFile;
@@ -35,7 +34,8 @@ public class MainJarInstrumenter {
       String pattern = Pattern.quote(System.getProperty("file.separator"));
       String[] fileNameParts = jarFile.getName().split(pattern);
       String inputFolder = folderNames.getJARWithInstrumentedDependenciesPackage();
-      final String inputFileName = String.format("%s/%s", inputFolder, fileNameParts[fileNameParts.length - 1]);
+      final String inputFileName =
+          String.format("%s/%s", inputFolder, fileNameParts[fileNameParts.length - 1]);
       String mainPath = inputFileName + File.pathSeparator;
       Process process;
       final String outputFolder = folderNames.getInstrumentedJARPackage();
@@ -57,13 +57,12 @@ public class MainJarInstrumenter {
       } catch (InterruptedException exception) {
         System.err.println("The instrumentation process for main JAR was interrupted.");
       }
-    }
-    finally {
+    } finally {
       try {
         FileUtils.deleteDirectory(folderNames.getJARWithInstrumentedDependenciesPackage());
       } catch (IOException exception) {
         System.err.println(
-                "Temporary directory required for main JAR instrumentation process was not deleted properly.");
+            "Temporary directory required for main JAR instrumentation process was not deleted properly.");
       }
     }
   }

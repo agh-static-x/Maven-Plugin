@@ -61,9 +61,9 @@ public class JarRepackager {
     String pattern = Pattern.quote(System.getProperty("file.separator"));
     String[] fileNameParts = jarFile.getName().split(pattern);
     final String fileName =
-            folderNames.getJARWithInstrumentedDependenciesPackage()
-                    + File.separator
-                    + fileNameParts[fileNameParts.length - 1];
+        folderNames.getJARWithInstrumentedDependenciesPackage()
+            + File.separator
+            + fileNameParts[fileNameParts.length - 1];
     new MainJarInstrumenter(new File(fileName), agentPath).instrumentMain();
   }
 
