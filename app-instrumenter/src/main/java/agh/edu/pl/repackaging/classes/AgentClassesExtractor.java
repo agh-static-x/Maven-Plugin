@@ -1,12 +1,12 @@
 /* (C)2021 */
 package agh.edu.pl.repackaging.classes;
 
+import static agh.edu.pl.utils.ZipEntryCreator.copySingleEntryFromJar;
 import static agh.edu.pl.utils.ZipEntryCreator.createZipEntryFromFile;
 
 import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
 import java.io.*;
-import java.nio.file.Files;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -157,29 +157,33 @@ public class AgentClassesExtractor {
 
   private void copySingleEntryWithFrameworkSupport(JarEntry entry, ZipOutputStream zout)
       throws IOException {
-    File tmpFile = copySingleEntryFromJar(entry, agentJar);
+    File tmpFile =
+        copySingleEntryFromJar(entry, agentJar, folderNames.getOpenTelemetryClassesPackage());
     String prefix = frameworkSupport.getPrefix();
     String newEntryPath = prefix + entry.getName();
-    createZipEntry(zout, tmpFile, newEntryPath);
+    createZipEntryFromFile(zout, tmpFile, newEntryPath);
   }
 
   private void copySingleInstFolderFile(JarEntry entry, ZipOutputStream zout) throws IOException {
-    File tmpFile = copySingleEntryFromJar(entry, agentJar);
+    File tmpFile =
+        copySingleEntryFromJar(entry, agentJar, folderNames.getOpenTelemetryClassesPackage());
     String prefix = frameworkSupport != null ? frameworkSupport.getPrefix() : "";
     String newEntryPath = entry.getName().replace("inst/", prefix);
-    createZipEntry(zout, tmpFile, newEntryPath);
+    createZipEntryFromFile(zout, tmpFile, newEntryPath);
   }
 
   private void copyMainClassWithPrefix(
       JarEntry entry, ZipOutputStream zout, JarFile jarFile, FrameworkSupport frameworkSupport)
       throws IOException {
-    File tmpFile = copySingleEntryFromJar(entry, jarFile);
+    File tmpFile =
+        copySingleEntryFromJar(entry, jarFile, folderNames.getOpenTelemetryClassesPackage());
     String newEntryPath = frameworkSupport.getPrefix() + entry.getName();
-    createZipEntry(zout, tmpFile, newEntryPath);
+    createZipEntryFromFile(zout, tmpFile, newEntryPath);
   }
 
   private void copySingleClassdataFile(JarEntry entry, ZipOutputStream zout) throws IOException {
-    File tmpFile = copySingleEntryFromJar(entry, agentJar);
+    File tmpFile =
+        copySingleEntryFromJar(entry, agentJar, folderNames.getOpenTelemetryClassesPackage());
     String prefix = frameworkSupport != null ? frameworkSupport.getPrefix() : "";
     String newEntryPath = entry.getName().replace(".classdata", ".class");
     if (entry.getName().startsWith("/inst/io/opentelemetry/sdk")) {
@@ -189,27 +193,6 @@ public class AgentClassesExtractor {
       // instrumentation modules
       newEntryPath = newEntryPath.replace("inst/", prefix);
     }
-    createZipEntry(zout, tmpFile, newEntryPath);
-  }
-
-  private File copySingleEntryFromJar(JarEntry entry, JarFile jarFile) throws IOException {
-    File tmpFile = new File(folderNames.getOpenTelemetryClassesPackage() + '/' + entry.getName());
-    if (!tmpFile.getParentFile().mkdirs() && !tmpFile.getParentFile().exists()) {
-      System.err.println(
-          "Temporary directory for " + entry.getName() + " was not created properly.");
-    }
-    Files.copy(jarFile.getInputStream(entry), tmpFile.toPath());
-    return tmpFile;
-  }
-
-  private void createZipEntry(ZipOutputStream zout, File file, String pathToFile)
-      throws IOException {
-    try {
-      createZipEntryFromFile(zout, file, pathToFile);
-    } catch (ZipException e) {
-      if (!e.getMessage().contains("duplicate")) {
-        System.err.println("Error while copying OpenTelemetry classes to JAR.");
-      }
-    }
+    createZipEntryFromFile(zout, tmpFile, newEntryPath);
   }
 }

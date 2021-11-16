@@ -13,7 +13,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
 import org.codehaus.plexus.util.FileUtils;
 
@@ -104,7 +103,7 @@ public class DependenciesInstrumenter {
     if (frameworkSupport != null
         && entry.getName().startsWith(frameworkSupport.getPrefix())
         && !entry.isDirectory()) {
-      copyMainClassWithoutPrefix(entry, zout, jarFile);
+      frameworkSupport.copyMainClassWithoutPrefix(entry, zout, jarFile);
     } else {
       ZipEntry outEntry = new ZipEntry(entry);
       zout.putNextEntry(outEntry);
@@ -191,35 +190,6 @@ public class DependenciesInstrumenter {
           "Error while cleaning temporary directories after dependency "
               + entry.getName()
               + " was instrumented.");
-    }
-  }
-
-  private void copyMainClassWithoutPrefix(JarEntry entry, ZipOutputStream zout, JarFile jarFile)
-      throws IOException {
-    File tmpFile = copySingleEntry(entry, jarFile);
-    String newEntryPath = entry.getName().replace(frameworkSupport.getPrefix(), "");
-    frameworkSupport.addFileToRepackage(newEntryPath);
-    createZipEntry(zout, tmpFile, newEntryPath);
-  }
-
-  private File copySingleEntry(JarEntry entry, JarFile jarFile) throws IOException {
-    File tmpFile = new File(folderNames.getFrameworkSupportFolder(), entry.getName());
-    if (!tmpFile.getParentFile().mkdirs() && !tmpFile.getParentFile().exists()) {
-      System.err.println(
-          "Temporary directory for " + entry.getName() + " was not created properly.");
-    }
-    Files.copy(jarFile.getInputStream(entry), tmpFile.toPath());
-    return tmpFile;
-  }
-
-  private void createZipEntry(ZipOutputStream zout, File file, String pathToFile)
-      throws IOException {
-    try {
-      createZipEntryFromFile(zout, file, pathToFile);
-    } catch (ZipException e) {
-      if (!e.getMessage().contains("duplicate")) {
-        System.err.println("Error while copying OpenTelemetry classes to JAR.");
-      }
     }
   }
 }
