@@ -4,6 +4,8 @@ package agh.edu.pl.repackaging;
 import agh.edu.pl.repackaging.classes.AgentClassesExtractor;
 import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.repackaging.config.InstrumentationConstants;
+import agh.edu.pl.repackaging.frameworks.AppFramework;
+import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
 import agh.edu.pl.repackaging.instrumenters.dependencies.DependenciesInstrumenter;
 import agh.edu.pl.repackaging.instrumenters.mainclass.MainJarInstrumenter;
 import java.io.File;
@@ -18,6 +20,7 @@ public class JarRepackager {
   private String agentPath;
   private File jarFile;
   private final FolderNames folderNames = FolderNames.getInstance();
+  private FrameworkSupport frameworkSupport;
 
   public JarRepackager() {
     this.copyInstrumentedOtelJar();
@@ -54,8 +57,14 @@ public class JarRepackager {
   }
 
   public void repackageJar() {
-    new DependenciesInstrumenter(jarFile, agentPath).instrumentDependencies();
-    new MainJarInstrumenter(jarFile, agentPath).instrumentMain();
+    new DependenciesInstrumenter(jarFile, agentPath, frameworkSupport).instrumentDependencies();
+    String pattern = Pattern.quote(System.getProperty("file.separator"));
+    String[] fileNameParts = jarFile.getName().split(pattern);
+    final String fileName =
+        folderNames.getJARWithInstrumentedDependenciesPackage()
+            + File.separator
+            + fileNameParts[fileNameParts.length - 1];
+    new MainJarInstrumenter(new File(fileName), agentPath).instrumentMain();
   }
 
   public void addOpenTelemetryClasses() {
@@ -68,6 +77,10 @@ public class JarRepackager {
     AgentClassesExtractor agentClassesExtractor =
         new AgentClassesExtractor(
             new File(outFileName), agentPath, folderNames.getInstrumentedJARPackage());
-    agentClassesExtractor.addOpenTelemetryFolders();
+    agentClassesExtractor.addOpenTelemetryFolders(frameworkSupport);
+  }
+
+  public void checkFrameworkSupport() {
+    this.frameworkSupport = new AppFramework().getAppFramework(jarFile);
   }
 }

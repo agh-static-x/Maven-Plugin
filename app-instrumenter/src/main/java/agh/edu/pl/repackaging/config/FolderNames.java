@@ -12,6 +12,7 @@ public class FolderNames {
   private final String JAR_WITH_INSTRUMENTED_DEPENDENCIES;
   private final String INSTRUMENTED_JAR;
   private final String OPENTELEMETRY_CLASSES;
+  private final String FRAMEWORK_SUPPORT_FOLDER;
 
   private FolderNames() {
     INSTRUMENTED_OTEL_JAR_PACKAGE_NAME =
@@ -29,6 +30,9 @@ public class FolderNames {
         String.format("%s_%s", "./INSTRUMENTED_JAR", RandomStringUtils.randomAlphanumeric(8));
     OPENTELEMETRY_CLASSES =
         String.format("%s_%s", "./OPENTELEMETRY_CLASSES", RandomStringUtils.randomAlphanumeric(8));
+    FRAMEWORK_SUPPORT_FOLDER =
+        String.format(
+            "%s_%s", "./FRAMEWORK_SUPPORT_FOLDER", RandomStringUtils.randomAlphanumeric(8));
   }
 
   public static FolderNames getInstance() {
@@ -64,6 +68,10 @@ public class FolderNames {
 
   public String getOpenTelemetryClassesPackage() {
     return OPENTELEMETRY_CLASSES;
+  }
+
+  public String getFrameworkSupportFolder() {
+    return FRAMEWORK_SUPPORT_FOLDER;
   }
 
   public String getFinalFolder() {
