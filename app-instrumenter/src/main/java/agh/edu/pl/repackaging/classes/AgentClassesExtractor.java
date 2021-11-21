@@ -93,7 +93,11 @@ public class AgentClassesExtractor {
       String fileName = outFileNameParts[outFileNameParts.length - 1];
       int lastDotIndex = fileName.lastIndexOf('.');
       final File outFile =
-          new File(folderNames.getFinalFolder(), String.format("%s-instrumented%s", fileName.substring(0, lastDotIndex), fileName.substring(lastDotIndex)));
+          new File(
+              folderNames.getFinalFolder(),
+              String.format(
+                  "%s-instrumented%s",
+                  fileName.substring(0, lastDotIndex), fileName.substring(lastDotIndex)));
       ZipOutputStream zout;
       try {
         zout = new ZipOutputStream(new FileOutputStream(outFile));
