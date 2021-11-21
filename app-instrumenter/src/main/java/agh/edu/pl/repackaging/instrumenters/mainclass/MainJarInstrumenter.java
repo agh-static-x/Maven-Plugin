@@ -22,7 +22,6 @@ public class MainJarInstrumenter {
 
   public void instrumentMain() {
     try {
-
       JarFile jarFile;
       try {
         jarFile = new JarFile(this.file);
@@ -33,17 +32,16 @@ public class MainJarInstrumenter {
       }
 
       String pattern = Pattern.quote(System.getProperty("file.separator"));
-      String[] outFileNameParts = jarFile.getName().split(pattern);
-      final String outFileName =
-          folderNames.getJARWithInstrumentedDependenciesPackage()
-              + File.separator
-              + outFileNameParts[outFileNameParts.length - 1];
-      String mainPath = outFileName + File.pathSeparator;
+      String[] fileNameParts = jarFile.getName().split(pattern);
+      String inputFolder = folderNames.getJARWithInstrumentedDependenciesPackage();
+      final String inputFileName =
+          String.format("%s/%s", inputFolder, fileNameParts[fileNameParts.length - 1]);
+      String mainPath = inputFileName + File.pathSeparator;
       Process process;
+      final String outputFolder = folderNames.getInstrumentedJARPackage();
       try {
         process =
-            InstrumentationConstants.getInstrumentationProcess(
-                    agentPath, mainPath, folderNames.getInstrumentedJARPackage())
+            InstrumentationConstants.getInstrumentationProcess(agentPath, mainPath, outputFolder)
                 .inheritIO()
                 .start();
       } catch (IOException exception) {

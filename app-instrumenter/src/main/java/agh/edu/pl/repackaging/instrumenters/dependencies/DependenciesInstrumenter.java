@@ -5,6 +5,7 @@ import static agh.edu.pl.utils.ZipEntryCreator.createZipEntryFromFile;
 
 import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.repackaging.config.InstrumentationConstants;
+import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Enumeration;
@@ -20,10 +21,12 @@ public class DependenciesInstrumenter {
   private final File file;
   private final String agentPath;
   private final FolderNames folderNames = FolderNames.getInstance();
+  private final FrameworkSupport frameworkSupport;
 
-  public DependenciesInstrumenter(File file, String agentPath) {
+  public DependenciesInstrumenter(File file, String agentPath, FrameworkSupport frameworkSupport) {
     this.file = file;
     this.agentPath = agentPath;
+    this.frameworkSupport = frameworkSupport;
   }
 
   public void instrumentDependencies() {
@@ -97,12 +100,18 @@ public class DependenciesInstrumenter {
 
   private void storeSingleJAREntry(JarEntry entry, JarFile jarFile, ZipOutputStream zout)
       throws IOException {
-    ZipEntry outEntry = new ZipEntry(entry);
-    zout.putNextEntry(outEntry);
-    InputStream in = jarFile.getInputStream(entry);
-    in.transferTo(zout);
-    in.close();
-    zout.closeEntry();
+    if (frameworkSupport != null
+        && entry.getName().startsWith(frameworkSupport.getPrefix())
+        && !entry.isDirectory()) {
+      frameworkSupport.copyMainClassWithoutPrefix(entry, zout, jarFile);
+    } else {
+      ZipEntry outEntry = new ZipEntry(entry);
+      zout.putNextEntry(outEntry);
+      InputStream in = jarFile.getInputStream(entry);
+      in.transferTo(zout);
+      in.close();
+      zout.closeEntry();
+    }
   }
 
   private void instrumentSingleDependency(JarEntry entry, JarFile jarFile, ZipOutputStream zout) {
@@ -125,7 +134,6 @@ public class DependenciesInstrumenter {
       return;
     }
     classpath.append(fileName).append(File.pathSeparator);
-    System.out.println(classpath);
     Process process;
     try {
       process =

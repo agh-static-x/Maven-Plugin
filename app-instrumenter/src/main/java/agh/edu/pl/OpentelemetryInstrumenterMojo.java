@@ -38,6 +38,7 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
       for (File artifact : artifactsToInstrument) {
         System.out.println("Instrumenting artifact " + artifact.getName());
         repackager.setJarFile(artifact);
+        repackager.checkFrameworkSupport();
         repackager.repackageJar();
         repackager.addOpenTelemetryClasses();
       }
