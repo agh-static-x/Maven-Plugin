@@ -31,6 +31,7 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
   public void execute() throws MojoExecutionException, MojoFailureException {
     JarRepackager repackager = new JarRepackager();
     if (outputFolder != null) FolderNames.getInstance().setFinalFolder(outputFolder);
+    else FolderNames.getInstance().setFinalFolder(project.getBuild().getDirectory());
     try {
       List<File> artifactsToInstrument =
           new ArtifactChooser(project, artifactName).chooseArtifacts();

@@ -16,8 +16,8 @@ Project consists of the following modules:
 - `artifactName` - name of the artifact that should be instrumented. Plugin will search for artifact with this exact
   name. If such artifact won't be found, plugin will default to instrumenting all project artifacts.
 
-- `outputFolder` - name of the output folder for instrumented JAR. If no name for the folder is provided, the
-  instrumented JAR will be stored in `openetelemetry_instrumented_jar` folder.
+- `outputFolder` - path to output folder for instrumented JAR. If no name for the folder is provided, the
+  instrumented JAR will be stored in the default folder for Maven project .
 
 ## Execution
 
