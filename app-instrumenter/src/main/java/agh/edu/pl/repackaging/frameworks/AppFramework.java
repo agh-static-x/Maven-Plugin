@@ -21,6 +21,9 @@ public class AppFramework {
       if (entry.isDirectory() && entry.getName().equals("BOOT-INF/")) {
         return new SpringSupport();
       }
+      if (entry.isDirectory() && entry.getName().equals("WEB-INF/")) {
+        return new WarSupport();
+      }
     }
     return null;
   }
