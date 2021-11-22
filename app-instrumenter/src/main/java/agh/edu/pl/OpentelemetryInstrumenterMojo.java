@@ -3,6 +3,7 @@ package agh.edu.pl;
 
 import agh.edu.pl.artifact.ArtifactChooser;
 import agh.edu.pl.repackaging.JarRepackager;
+import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.utils.Cleanup;
 import java.io.File;
 import java.util.List;
@@ -23,9 +24,14 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
   @Parameter(readonly = true)
   private String artifactName;
 
+  @Parameter(readonly = true)
+  private String outputFolder;
+
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     JarRepackager repackager = new JarRepackager();
+    if (outputFolder != null) FolderNames.getInstance().setFinalFolder(outputFolder);
+    else FolderNames.getInstance().setFinalFolder(project.getBuild().getDirectory());
     try {
       List<File> artifactsToInstrument =
           new ArtifactChooser(project, artifactName).chooseArtifacts();
