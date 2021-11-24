@@ -159,7 +159,7 @@ public class AgentClassesExtractor {
       throws IOException {
     File tmpFile =
         copySingleEntryFromJar(entry, agentJar, folderNames.getOpenTelemetryClassesPackage());
-    String prefix = frameworkSupport.getPrefix();
+    String prefix = frameworkSupport.getClassesPrefix();
     String newEntryPath = prefix + entry.getName();
     createZipEntryFromFile(zout, tmpFile, newEntryPath);
   }
@@ -167,7 +167,7 @@ public class AgentClassesExtractor {
   private void copySingleInstFolderFile(JarEntry entry, ZipOutputStream zout) throws IOException {
     File tmpFile =
         copySingleEntryFromJar(entry, agentJar, folderNames.getOpenTelemetryClassesPackage());
-    String prefix = frameworkSupport != null ? frameworkSupport.getPrefix() : "";
+    String prefix = frameworkSupport != null ? frameworkSupport.getClassesPrefix() : "";
     String newEntryPath = entry.getName().replace("inst/", prefix);
     createZipEntryFromFile(zout, tmpFile, newEntryPath);
   }
@@ -177,14 +177,14 @@ public class AgentClassesExtractor {
       throws IOException {
     File tmpFile =
         copySingleEntryFromJar(entry, jarFile, folderNames.getOpenTelemetryClassesPackage());
-    String newEntryPath = frameworkSupport.getPrefix() + entry.getName();
+    String newEntryPath = frameworkSupport.getClassesPrefix() + entry.getName();
     createZipEntryFromFile(zout, tmpFile, newEntryPath);
   }
 
   private void copySingleClassdataFile(JarEntry entry, ZipOutputStream zout) throws IOException {
     File tmpFile =
         copySingleEntryFromJar(entry, agentJar, folderNames.getOpenTelemetryClassesPackage());
-    String prefix = frameworkSupport != null ? frameworkSupport.getPrefix() : "";
+    String prefix = frameworkSupport != null ? frameworkSupport.getClassesPrefix() : "";
     String newEntryPath = entry.getName().replace(".classdata", ".class");
     if (entry.getName().startsWith("/inst/io/opentelemetry/sdk")) {
       // opentelemetry sdk, autoconfigure and exporters

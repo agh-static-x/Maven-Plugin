@@ -43,7 +43,7 @@ public class StaticInstrumenter {
       // FIXME java 9 / jmod support, proper handling of directories, just generally better and more
       // resilient stuff
       // FIXME jmod in particular introduces weirdness with adding helpers to the dependencies
-      if (pathItem.endsWith(".jar")) {
+      if (pathItem.endsWith(".jar") || pathItem.endsWith(".war")) {
         processJar(new File(pathItem), outDir);
       }
     }
@@ -65,8 +65,8 @@ public class StaticInstrumenter {
     while (entries.hasMoreElements()) {
       final JarEntry ent = entries.nextElement();
       final String name = ent.getName();
-      final ZipEntry outEnt = new ZipEntry(ent);
-      InputStream entryIn = null;
+      final ZipEntry outEnt = name.endsWith(".jar") ? new ZipEntry(ent) : new ZipEntry(name);
+      InputStream entryIn;
       if (name.endsWith(".class") && !shouldSkip(name)) {
         final String className = name.substring(0, name.indexOf(".class")).replace('/', '.');
         //        System.out.println("[className] " + className);

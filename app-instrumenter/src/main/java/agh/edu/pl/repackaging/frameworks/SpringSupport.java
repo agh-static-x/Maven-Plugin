@@ -5,12 +5,16 @@ import java.util.HashSet;
 
 public class SpringSupport implements FrameworkSupport {
 
-  private final String prefix = "BOOT-INF/classes/";
   private final HashSet<String> filesToRepackage = new HashSet<>();
 
   @Override
-  public String getPrefix() {
-    return prefix;
+  public String getClassesPrefix() {
+    return "BOOT-INF/classes/";
+  }
+
+  @Override
+  public String getLibPrefix() {
+    return "BOOT-INF/lib/";
   }
 
   public void addFileToRepackage(String fileName) {

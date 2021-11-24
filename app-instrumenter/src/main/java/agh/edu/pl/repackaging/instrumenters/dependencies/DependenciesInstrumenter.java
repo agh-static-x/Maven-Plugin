@@ -42,8 +42,8 @@ public class DependenciesInstrumenter {
         return;
       }
 
-      String pattern = Pattern.quote(System.getProperty("file.separator"));
-      String[] outFileNameParts = jarFile.getName().split(pattern);
+      String fileSeparatorPattern = Pattern.quote(System.getProperty("file.separator"));
+      String[] outFileNameParts = jarFile.getName().split(fileSeparatorPattern);
       final String outFileName = outFileNameParts[outFileNameParts.length - 1];
       final File outFile =
           new File(folderNames.getJARWithInstrumentedDependenciesPackage(), outFileName);
@@ -56,11 +56,12 @@ public class DependenciesInstrumenter {
         return;
       }
       zout.setMethod(ZipOutputStream.STORED);
+      StringBuilder classpath = new StringBuilder();
 
       for (Enumeration<JarEntry> enums = jarFile.entries(); enums.hasMoreElements(); ) {
         JarEntry entry = enums.nextElement();
         if (entry.getName().endsWith(".jar")) {
-          instrumentSingleDependency(entry, jarFile, zout);
+          unpackSingleDependency(entry, jarFile, classpath);
         } else {
           try {
             storeSingleJAREntry(entry, jarFile, zout);
@@ -69,6 +70,46 @@ public class DependenciesInstrumenter {
                 "Error occurred while adding dependency " + entry.getName() + " to main JAR.");
             return;
           }
+        }
+      }
+      Process process = null;
+      try {
+        process =
+                InstrumentationConstants.getInstrumentationProcess(
+                        agentPath, classpath.toString(), folderNames.getInstrumentedDependencyPackage())
+                        .inheritIO()
+                        .start();
+      } catch (IOException exception) {
+        System.err.println(
+                "Error occurred during the instrumentation process for JAR dependencies.");
+      }
+      int ret;
+      if (process != null) {
+        try {
+          ret = process.waitFor();
+          if (ret != 0) {
+            System.err.println(
+                    "The instrumentation process for JAR dependencies finished with exit value "
+                            + ret
+                            + ".");
+          }
+        } catch (InterruptedException exception) {
+          System.err.println(
+                  "The instrumentation process for JAR dependencies was interrupted.");
+        }
+      }
+      String[] dependenciesPathsList = classpath.toString().split(File.pathSeparator);
+      for(String dependencyPath: dependenciesPathsList){
+        String[] dependencyPathElements = dependencyPath.split("/");
+        String dependencyName = dependencyPathElements[dependencyPathElements.length-1];
+        try {
+          createZipEntryFromFile(zout, new File(String.format("%s/%s", folderNames.getInstrumentedDependencyPackage(), dependencyName)), dependencyPath.replaceFirst(folderNames.getMainJARInitialCopyPackage() + "/", ""));
+        } catch (IOException exception){
+          System.err.println(
+                  "Exception occurred while adding instrumented dependency "
+                          + dependencyName
+                          + " to main JAR.");
+          exception.printStackTrace();
         }
       }
       try {
@@ -101,7 +142,7 @@ public class DependenciesInstrumenter {
   private void storeSingleJAREntry(JarEntry entry, JarFile jarFile, ZipOutputStream zout)
       throws IOException {
     if (frameworkSupport != null
-        && entry.getName().startsWith(frameworkSupport.getPrefix())
+        && entry.getName().startsWith(frameworkSupport.getClassesPrefix())
         && !entry.isDirectory()) {
       frameworkSupport.copyMainClassWithoutPrefix(entry, zout, jarFile);
     } else {
@@ -114,12 +155,11 @@ public class DependenciesInstrumenter {
     }
   }
 
-  private void instrumentSingleDependency(JarEntry entry, JarFile jarFile, ZipOutputStream zout) {
-    StringBuilder classpath = new StringBuilder();
+  private void unpackSingleDependency(JarEntry entry, JarFile jarFile, StringBuilder classpath) {
     String fileName =
         String.format("%s/%s", folderNames.getMainJARInitialCopyPackage(), entry.getName());
     File f = new File(fileName);
-    if (!f.getParentFile().mkdirs()) {
+    if (!f.getParentFile().mkdirs() && !f.getParentFile().exists()) {
       System.err.println(
           "The temporary directory necessary for dependency "
               + entry.getName()
@@ -127,69 +167,14 @@ public class DependenciesInstrumenter {
       return;
     }
     try {
-      Files.copy(jarFile.getInputStream(entry), f.toPath());
+      InputStream jarFileInputStream = jarFile.getInputStream(entry);
+      Files.copy(jarFileInputStream, f.toPath());
+      jarFileInputStream.close();
     } catch (IOException exception) {
       System.err.println(
-          "Could not copy JAR dependency " + entry.getName() + " to temporary folder.");
+              "Could not copy JAR dependency " + entry.getName() + " to temporary folder.");
       return;
     }
     classpath.append(fileName).append(File.pathSeparator);
-    Process process;
-    try {
-      process =
-          InstrumentationConstants.getInstrumentationProcess(
-                  agentPath, classpath.toString(), folderNames.getInstrumentedDependencyPackage())
-              .inheritIO()
-              .start();
-    } catch (IOException exception) {
-      System.err.println(
-          "Error occurred during the instrumentation process for JAR dependency "
-              + entry.getName()
-              + ".");
-      return;
-    }
-    try {
-      int ret = process.waitFor();
-      if (ret != 0) {
-        System.err.println(
-            "The instrumentation process for JAR dependency "
-                + entry.getName()
-                + " finished with exit value "
-                + ret
-                + ".");
-        return;
-      }
-    } catch (InterruptedException exception) {
-      System.err.println(
-          "The instrumentation process for JAR dependency "
-              + entry.getName()
-              + " was interrupted.");
-      return;
-    }
-    String[] fileNameParts = entry.getName().split("/");
-    try {
-      createZipEntryFromFile(
-          zout,
-          new File(
-              folderNames.getInstrumentedDependencyPackage()
-                  + File.separator
-                  + fileNameParts[fileNameParts.length - 1]),
-          entry.getName());
-    } catch (IOException exception) {
-      System.err.println(
-          "Exception occurred while adding instrumented dependency "
-              + entry.getName()
-              + " to main JAR.");
-      return;
-    }
-    try {
-      FileUtils.cleanDirectory(folderNames.getMainJARInitialCopyPackage());
-      FileUtils.cleanDirectory(folderNames.getInstrumentedDependencyPackage());
-    } catch (IOException exception) {
-      System.err.println(
-          "Error while cleaning temporary directories after dependency "
-              + entry.getName()
-              + " was instrumented.");
-    }
   }
 }

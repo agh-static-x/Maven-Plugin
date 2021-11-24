@@ -13,7 +13,8 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipOutputStream;
 
 public interface FrameworkSupport {
-  String getPrefix();
+  String getClassesPrefix();
+  String getLibPrefix();
 
   void addFileToRepackage(String fileName);
 
@@ -24,7 +25,7 @@ public interface FrameworkSupport {
     File tmpFile =
         copySingleEntryFromJar(
             entry, jarFile, FolderNames.getInstance().getFrameworkSupportFolder());
-    String newEntryPath = entry.getName().replace(getPrefix(), "");
+    String newEntryPath = entry.getName().replace(getClassesPrefix(), "");
     addFileToRepackage(newEntryPath);
     createZipEntryFromFile(zout, tmpFile, newEntryPath);
   }
