@@ -75,13 +75,13 @@ public class DependenciesInstrumenter {
       Process process = null;
       try {
         process =
-                InstrumentationConstants.getInstrumentationProcess(
-                        agentPath, classpath.toString(), folderNames.getInstrumentedDependencyPackage())
-                        .inheritIO()
-                        .start();
+            InstrumentationConstants.getInstrumentationProcess(
+                    agentPath, classpath.toString(), folderNames.getInstrumentedDependencyPackage())
+                .inheritIO()
+                .start();
       } catch (IOException exception) {
         System.err.println(
-                "Error occurred during the instrumentation process for JAR dependencies.");
+            "Error occurred during the instrumentation process for JAR dependencies.");
       }
       int ret;
       if (process != null) {
@@ -89,26 +89,30 @@ public class DependenciesInstrumenter {
           ret = process.waitFor();
           if (ret != 0) {
             System.err.println(
-                    "The instrumentation process for JAR dependencies finished with exit value "
-                            + ret
-                            + ".");
+                "The instrumentation process for JAR dependencies finished with exit value "
+                    + ret
+                    + ".");
           }
         } catch (InterruptedException exception) {
-          System.err.println(
-                  "The instrumentation process for JAR dependencies was interrupted.");
+          System.err.println("The instrumentation process for JAR dependencies was interrupted.");
         }
       }
       String[] dependenciesPathsList = classpath.toString().split(File.pathSeparator);
-      for(String dependencyPath: dependenciesPathsList){
+      for (String dependencyPath : dependenciesPathsList) {
         String[] dependencyPathElements = dependencyPath.split("/");
-        String dependencyName = dependencyPathElements[dependencyPathElements.length-1];
+        String dependencyName = dependencyPathElements[dependencyPathElements.length - 1];
         try {
-          createZipEntryFromFile(zout, new File(String.format("%s/%s", folderNames.getInstrumentedDependencyPackage(), dependencyName)), dependencyPath.replaceFirst(folderNames.getMainJARInitialCopyPackage() + "/", ""));
-        } catch (IOException exception){
+          createZipEntryFromFile(
+              zout,
+              new File(
+                  String.format(
+                      "%s/%s", folderNames.getInstrumentedDependencyPackage(), dependencyName)),
+              dependencyPath.replaceFirst(folderNames.getMainJARInitialCopyPackage() + "/", ""));
+        } catch (IOException exception) {
           System.err.println(
-                  "Exception occurred while adding instrumented dependency "
-                          + dependencyName
-                          + " to main JAR.");
+              "Exception occurred while adding instrumented dependency "
+                  + dependencyName
+                  + " to main JAR.");
           exception.printStackTrace();
         }
       }
@@ -172,7 +176,7 @@ public class DependenciesInstrumenter {
       jarFileInputStream.close();
     } catch (IOException exception) {
       System.err.println(
-              "Could not copy JAR dependency " + entry.getName() + " to temporary folder.");
+          "Could not copy JAR dependency " + entry.getName() + " to temporary folder.");
       return;
     }
     classpath.append(fileName).append(File.pathSeparator);

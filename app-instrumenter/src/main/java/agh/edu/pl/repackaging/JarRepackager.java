@@ -72,7 +72,11 @@ public class JarRepackager {
     String[] outFileNameParts = jarFile.getName().split(pattern);
     AgentClassesExtractor agentClassesExtractor =
         new AgentClassesExtractor(
-            new File(folderNames.getInstrumentedJARPackage(), outFileNameParts[outFileNameParts.length - 1]), agentPath, folderNames.getInstrumentedJARPackage());
+            new File(
+                folderNames.getInstrumentedJARPackage(),
+                outFileNameParts[outFileNameParts.length - 1]),
+            agentPath,
+            folderNames.getInstrumentedJARPackage());
     agentClassesExtractor.addOpenTelemetryFolders(frameworkSupport);
   }
 

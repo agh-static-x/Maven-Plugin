@@ -14,6 +14,7 @@ import java.util.zip.ZipOutputStream;
 
 public interface FrameworkSupport {
   String getClassesPrefix();
+
   String getLibPrefix();
 
   void addFileToRepackage(String fileName);
