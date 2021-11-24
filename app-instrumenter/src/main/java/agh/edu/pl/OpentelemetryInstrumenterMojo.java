@@ -29,6 +29,8 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    Runtime.getRuntime()
+        .addShutdownHook(new Thread(() -> new Cleanup().deleteAllTemporaryFolders()));
     JarRepackager repackager = new JarRepackager();
     if (outputFolder != null) FolderNames.getInstance().setFinalFolder(outputFolder);
     else FolderNames.getInstance().setFinalFolder(project.getBuild().getDirectory());
