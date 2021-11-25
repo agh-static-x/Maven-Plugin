@@ -90,6 +90,7 @@
                 </executions>
                 <configuration>
                     <artifactName>apache-http-test-app-1.0-SNAPSHOT-shaded.jar</artifactName>
+                    <outputFolder>FINAL</outputFolder>
                 </configuration>
                 <dependencies>
                     <dependency>

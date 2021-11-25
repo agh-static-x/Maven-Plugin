@@ -13,6 +13,7 @@ public class FolderNames {
   private final String INSTRUMENTED_JAR;
   private final String OPENTELEMETRY_CLASSES;
   private final String FRAMEWORK_SUPPORT_FOLDER;
+  private String FINAL_FOLDER;
 
   private FolderNames() {
     INSTRUMENTED_OTEL_JAR_PACKAGE_NAME =
@@ -75,6 +76,10 @@ public class FolderNames {
   }
 
   public String getFinalFolder() {
-    return "./FINAL";
+    return FINAL_FOLDER;
+  }
+
+  public void setFinalFolder(String name) {
+    this.FINAL_FOLDER = name;
   }
 }

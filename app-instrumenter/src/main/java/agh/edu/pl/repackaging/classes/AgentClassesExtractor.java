@@ -90,8 +90,14 @@ public class AgentClassesExtractor {
 
       String pattern = Pattern.quote(System.getProperty("file.separator"));
       String[] outFileNameParts = mainFile.getName().split(pattern);
+      String fileName = outFileNameParts[outFileNameParts.length - 1];
+      int lastDotIndex = fileName.lastIndexOf('.');
       final File outFile =
-          new File(folderNames.getFinalFolder(), outFileNameParts[outFileNameParts.length - 1]);
+          new File(
+              folderNames.getFinalFolder(),
+              String.format(
+                  "%s-instrumented%s",
+                  fileName.substring(0, lastDotIndex), fileName.substring(lastDotIndex)));
       ZipOutputStream zout;
       try {
         zout = new ZipOutputStream(new FileOutputStream(outFile));
@@ -151,8 +157,18 @@ public class AgentClassesExtractor {
       } catch (IOException exception) {
         System.err.println(
             "Temporary directory required for adding Agent classes to main JAR process was not deleted properly.");
+        exception.printStackTrace();
       }
     }
+  }
+
+  private void copySingleEntryWithFrameworkSupport(JarEntry entry, ZipOutputStream zout)
+      throws IOException {
+    File tmpFile =
+        copySingleEntryFromJar(entry, agentJar, folderNames.getOpenTelemetryClassesPackage());
+    String prefix = frameworkSupport.getPrefix();
+    String newEntryPath = prefix + entry.getName();
+    createZipEntryFromFile(zout, tmpFile, newEntryPath);
   }
 
   private void copySingleEntryWithFrameworkSupport(JarEntry entry, ZipOutputStream zout)
