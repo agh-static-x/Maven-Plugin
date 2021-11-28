@@ -43,6 +43,8 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    Runtime.getRuntime()
+            .addShutdownHook(new Thread(() -> new Cleanup().deleteAllTemporaryFolders()));
     Set<Artifact> artifactSet = project.getArtifacts();
     HashMap<Artifact, Boolean> artifactsMap = new HashMap<>();
     artifactSet.forEach((artifact) -> artifactsMap.put(artifact, true));

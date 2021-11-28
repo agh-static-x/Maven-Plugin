@@ -12,16 +12,34 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipOutputStream;
 
-public interface FrameworkSupport {
-  String getClassesPrefix();
+public class FrameworkSupport {
 
-  String getLibPrefix();
+  private final String classesPrefix;
+  private final String libPrefix;
+  private final HashSet<String> filesToRepackage = new HashSet<>();
 
-  void addFileToRepackage(String fileName);
+  public FrameworkSupport(String classesPrefix, String libPrefix) {
+    this.classesPrefix = classesPrefix;
+    this.libPrefix = libPrefix;
+  }
 
-  HashSet<String> getFilesToRepackage();
+  public String getClassesPrefix() {
+    return classesPrefix;
+  }
 
-  default void copyMainClassWithoutPrefix(JarEntry entry, ZipOutputStream zout, JarFile jarFile)
+  public String getLibPrefix() {
+    return libPrefix;
+  }
+
+  public void addFileToRepackage(String fileName) {
+    this.filesToRepackage.add(fileName);
+  }
+
+  public HashSet<String> getFilesToRepackage() {
+    return filesToRepackage;
+  }
+
+  public void copyMainClassWithoutPrefix(JarEntry entry, ZipOutputStream zout, JarFile jarFile)
       throws IOException {
     File tmpFile =
         copySingleEntryFromJar(
