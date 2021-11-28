@@ -3,6 +3,7 @@ package io.opentelemetry.javaagent;
 
 import java.io.*;
 import java.lang.instrument.ClassFileTransformer;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,6 +39,8 @@ public class StaticInstrumenter {
       outDir.mkdir();
     }
 
+    final String[] transitiveDependencies = args[1].split(System.getProperty("path.separator"));
+
     for (final String pathItem :
         System.getProperty("java.class.path").split(System.getProperty("path.separator"))) {
       System.out.println("[PATH_ITEM] " + pathItem);
@@ -45,7 +48,7 @@ public class StaticInstrumenter {
       // resilient stuff
       // FIXME jmod in particular introduces weirdness with adding helpers to the dependencies
       if (pathItem.endsWith(".jar") || pathItem.endsWith(".war")) {
-        processJar(new File(pathItem), outDir);
+        processJar(new File(pathItem), outDir, Arrays.asList(transitiveDependencies).contains(pathItem));
       }
     }
   }
@@ -54,7 +57,7 @@ public class StaticInstrumenter {
     return entryName.startsWith("io/opentelemetry");
   }
 
-  private static void processJar(final File jar, final File outDir) throws Exception {
+  private static void processJar(final File jar, final File outDir, final boolean isTransitive) throws Exception {
     //    System.out.println("[processJar] " + jar.getName());
     // FIXME don't "instrument" our agent jar.
     final File outFile = new File(outDir, jar.getName()); // FIXME multiple jars with same name
@@ -85,7 +88,9 @@ public class StaticInstrumenter {
           }
         } catch (final Throwable t) { // NoClassDefFoundError among others
           entryIn = in.getInputStream(ent);
-          System.out.println("Problem with " + name + ": " + t);
+          if (!isTransitive) {
+            System.out.println("Problem with " + name + ": " + t);
+          }
         }
       } else {
         entryIn = in.getInputStream(ent);

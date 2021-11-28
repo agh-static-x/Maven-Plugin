@@ -3,6 +3,7 @@ package agh.edu.pl.repackaging.instrumenters.instrumentation;
 import static agh.edu.pl.utils.ZipEntryCreator.createZipEntryFromFile;
 
 import agh.edu.pl.repackaging.config.FolderNames;
+import agh.edu.pl.repackaging.config.InstrumentationConfiguration;
 import agh.edu.pl.repackaging.config.InstrumentationConstants;
 import java.io.*;
 import java.util.Enumeration;
@@ -13,13 +14,13 @@ import java.util.zip.ZipOutputStream;
 import org.codehaus.plexus.util.FileUtils;
 
 public class JarWithDependenciesInstrumenter {
-  private final String classpath;
+  private final InstrumentationConfiguration instrumentationConfiguration;
   private final String agentPath;
   private final FolderNames folderNames = FolderNames.getInstance();
   private final String mainFileName;
 
-  public JarWithDependenciesInstrumenter(String classpath, String agentPath, String mainFileName) {
-    this.classpath = classpath;
+  public JarWithDependenciesInstrumenter(InstrumentationConfiguration instrumentationConfiguration, String agentPath, String mainFileName) {
+    this.instrumentationConfiguration = instrumentationConfiguration;
     this.agentPath = agentPath;
     this.mainFileName = mainFileName;
   }
@@ -30,7 +31,7 @@ public class JarWithDependenciesInstrumenter {
       try {
         process =
             InstrumentationConstants.getInstrumentationProcess(
-                    agentPath, classpath, folderNames.getJARWithInstrumentedDependenciesPackage())
+                    agentPath, instrumentationConfiguration.getClasspath(), folderNames.getJARWithInstrumentedDependenciesPackage(), instrumentationConfiguration.getTransitiveDependencies())
                 .inheritIO()
                 .start();
       } catch (IOException exception) {

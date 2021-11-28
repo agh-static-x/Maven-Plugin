@@ -21,7 +21,7 @@ public class Cleanup {
     };
     try {
       for (String folderName : foldersToDelete) {
-        FileUtils.deleteDirectory(folderName);
+        FileUtils.forceDelete(folderName);
       }
     } catch (IllegalArgumentException ignored) {
     } catch (IOException exception) {

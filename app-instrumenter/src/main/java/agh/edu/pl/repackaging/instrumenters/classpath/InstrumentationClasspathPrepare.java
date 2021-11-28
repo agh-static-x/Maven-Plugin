@@ -1,6 +1,7 @@
 package agh.edu.pl.repackaging.instrumenters.classpath;
 
 import agh.edu.pl.repackaging.config.FolderNames;
+import agh.edu.pl.repackaging.config.InstrumentationConfiguration;
 import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
 import java.io.*;
 import java.nio.file.Files;
@@ -26,8 +27,10 @@ public class InstrumentationClasspathPrepare {
     this.artifactMap = artifactMap;
   }
 
-  public String prepareClasspath() {
+  public InstrumentationConfiguration prepareClasspath() {
     createInitialFolders();
+
+    InstrumentationConfiguration instrumentationConfiguration = new InstrumentationConfiguration();
 
     StringBuilder classpath = new StringBuilder();
 
@@ -39,7 +42,7 @@ public class InstrumentationClasspathPrepare {
           "The temporary directory "
               + f.getPath()
               + " necessary for main file instrumentation process could not be created. Please make sure you have permissions required to create a directory.");
-      return "";
+      return null;
     }
     JarFile mainJar;
     try {
@@ -49,7 +52,7 @@ public class InstrumentationClasspathPrepare {
           "Problem occurred while getting project JAR file "
               + this.mainFile.getName()
               + ". Make sure you have defined JAR packaging in pom.xml.");
-      return "";
+      return null;
     }
     ZipOutputStream zout;
     try {
@@ -59,7 +62,7 @@ public class InstrumentationClasspathPrepare {
           "Could not create output stream for JAR file, because file "
               + f.getPath()
               + " does not exist.");
-      return "";
+      return null;
     }
     zout.setMethod(ZipOutputStream.STORED);
     for (Enumeration<JarEntry> enums = mainJar.entries(); enums.hasMoreElements(); ) {
@@ -69,7 +72,7 @@ public class InstrumentationClasspathPrepare {
       } catch (IOException exception) {
         System.err.println(
             "Error occurred while adding dependency " + entry.getName() + " to main JAR.");
-        return "";
+        return null;
       }
     }
     try {
@@ -88,7 +91,8 @@ public class InstrumentationClasspathPrepare {
           "Problem occurred while getting project JAR file "
               + this.mainFile.getName()
               + ". Make sure you have defined JAR packaging in pom.xml.");
-      return classpath.toString();
+      instrumentationConfiguration.setClasspath(classpath.toString());
+      return instrumentationConfiguration;
     }
 
     for (Enumeration<JarEntry> enums = jarFile.entries(); enums.hasMoreElements(); ) {
@@ -98,6 +102,8 @@ public class InstrumentationClasspathPrepare {
       }
     }
 
+    StringBuilder transitiveDependencies = new StringBuilder();
+
     for (Map.Entry<Artifact, Boolean> entry : artifactMap.entrySet()) {
       if (entry.getValue()) {
         Artifact artifact = entry.getKey();
@@ -105,7 +111,6 @@ public class InstrumentationClasspathPrepare {
         String outFileName =
             String.format("%s/%s", folderNames.getMainJARInitialCopyPackage(), file.getName());
         File outFile = new File(outFileName);
-        System.out.println("[TRANSITIVE] " + outFileName);
         try {
           Files.copy(file.toPath(), outFile.toPath());
         } catch (IOException exception) {
@@ -113,9 +118,12 @@ public class InstrumentationClasspathPrepare {
               "Couldn't copy transitive dependency " + file.getPath() + " to temporary directory.");
         }
         classpath.append(outFileName).append(File.pathSeparator);
+        transitiveDependencies.append(outFileName).append(File.pathSeparator);
       }
     }
-    return classpath.toString();
+    instrumentationConfiguration.setTransitiveDependencies(transitiveDependencies.toString());
+    instrumentationConfiguration.setClasspath(classpath.toString());
+    return instrumentationConfiguration;
   }
 
   private void unpackSingleDependency(JarEntry entry, JarFile jarFile, StringBuilder classpath) {
@@ -150,7 +158,7 @@ public class InstrumentationClasspathPrepare {
     File tmpDir = new File(folderNames.getMainJARInitialCopyPackage());
     File instrumentedDir = new File(folderNames.getJARWithInstrumentedDependenciesPackage());
     File mainInstrumentedDir = new File(folderNames.getInstrumentedJARPackage());
-    if (!tmpDir.mkdir() || !instrumentedDir.mkdir() || mainInstrumentedDir.mkdir()) {
+    if (!tmpDir.mkdir() || !instrumentedDir.mkdir() || !mainInstrumentedDir.mkdir()) {
       System.err.println(
           "The temporary directories necessary for JAR instrumentation process could not be created. Please make sure you have permissions required to create a directory.");
     }

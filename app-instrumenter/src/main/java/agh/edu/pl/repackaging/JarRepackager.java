@@ -3,6 +3,7 @@ package agh.edu.pl.repackaging;
 
 import agh.edu.pl.repackaging.classes.AgentClassesExtractor;
 import agh.edu.pl.repackaging.config.FolderNames;
+import agh.edu.pl.repackaging.config.InstrumentationConfiguration;
 import agh.edu.pl.repackaging.config.InstrumentationConstants;
 import agh.edu.pl.repackaging.frameworks.AppFramework;
 import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
@@ -59,12 +60,12 @@ public class JarRepackager {
   }
 
   public void repackageJar(HashMap<Artifact, Boolean> artifactMap) {
-    String classpath =
+    InstrumentationConfiguration instrumentationConfiguration =
         new InstrumentationClasspathPrepare(jarFile, frameworkSupport, artifactMap)
             .prepareClasspath();
     String[] nameParts = jarFile.getName().split("/");
     String mainFileName = nameParts[nameParts.length - 1];
-    new JarWithDependenciesInstrumenter(classpath, agentPath, mainFileName)
+    new JarWithDependenciesInstrumenter(instrumentationConfiguration, agentPath, mainFileName)
         .instrumentJarWithDependencies();
   }
 
