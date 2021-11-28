@@ -11,6 +11,8 @@
         <module>agent-instrumenter</module>
         <module>app-instrumenter</module>
         <module>instrumentation-tests/test-apps/apache-http-test-app</module>
+        <module>instrumentation-tests/test-apps/spring-test-app</module>
+        <module>instrumentation-tests/utils/fake-backend</module>
     </modules>
     <packaging>pom</packaging>
 
