@@ -5,19 +5,25 @@ import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.apache.maven.artifact.Artifact;
 
 public class InstrumentationClasspathPrepare {
   private final File mainFile;
   private final FolderNames folderNames = FolderNames.getInstance();
   private final FrameworkSupport frameworkSupport;
+  private final HashMap<Artifact, Boolean> artifactMap;
 
-  public InstrumentationClasspathPrepare(File mainFile, FrameworkSupport frameworkSupport) {
+  public InstrumentationClasspathPrepare(
+      File mainFile, FrameworkSupport frameworkSupport, HashMap<Artifact, Boolean> artifactMap) {
     this.mainFile = mainFile;
     this.frameworkSupport = frameworkSupport;
+    this.artifactMap = artifactMap;
   }
 
   public String prepareClasspath() {
@@ -91,6 +97,24 @@ public class InstrumentationClasspathPrepare {
         unpackSingleDependency(entry, jarFile, classpath);
       }
     }
+
+    for (Map.Entry<Artifact, Boolean> entry : artifactMap.entrySet()) {
+      if (entry.getValue()) {
+        Artifact artifact = entry.getKey();
+        File file = artifact.getFile();
+        String outFileName =
+            String.format("%s/%s", folderNames.getMainJARInitialCopyPackage(), file.getName());
+        File outFile = new File(outFileName);
+        System.out.println("[TRANSITIVE] " + outFileName);
+        try {
+          Files.copy(file.toPath(), outFile.toPath());
+        } catch (IOException exception) {
+          System.err.println(
+              "Couldn't copy transitive dependency " + file.getPath() + " to temporary directory.");
+        }
+        classpath.append(outFileName).append(File.pathSeparator);
+      }
+    }
     return classpath.toString();
   }
 
@@ -113,6 +137,11 @@ public class InstrumentationClasspathPrepare {
       System.err.println(
           "Could not copy JAR dependency " + entry.getName() + " to temporary folder.");
       return;
+    }
+    for (Artifact artifact : artifactMap.keySet()) {
+      if (artifact.getFile().getName().equals(f.getName())) {
+        artifactMap.put(artifact, false);
+      }
     }
     classpath.append(fileName).append(File.pathSeparator);
   }

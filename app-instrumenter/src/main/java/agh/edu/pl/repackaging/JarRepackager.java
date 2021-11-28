@@ -14,7 +14,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.regex.Pattern;
+import org.apache.maven.artifact.Artifact;
 
 public class JarRepackager {
   private String agentPath;
@@ -56,9 +58,10 @@ public class JarRepackager {
     this.jarFile = jarFile;
   }
 
-  public void repackageJar() {
+  public void repackageJar(HashMap<Artifact, Boolean> artifactMap) {
     String classpath =
-        new InstrumentationClasspathPrepare(jarFile, frameworkSupport).prepareClasspath();
+        new InstrumentationClasspathPrepare(jarFile, frameworkSupport, artifactMap)
+            .prepareClasspath();
     String[] nameParts = jarFile.getName().split("/");
     String mainFileName = nameParts[nameParts.length - 1];
     new JarWithDependenciesInstrumenter(classpath, agentPath, mainFileName)
