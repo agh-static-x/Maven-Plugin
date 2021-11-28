@@ -17,6 +17,7 @@ public class InstrumentationConstants {
         "-cp",
         String.format("%s", classpath),
         InstrumentationConstants.STATIC_INSTRUMENTER_CLASS,
-        folderName, transitiveDependencies);
+        folderName,
+        transitiveDependencies);
   }
 }

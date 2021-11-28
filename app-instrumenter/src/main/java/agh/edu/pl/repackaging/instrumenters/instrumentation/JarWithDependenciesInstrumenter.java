@@ -19,7 +19,10 @@ public class JarWithDependenciesInstrumenter {
   private final FolderNames folderNames = FolderNames.getInstance();
   private final String mainFileName;
 
-  public JarWithDependenciesInstrumenter(InstrumentationConfiguration instrumentationConfiguration, String agentPath, String mainFileName) {
+  public JarWithDependenciesInstrumenter(
+      InstrumentationConfiguration instrumentationConfiguration,
+      String agentPath,
+      String mainFileName) {
     this.instrumentationConfiguration = instrumentationConfiguration;
     this.agentPath = agentPath;
     this.mainFileName = mainFileName;
@@ -31,7 +34,10 @@ public class JarWithDependenciesInstrumenter {
       try {
         process =
             InstrumentationConstants.getInstrumentationProcess(
-                    agentPath, instrumentationConfiguration.getClasspath(), folderNames.getJARWithInstrumentedDependenciesPackage(), instrumentationConfiguration.getTransitiveDependencies())
+                    agentPath,
+                    instrumentationConfiguration.getClasspath(),
+                    folderNames.getJARWithInstrumentedDependenciesPackage(),
+                    instrumentationConfiguration.getTransitiveDependencies())
                 .inheritIO()
                 .start();
       } catch (IOException exception) {

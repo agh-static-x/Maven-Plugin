@@ -48,7 +48,8 @@ public class StaticInstrumenter {
       // resilient stuff
       // FIXME jmod in particular introduces weirdness with adding helpers to the dependencies
       if (pathItem.endsWith(".jar") || pathItem.endsWith(".war")) {
-        processJar(new File(pathItem), outDir, Arrays.asList(transitiveDependencies).contains(pathItem));
+        processJar(
+            new File(pathItem), outDir, Arrays.asList(transitiveDependencies).contains(pathItem));
       }
     }
   }
@@ -57,7 +58,8 @@ public class StaticInstrumenter {
     return entryName.startsWith("io/opentelemetry");
   }
 
-  private static void processJar(final File jar, final File outDir, final boolean isTransitive) throws Exception {
+  private static void processJar(final File jar, final File outDir, final boolean isTransitive)
+      throws Exception {
     //    System.out.println("[processJar] " + jar.getName());
     // FIXME don't "instrument" our agent jar.
     final File outFile = new File(outDir, jar.getName()); // FIXME multiple jars with same name
