@@ -8,7 +8,6 @@ public class FolderNames {
 
   private String INSTRUMENTED_OTEL_JAR_PACKAGE_NAME;
   private final String MAIN_JAR_INITIAL_COPY;
-  private final String INSTRUMENTED_DEPENDENCY;
   private final String JAR_WITH_INSTRUMENTED_DEPENDENCIES;
   private final String INSTRUMENTED_JAR;
   private final String OPENTELEMETRY_CLASSES;
@@ -20,9 +19,6 @@ public class FolderNames {
         String.format("%s_%s", "INSTRUMENTED_OTEL_JAR", RandomStringUtils.randomAlphanumeric(8));
     MAIN_JAR_INITIAL_COPY =
         String.format("%s_%s", "./MAIN_JAR_INITIAL_COPY", RandomStringUtils.randomAlphanumeric(8));
-    INSTRUMENTED_DEPENDENCY =
-        String.format(
-            "%s_%s", "./INSTRUMENTED_DEPENDENCY", RandomStringUtils.randomAlphanumeric(8));
     JAR_WITH_INSTRUMENTED_DEPENDENCIES =
         String.format(
             "%s_%s",
@@ -53,10 +49,6 @@ public class FolderNames {
 
   public String getMainJARInitialCopyPackage() {
     return MAIN_JAR_INITIAL_COPY;
-  }
-
-  public String getInstrumentedDependencyPackage() {
-    return INSTRUMENTED_DEPENDENCY;
   }
 
   public String getJARWithInstrumentedDependenciesPackage() {

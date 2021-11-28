@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
 
 public class StaticInstrumenter {
@@ -89,7 +90,16 @@ public class StaticInstrumenter {
       } else {
         entryIn = in.getInputStream(ent);
       }
-      zout.putNextEntry(outEnt);
+      try {
+        zout.putNextEntry(outEnt);
+      } catch (ZipException e) {
+        if (e.getMessage().contains("duplicate")) continue;
+        else {
+          System.err.println(
+              "Error while copying OpenTelemetry file " + outEnt.getName() + "to main JAR.");
+          return;
+        }
+      }
       copy(entryIn, zout);
       entryIn.close();
       zout.closeEntry();

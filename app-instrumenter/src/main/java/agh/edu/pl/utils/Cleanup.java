@@ -14,7 +14,6 @@ public class Cleanup {
     String[] foldersToDelete = {
       folderNames.getInstrumentedOtelJarPackage(),
       folderNames.getMainJARInitialCopyPackage(),
-      folderNames.getInstrumentedDependencyPackage(),
       folderNames.getInstrumentedJARPackage(),
       folderNames.getOpenTelemetryClassesPackage(),
       folderNames.getJARWithInstrumentedDependenciesPackage(),

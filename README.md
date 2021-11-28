@@ -17,7 +17,12 @@ Project consists of the following modules:
   name. If such artifact won't be found, plugin will default to instrumenting all project artifacts.
 
 - `outputFolder` - path to output folder for instrumented JAR. If no name for the folder is provided, the
-  instrumented JAR will be stored in the default folder for Maven project .
+  instrumented JAR will be stored in the default folder for Maven project.
+
+- `suffix` - suffix will be added to your file name after the instrumentation. The default suffix is '-instrumented'
+  (e.g 'example-2.1.jar' will become 'example-2.1-instrumented.jar').
+
+- `noSuffix` - if set to true, no suffix will be added to file name.
 
 ## Execution
 

@@ -12,6 +12,7 @@ public class InstrumentationConstants {
         "java",
         "-Dota.static.instrumenter=true",
         "-Dotel.javaagent.experimental.field-injection.enabled=false",
+        "-Dotel.javaagent.exclude-classes=ch.qos.logback.classic.Logger",
         String.format("-javaagent:%s", agentPath),
         "-cp",
         String.format("%s", classpath),

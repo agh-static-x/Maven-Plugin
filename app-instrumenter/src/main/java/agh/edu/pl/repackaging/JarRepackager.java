@@ -6,8 +6,8 @@ import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.repackaging.config.InstrumentationConstants;
 import agh.edu.pl.repackaging.frameworks.AppFramework;
 import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
-import agh.edu.pl.repackaging.instrumenters.dependencies.DependenciesInstrumenter;
-import agh.edu.pl.repackaging.instrumenters.mainclass.MainJarInstrumenter;
+import agh.edu.pl.repackaging.instrumenters.classpath.InstrumentationClasspathPrepare;
+import agh.edu.pl.repackaging.instrumenters.instrumentation.JarWithDependenciesInstrumenter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -57,17 +57,15 @@ public class JarRepackager {
   }
 
   public void repackageJar() {
-    new DependenciesInstrumenter(jarFile, agentPath, frameworkSupport).instrumentDependencies();
-    String pattern = Pattern.quote(System.getProperty("file.separator"));
-    String[] fileNameParts = jarFile.getName().split(pattern);
-    final String fileName =
-        folderNames.getJARWithInstrumentedDependenciesPackage()
-            + File.separator
-            + fileNameParts[fileNameParts.length - 1];
-    new MainJarInstrumenter(new File(fileName), agentPath).instrumentMain();
+    String classpath =
+        new InstrumentationClasspathPrepare(jarFile, frameworkSupport).prepareClasspath();
+    String[] nameParts = jarFile.getName().split("/");
+    String mainFileName = nameParts[nameParts.length - 1];
+    new JarWithDependenciesInstrumenter(classpath, agentPath, mainFileName)
+        .instrumentJarWithDependencies();
   }
 
-  public void addOpenTelemetryClasses() {
+  public void addOpenTelemetryClasses(String suffix) {
     String pattern = Pattern.quote(System.getProperty("file.separator"));
     String[] outFileNameParts = jarFile.getName().split(pattern);
     AgentClassesExtractor agentClassesExtractor =
@@ -77,7 +75,7 @@ public class JarRepackager {
                 outFileNameParts[outFileNameParts.length - 1]),
             agentPath,
             folderNames.getInstrumentedJARPackage());
-    agentClassesExtractor.addOpenTelemetryFolders(frameworkSupport);
+    agentClassesExtractor.addOpenTelemetryFolders(frameworkSupport, suffix);
   }
 
   public void checkFrameworkSupport() {

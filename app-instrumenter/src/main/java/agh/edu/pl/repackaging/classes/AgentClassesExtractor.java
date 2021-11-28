@@ -39,7 +39,9 @@ public class AgentClassesExtractor {
       jarFile = new JarFile(this.mainFile);
     } catch (IOException e) {
       System.err.println(
-          "Problem occurred while getting project JAR file. Make sure you have defined JAR packaging in pom.xml.");
+          "Problem occurred while getting project JAR file "
+              + mainFile.getPath()
+              + ".Make sure you have defined JAR packaging in pom.xml.");
       return;
     }
     try {
@@ -78,7 +80,7 @@ public class AgentClassesExtractor {
     }
   }
 
-  public void addOpenTelemetryFolders(FrameworkSupport frameworkSupport) {
+  public void addOpenTelemetryFolders(FrameworkSupport frameworkSupport, String suffix) {
     try {
       File finalDir = new File(folderNames.getFinalFolder());
       this.frameworkSupport = frameworkSupport;
@@ -96,14 +98,16 @@ public class AgentClassesExtractor {
           new File(
               folderNames.getFinalFolder(),
               String.format(
-                  "%s-instrumented%s",
-                  fileName.substring(0, lastDotIndex), fileName.substring(lastDotIndex)));
+                  "%s%s%s",
+                  fileName.substring(0, lastDotIndex), suffix, fileName.substring(lastDotIndex)));
       ZipOutputStream zout;
       try {
         zout = new ZipOutputStream(new FileOutputStream(outFile));
       } catch (FileNotFoundException exception) {
         System.err.println(
-            "Could not create output stream for JAR file, because file does not exist.");
+            "Could not create output stream for JAR file, because file "
+                + outFile.getPath()
+                + " does not exist.");
         return;
       }
       zout.setMethod(ZipOutputStream.STORED);
@@ -160,15 +164,6 @@ public class AgentClassesExtractor {
         exception.printStackTrace();
       }
     }
-  }
-
-  private void copySingleEntryWithFrameworkSupport(JarEntry entry, ZipOutputStream zout)
-      throws IOException {
-    File tmpFile =
-        copySingleEntryFromJar(entry, agentJar, folderNames.getOpenTelemetryClassesPackage());
-    String prefix = frameworkSupport.getPrefix();
-    String newEntryPath = prefix + entry.getName();
-    createZipEntryFromFile(zout, tmpFile, newEntryPath);
   }
 
   private void copySingleEntryWithFrameworkSupport(JarEntry entry, ZipOutputStream zout)

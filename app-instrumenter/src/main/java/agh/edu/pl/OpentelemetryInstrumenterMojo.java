@@ -27,6 +27,12 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
   @Parameter(readonly = true)
   private String outputFolder;
 
+  @Parameter(readonly = true, defaultValue = "-instrumented")
+  private String suffix;
+
+  @Parameter(readonly = true, defaultValue = "false")
+  private boolean noSuffix;
+
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     JarRepackager repackager = new JarRepackager();
@@ -40,7 +46,8 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
         repackager.setJarFile(artifact);
         repackager.checkFrameworkSupport();
         repackager.repackageJar();
-        repackager.addOpenTelemetryClasses();
+        String suf = noSuffix ? "" : suffix;
+        repackager.addOpenTelemetryClasses(suf);
       }
     } finally {
       new Cleanup().deleteAllTemporaryFolders();
