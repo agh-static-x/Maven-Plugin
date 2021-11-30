@@ -39,7 +39,10 @@ public class StaticInstrumenter {
       outDir.mkdir();
     }
 
-    final String[] transitiveDependencies = args[1].split(System.getProperty("path.separator"));
+    String[] transitiveDependencies = {};
+    if (args.length > 1) {
+      transitiveDependencies = args[1].split(System.getProperty("path.separator"));
+    }
 
     for (final String pathItem :
         System.getProperty("java.class.path").split(System.getProperty("path.separator"))) {
