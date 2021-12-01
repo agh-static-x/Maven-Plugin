@@ -48,7 +48,7 @@ Project consists of the following modules:
 
 2. Run `mvn package` in project's folder.
 
-3. Run instrumented app with `-Dio.opentelemetry.javaagent.shaded.io.opentelemetry.context.contextStorageProvider=default` system property.
+3. Run instrumented app with `-Dio.opentelemetry.javaagent.shaded.io.opentelemetry.context.contextStorageProvider=default` system property. 
 
 Example: `java -jar -Dio.opentelemetry.javaagent.shaded.io.opentelemetry.context.contextStorageProvider=default target/your-app-instrumented.jar`
 ### Build plugin
