@@ -6,6 +6,8 @@ import static agh.edu.pl.utils.ZipEntryCreator.createZipEntryFromFile;
 
 import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
+import org.codehaus.plexus.util.FileUtils;
+
 import java.io.*;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
@@ -14,7 +16,6 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
-import org.codehaus.plexus.util.FileUtils;
 
 public class AgentClassesExtractor {
   private final File mainFile;
@@ -191,15 +192,12 @@ public class AgentClassesExtractor {
   private void copySingleClassdataFile(JarEntry entry, ZipOutputStream zout) throws IOException {
     File tmpFile =
         copySingleEntryFromJar(entry, agentJar, folderNames.getOpenTelemetryClassesPackage());
+
     String prefix = frameworkSupport != null ? frameworkSupport.getPrefix() : "";
+
     String newEntryPath = entry.getName().replace(".classdata", ".class");
-    if (entry.getName().startsWith("/inst/io/opentelemetry/sdk")) {
-      // opentelemetry sdk, autoconfigure and exporters
-      newEntryPath = newEntryPath.replace("inst/", prefix + "io/opentelemetry/javaagent/shaded/");
-    } else {
-      // instrumentation modules
-      newEntryPath = newEntryPath.replace("inst/", prefix);
-    }
+    newEntryPath = newEntryPath.replace("inst/", prefix);
+
     createZipEntryFromFile(zout, tmpFile, newEntryPath);
   }
 }
