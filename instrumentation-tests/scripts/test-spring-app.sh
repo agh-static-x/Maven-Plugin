@@ -8,7 +8,7 @@ BACKEND_PID=$!
 export OTEL_TRACES_EXPORTER=otlp
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:8888/
 
-java -jar instrumentation-tests/test-apps/spring-test-app/target/spring-test-app-0.0.1-SNAPSHOT-instrumented.jar &
+java -Dio.opentelemetry.javaagent.shaded.io.opentelemetry.context.contextStorageProvider=default -jar instrumentation-tests/test-apps/spring-test-app/target/spring-test-app-0.0.1-SNAPSHOT-instrumented.jar &
 SPRING_PID=$!
 
 sleep 10;
