@@ -10,7 +10,7 @@ public class AgentInstrumenter {
       otelJarPath = args[0];
       pluginResourcesPath = args[1];
     } else {
-      otelJarPath = "opentelemetry-javaagent-all.jar";
+      otelJarPath = "opentelemetry-javaagent.jar";
       pluginResourcesPath = "app-instrumenter/src/main/resources";
     }
     OpenTelemetryLoader loader = new OpenTelemetryLoader(otelJarPath, pluginResourcesPath);

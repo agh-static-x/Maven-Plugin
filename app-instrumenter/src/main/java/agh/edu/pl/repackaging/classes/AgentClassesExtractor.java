@@ -191,15 +191,12 @@ public class AgentClassesExtractor {
   private void copySingleClassdataFile(JarEntry entry, ZipOutputStream zout) throws IOException {
     File tmpFile =
         copySingleEntryFromJar(entry, agentJar, folderNames.getOpenTelemetryClassesPackage());
+
     String prefix = frameworkSupport != null ? frameworkSupport.getPrefix() : "";
+
     String newEntryPath = entry.getName().replace(".classdata", ".class");
-    if (entry.getName().startsWith("/inst/io/opentelemetry/sdk")) {
-      // opentelemetry sdk, autoconfigure and exporters
-      newEntryPath = newEntryPath.replace("inst/", prefix + "io/opentelemetry/javaagent/shaded/");
-    } else {
-      // instrumentation modules
-      newEntryPath = newEntryPath.replace("inst/", prefix);
-    }
+    newEntryPath = newEntryPath.replace("inst/", prefix);
+
     createZipEntryFromFile(zout, tmpFile, newEntryPath);
   }
 }
