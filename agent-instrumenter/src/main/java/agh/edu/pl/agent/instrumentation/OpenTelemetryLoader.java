@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.asm.Advice;
@@ -86,13 +87,13 @@ public class OpenTelemetryLoader {
 
   public void injectClasses(File jarFile) throws IOException {
     List<Class<?>> classesToInject =
-        List.of(
+        Arrays.asList(
             BytesAndName.class,
             PreTransformer.class,
             PostTransformer.class,
             StaticInstrumenter.class);
 
-    for (var clazz : classesToInject) {
+    for (Class<?> clazz : classesToInject) {
       String[] clazzNameParts = clazz.getName().split("\\.");
       String clazzName = clazzNameParts[clazzNameParts.length - 1];
 
