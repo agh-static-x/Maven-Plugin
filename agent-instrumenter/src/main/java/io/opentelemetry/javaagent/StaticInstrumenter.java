@@ -3,12 +3,14 @@ package io.opentelemetry.javaagent;
 
 import java.io.*;
 import java.lang.instrument.ClassFileTransformer;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
 
 public class StaticInstrumenter {
@@ -37,14 +39,20 @@ public class StaticInstrumenter {
       outDir.mkdir();
     }
 
+    String[] transitiveDependencies = {};
+    if (args.length > 1) {
+      transitiveDependencies = args[1].split(System.getProperty("path.separator"));
+    }
+
     for (final String pathItem :
         System.getProperty("java.class.path").split(System.getProperty("path.separator"))) {
       System.out.println("[PATH_ITEM] " + pathItem);
       // FIXME java 9 / jmod support, proper handling of directories, just generally better and more
       // resilient stuff
       // FIXME jmod in particular introduces weirdness with adding helpers to the dependencies
-      if (pathItem.endsWith(".jar")) {
-        processJar(new File(pathItem), outDir);
+      if (pathItem.endsWith(".jar") || pathItem.endsWith(".war")) {
+        processJar(
+            new File(pathItem), outDir, Arrays.asList(transitiveDependencies).contains(pathItem));
       }
     }
   }
@@ -53,7 +61,8 @@ public class StaticInstrumenter {
     return entryName.startsWith("io/opentelemetry");
   }
 
-  private static void processJar(final File jar, final File outDir) throws Exception {
+  private static void processJar(final File jar, final File outDir, final boolean isTransitive)
+      throws Exception {
     //    System.out.println("[processJar] " + jar.getName());
     // FIXME don't "instrument" our agent jar.
     final File outFile = new File(outDir, jar.getName()); // FIXME multiple jars with same name
@@ -65,8 +74,8 @@ public class StaticInstrumenter {
     while (entries.hasMoreElements()) {
       final JarEntry ent = entries.nextElement();
       final String name = ent.getName();
-      final ZipEntry outEnt = new ZipEntry(ent);
-      InputStream entryIn = null;
+      final ZipEntry outEnt = name.endsWith(".jar") ? new ZipEntry(ent) : new ZipEntry(name);
+      InputStream entryIn;
       if (name.endsWith(".class") && !shouldSkip(name)) {
         final String className = name.substring(0, name.indexOf(".class")).replace('/', '.');
         //        System.out.println("[className] " + className);
@@ -84,12 +93,23 @@ public class StaticInstrumenter {
           }
         } catch (final Throwable t) { // NoClassDefFoundError among others
           entryIn = in.getInputStream(ent);
-          System.out.println("Problem with " + name + ": " + t);
+          if (!isTransitive) {
+            System.out.println("Problem with " + name + ": " + t);
+          }
         }
       } else {
         entryIn = in.getInputStream(ent);
       }
-      zout.putNextEntry(outEnt);
+      try {
+        zout.putNextEntry(outEnt);
+      } catch (ZipException e) {
+        if (e.getMessage().contains("duplicate")) continue;
+        else {
+          System.err.println(
+              "Error while copying OpenTelemetry file " + outEnt.getName() + "to main JAR.");
+          return;
+        }
+      }
       copy(entryIn, zout);
       entryIn.close();
       zout.closeEntry();

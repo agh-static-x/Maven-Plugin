@@ -14,7 +14,6 @@ public class Cleanup {
     String[] foldersToDelete = {
       folderNames.getInstrumentedOtelJarPackage(),
       folderNames.getMainJARInitialCopyPackage(),
-      folderNames.getInstrumentedDependencyPackage(),
       folderNames.getInstrumentedJARPackage(),
       folderNames.getOpenTelemetryClassesPackage(),
       folderNames.getJARWithInstrumentedDependenciesPackage(),
@@ -22,7 +21,7 @@ public class Cleanup {
     };
     try {
       for (String folderName : foldersToDelete) {
-        FileUtils.deleteDirectory(folderName);
+        FileUtils.forceDelete(folderName);
       }
     } catch (IllegalArgumentException ignored) {
     } catch (IOException exception) {

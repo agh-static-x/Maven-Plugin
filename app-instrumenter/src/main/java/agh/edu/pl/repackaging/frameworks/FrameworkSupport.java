@@ -14,15 +14,21 @@ import java.util.zip.ZipOutputStream;
 
 public class FrameworkSupport {
 
-  private final String prefix;
+  private final String classesPrefix;
+  private final String libPrefix;
   private final HashSet<String> filesToRepackage = new HashSet<>();
 
-  public FrameworkSupport(String prefix) {
-    this.prefix = prefix;
+  public FrameworkSupport(String classesPrefix, String libPrefix) {
+    this.classesPrefix = classesPrefix;
+    this.libPrefix = libPrefix;
   }
 
-  public String getPrefix() {
-    return prefix;
+  public String getClassesPrefix() {
+    return classesPrefix;
+  }
+
+  public String getLibPrefix() {
+    return libPrefix;
   }
 
   public void addFileToRepackage(String fileName) {
@@ -38,7 +44,7 @@ public class FrameworkSupport {
     File tmpFile =
         copySingleEntryFromJar(
             entry, jarFile, FolderNames.getInstance().getFrameworkSupportFolder());
-    String newEntryPath = entry.getName().replace(getPrefix(), "");
+    String newEntryPath = entry.getName().replace(getClassesPrefix(), "");
     addFileToRepackage(newEntryPath);
     createZipEntryFromFile(zout, tmpFile, newEntryPath);
   }

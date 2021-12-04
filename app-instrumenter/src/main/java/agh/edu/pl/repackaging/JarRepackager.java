@@ -3,18 +3,21 @@ package agh.edu.pl.repackaging;
 
 import agh.edu.pl.repackaging.classes.AgentClassesExtractor;
 import agh.edu.pl.repackaging.config.FolderNames;
+import agh.edu.pl.repackaging.config.InstrumentationConfiguration;
 import agh.edu.pl.repackaging.config.InstrumentationConstants;
 import agh.edu.pl.repackaging.frameworks.AppFramework;
 import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
-import agh.edu.pl.repackaging.instrumenters.dependencies.DependenciesInstrumenter;
-import agh.edu.pl.repackaging.instrumenters.mainclass.MainJarInstrumenter;
+import agh.edu.pl.repackaging.instrumenters.classpath.InstrumentationClasspathPrepare;
+import agh.edu.pl.repackaging.instrumenters.instrumentation.JarWithDependenciesInstrumenter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.regex.Pattern;
+import org.apache.maven.artifact.Artifact;
 
 public class JarRepackager {
   private String agentPath;
@@ -56,28 +59,27 @@ public class JarRepackager {
     this.jarFile = jarFile;
   }
 
-  public void repackageJar() {
-    new DependenciesInstrumenter(jarFile, agentPath, frameworkSupport).instrumentDependencies();
-    String pattern = Pattern.quote(System.getProperty("file.separator"));
-    String[] fileNameParts = jarFile.getName().split(pattern);
-    final String fileName =
-        folderNames.getJARWithInstrumentedDependenciesPackage()
-            + File.separator
-            + fileNameParts[fileNameParts.length - 1];
-    new MainJarInstrumenter(new File(fileName), agentPath).instrumentMain();
+  public void repackageJar(HashMap<Artifact, Boolean> artifactMap) {
+    InstrumentationConfiguration instrumentationConfiguration =
+        new InstrumentationClasspathPrepare(jarFile, frameworkSupport, artifactMap)
+            .prepareClasspath();
+    String[] nameParts = jarFile.getName().split("/");
+    String mainFileName = nameParts[nameParts.length - 1];
+    new JarWithDependenciesInstrumenter(instrumentationConfiguration, agentPath, mainFileName)
+        .instrumentJarWithDependencies();
   }
 
-  public void addOpenTelemetryClasses() {
+  public void addOpenTelemetryClasses(String suffix) {
     String pattern = Pattern.quote(System.getProperty("file.separator"));
     String[] outFileNameParts = jarFile.getName().split(pattern);
-    final String outFileName =
-        folderNames.getInstrumentedJARPackage()
-            + File.separator
-            + outFileNameParts[outFileNameParts.length - 1];
     AgentClassesExtractor agentClassesExtractor =
         new AgentClassesExtractor(
-            new File(outFileName), agentPath, folderNames.getInstrumentedJARPackage());
-    agentClassesExtractor.addOpenTelemetryFolders(frameworkSupport);
+            new File(
+                folderNames.getInstrumentedJARPackage(),
+                outFileNameParts[outFileNameParts.length - 1]),
+            agentPath,
+            folderNames.getInstrumentedJARPackage());
+    agentClassesExtractor.addOpenTelemetryFolders(frameworkSupport, suffix);
   }
 
   public void checkFrameworkSupport() {
