@@ -9,7 +9,7 @@ is_agent_instrumenter_changed = False
 is_agent_jar_changed = False
 
 agent_instrumenter_classes_regex = re.compile(r"^agent-instrumenter\/\S+\.java$")
-agent_jar_path = "app-instrumenter/src/main/resources/opentelemetry-javaagent-all.jar"
+agent_jar_path = "app-instrumenter/src/main/resources/opentelemetry-javaagent.jar"
 
 for changed_file in diff_result.strip().split("\n"):
     if agent_instrumenter_classes_regex.match(changed_file):
