@@ -73,8 +73,7 @@ public class InstrumentationClasspathPrepare {
       try {
         storeSingleJAREntry(entry, mainJar, zout);
       } catch (IOException exception) {
-        logger.error(
-            "Error occurred while adding dependency " + entry.getName() + " to main JAR.");
+        logger.error("Error occurred while adding dependency " + entry.getName() + " to main JAR.");
         return null;
       }
     }
@@ -145,8 +144,7 @@ public class InstrumentationClasspathPrepare {
       Files.copy(jarFileInputStream, f.toPath());
       jarFileInputStream.close();
     } catch (IOException exception) {
-      logger.error(
-          "Could not copy JAR dependency " + entry.getName() + " to temporary folder.");
+      logger.error("Could not copy JAR dependency " + entry.getName() + " to temporary folder.");
       return;
     }
     for (Artifact artifact : artifactMap.keySet()) {

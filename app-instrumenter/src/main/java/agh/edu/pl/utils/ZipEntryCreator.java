@@ -1,10 +1,6 @@
 /* (C)2021 */
 package agh.edu.pl.utils;
 
-import org.apache.maven.model.building.Result;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,6 +12,8 @@ import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ZipEntryCreator {
 
@@ -38,8 +36,7 @@ public class ZipEntryCreator {
     } catch (ZipException e) {
       if (!e.getMessage().contains("duplicate")) {
         Logger logger = LoggerFactory.getLogger(ZipEntryCreator.class);
-        logger.error(
-            "Error (ZipException) while creating Zip Entry " + entryPath + " from file.");
+        logger.error("Error (ZipException) while creating Zip Entry " + entryPath + " from file.");
       }
     }
   }
@@ -49,8 +46,7 @@ public class ZipEntryCreator {
     File tmpFile = new File(folderName, entry.getName());
     if (!tmpFile.getParentFile().mkdirs() && !tmpFile.getParentFile().exists()) {
       Logger logger = LoggerFactory.getLogger(ZipEntryCreator.class);
-      logger.error(
-          "Temporary directory for " + entry.getName() + " was not created properly.");
+      logger.error("Temporary directory for " + entry.getName() + " was not created properly.");
     }
     Files.copy(jarFile.getInputStream(entry), tmpFile.toPath());
     return tmpFile;

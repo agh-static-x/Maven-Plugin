@@ -44,8 +44,7 @@ public class JarWithDependenciesInstrumenter {
                 .inheritIO()
                 .start();
       } catch (IOException exception) {
-        logger.error(
-            "Error occurred during the instrumentation process for JAR dependencies.");
+        logger.error("Error occurred during the instrumentation process for JAR dependencies.");
       }
       int ret;
       if (process != null) {

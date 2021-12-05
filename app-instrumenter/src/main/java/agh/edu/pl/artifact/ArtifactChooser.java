@@ -45,8 +45,7 @@ public class ArtifactChooser {
     }
 
     String allArtifactsNames = Arrays.toString(artifactFiles.stream().map(File::getName).toArray());
-   logger.debug(
-        "Will default to instrumenting all available artifacts: " + allArtifactsNames);
+    logger.debug("Will default to instrumenting all available artifacts: " + allArtifactsNames);
 
     return artifactFiles;
   }

@@ -145,8 +145,7 @@ public class AgentClassesExtractor {
               zout.closeEntry();
             }
           } catch (IOException exception) {
-            logger.error(
-                "Error while copying OpenTelemetry file " + entryName + "to main JAR.");
+            logger.error("Error while copying OpenTelemetry file " + entryName + "to main JAR.");
             return;
           }
         }
