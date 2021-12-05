@@ -17,6 +17,7 @@ public class StaticInstrumenter {
   // FIXME classloaders in use by loaded jars, classloader as key
   // key is slashy name, not dotty
   public static final Map<String, byte[]> InstrumentedClasses = new ConcurrentHashMap<>();
+  public static final Map<String, byte[]> AdditionalClasses = new ConcurrentHashMap<>();
 
   public static final ThreadLocal<BytesAndName> CurrentClass = new ThreadLocal<>();
 
@@ -114,11 +115,25 @@ public class StaticInstrumenter {
       entryIn.close();
       zout.closeEntry();
     }
+
+    for (String className : AdditionalClasses.keySet()) {
+      byte[] bytes = AdditionalClasses.get(className);
+
+      ZipEntry newEntry = new ZipEntry(className);
+      newEntry.setSize(bytes.length);
+      newEntry.setCompressedSize(-1);
+      zout.putNextEntry(newEntry);
+      copy(new ByteArrayInputStream(AdditionalClasses.get(className)), zout);
+      zout.closeEntry();
+
+      System.out.println("ADDED " + className);
+    }
+
     zout.close();
     in.close();
   }
 
-  private static void copy(final InputStream in, final OutputStream out) throws IOException {
+  public static void copy(final InputStream in, final OutputStream out) throws IOException {
     final byte[] buf = new byte[4 * 1024];
     int read = in.read(buf);
     while (read != -1) {
