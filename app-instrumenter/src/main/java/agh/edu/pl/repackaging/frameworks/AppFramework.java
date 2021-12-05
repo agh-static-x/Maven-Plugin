@@ -1,6 +1,9 @@
 /* (C)2021 */
 package agh.edu.pl.repackaging.frameworks;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -14,13 +17,14 @@ public class AppFramework {
   private static final String WAR_SUPPORT_PREFIX = "WEB-INF/classes/";
   private static final String SPRING_SUPPORT_PREFIX_LIB = "BOOT-INF/lib/";
   private static final String WAR_SUPPORT_PREFIX_LIB = "WEB-INF/lib/";
+  private final Logger logger = LoggerFactory.getLogger(AppFramework.class);
 
   public FrameworkSupport getAppFramework(File mainFile) {
     JarFile jarFile;
     try {
       jarFile = new JarFile(mainFile);
     } catch (IOException exception) {
-      System.err.println("Error while converting File to JarFile.");
+      logger.error("Error while converting File to JarFile.");
       return null;
     }
     for (Enumeration<JarEntry> enums = jarFile.entries(); enums.hasMoreElements(); ) {

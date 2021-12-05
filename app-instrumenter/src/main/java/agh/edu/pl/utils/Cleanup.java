@@ -4,8 +4,11 @@ package agh.edu.pl.utils;
 import agh.edu.pl.repackaging.config.FolderNames;
 import java.io.IOException;
 import org.codehaus.plexus.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Cleanup {
+  private final Logger logger = LoggerFactory.getLogger(Cleanup.class);
 
   public Cleanup() {}
 
@@ -25,7 +28,7 @@ public class Cleanup {
       }
     } catch (IllegalArgumentException ignored) {
     } catch (IOException exception) {
-      System.err.println("Temporary directories were not deleted properly.");
+      logger.error("Temporary directories were not deleted properly.");
     }
   }
 }

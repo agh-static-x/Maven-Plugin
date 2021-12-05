@@ -12,6 +12,8 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StaticInstrumenter {
   // FIXME classloaders in use by loaded jars, classloader as key
@@ -19,6 +21,8 @@ public class StaticInstrumenter {
   public static final Map<String, byte[]> InstrumentedClasses = new ConcurrentHashMap<>();
 
   public static final ThreadLocal<BytesAndName> CurrentClass = new ThreadLocal<>();
+
+  private static final Logger logger = LoggerFactory.getLogger(StaticInstrumenter.class);
 
   public static ClassFileTransformer getPreTransformer() {
     return new PreTransformer();
@@ -31,7 +35,7 @@ public class StaticInstrumenter {
   // Above happens in -javaagent-space, below in main-space
   public static void main(final String[] args) throws Exception {
 
-    System.out.println("[CLASSPATH] " + System.getProperty("java.class.path"));
+    logger.debug("[CLASSPATH] " + System.getProperty("java.class.path"));
 
     // FIXME error handling, user niceties, etc.
     final File outDir = new File(args[0]);
@@ -46,7 +50,7 @@ public class StaticInstrumenter {
 
     for (final String pathItem :
         System.getProperty("java.class.path").split(System.getProperty("path.separator"))) {
-      System.out.println("[PATH_ITEM] " + pathItem);
+      logger.debug("[PATH_ITEM] " + pathItem);
       // FIXME java 9 / jmod support, proper handling of directories, just generally better and more
       // resilient stuff
       // FIXME jmod in particular introduces weirdness with adding helpers to the dependencies
@@ -86,7 +90,7 @@ public class StaticInstrumenter {
           if (modified == null) {
             entryIn = in.getInputStream(ent);
           } else {
-            System.out.println("INSTRUMENTED " + className);
+            logger.debug("INSTRUMENTED " + className);
             entryIn = new ByteArrayInputStream(modified);
             outEnt.setSize(modified.length);
             outEnt.setCompressedSize(-1); // unknown
@@ -94,7 +98,7 @@ public class StaticInstrumenter {
         } catch (final Throwable t) { // NoClassDefFoundError among others
           entryIn = in.getInputStream(ent);
           if (!isTransitive) {
-            System.out.println("Problem with " + name + ": " + t);
+            logger.error("Problem with " + name + ": " + t);
           }
         }
       } else {

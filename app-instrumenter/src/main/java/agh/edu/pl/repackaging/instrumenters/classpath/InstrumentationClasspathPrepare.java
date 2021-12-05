@@ -13,12 +13,15 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.maven.artifact.Artifact;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InstrumentationClasspathPrepare {
   private final File mainFile;
   private final FolderNames folderNames = FolderNames.getInstance();
   private final FrameworkSupport frameworkSupport;
   private final HashMap<Artifact, Boolean> artifactMap;
+  private final Logger logger = LoggerFactory.getLogger(InstrumentationClasspathPrepare.class);
 
   public InstrumentationClasspathPrepare(
       File mainFile, FrameworkSupport frameworkSupport, HashMap<Artifact, Boolean> artifactMap) {
@@ -38,7 +41,7 @@ public class InstrumentationClasspathPrepare {
         String.format("%s/%s", folderNames.getMainJARInitialCopyPackage(), mainFile.getName());
     File f = new File(fileName);
     if (!f.getParentFile().mkdirs() && !f.getParentFile().exists()) {
-      System.err.println(
+      logger.error(
           "The temporary directory "
               + f.getPath()
               + " necessary for main file instrumentation process could not be created. Please make sure you have permissions required to create a directory.");
@@ -48,7 +51,7 @@ public class InstrumentationClasspathPrepare {
     try {
       mainJar = new JarFile(this.mainFile);
     } catch (IOException e) {
-      System.err.println(
+      logger.error(
           "Problem occurred while getting project JAR file "
               + this.mainFile.getName()
               + ". Make sure you have defined JAR packaging in pom.xml.");
@@ -58,7 +61,7 @@ public class InstrumentationClasspathPrepare {
     try {
       zout = new ZipOutputStream(new FileOutputStream(f));
     } catch (FileNotFoundException exception) {
-      System.err.println(
+      logger.error(
           "Could not create output stream for JAR file, because file "
               + f.getPath()
               + " does not exist.");
@@ -70,7 +73,7 @@ public class InstrumentationClasspathPrepare {
       try {
         storeSingleJAREntry(entry, mainJar, zout);
       } catch (IOException exception) {
-        System.err.println(
+        logger.error(
             "Error occurred while adding dependency " + entry.getName() + " to main JAR.");
         return null;
       }
@@ -79,7 +82,7 @@ public class InstrumentationClasspathPrepare {
       zout.close();
       mainJar.close();
     } catch (IOException exception) {
-      System.err.println("JAR file/output stream was not closed properly.");
+      logger.error("JAR file/output stream was not closed properly.");
     }
     classpath.append(fileName).append(File.pathSeparator);
 
@@ -87,7 +90,7 @@ public class InstrumentationClasspathPrepare {
     try {
       jarFile = new JarFile(this.mainFile);
     } catch (IOException e) {
-      System.err.println(
+      logger.error(
           "Problem occurred while getting project JAR file "
               + this.mainFile.getName()
               + ". Make sure you have defined JAR packaging in pom.xml.");
@@ -114,7 +117,7 @@ public class InstrumentationClasspathPrepare {
         try {
           Files.copy(file.toPath(), outFile.toPath());
         } catch (IOException exception) {
-          System.err.println(
+          logger.error(
               "Couldn't copy transitive dependency " + file.getPath() + " to temporary directory.");
         }
         classpath.append(outFileName).append(File.pathSeparator);
@@ -131,7 +134,7 @@ public class InstrumentationClasspathPrepare {
         String.format("%s/%s", folderNames.getMainJARInitialCopyPackage(), entry.getName());
     File f = new File(fileName);
     if (!f.getParentFile().mkdirs() && !f.getParentFile().exists()) {
-      System.err.println(
+      logger.error(
           "The temporary directory necessary for dependency "
               + entry.getName()
               + " instrumentation process could not be created. Please make sure you have permissions required to create a directory.");
@@ -142,7 +145,7 @@ public class InstrumentationClasspathPrepare {
       Files.copy(jarFileInputStream, f.toPath());
       jarFileInputStream.close();
     } catch (IOException exception) {
-      System.err.println(
+      logger.error(
           "Could not copy JAR dependency " + entry.getName() + " to temporary folder.");
       return;
     }
@@ -159,7 +162,7 @@ public class InstrumentationClasspathPrepare {
     File instrumentedDir = new File(folderNames.getJARWithInstrumentedDependenciesPackage());
     File mainInstrumentedDir = new File(folderNames.getInstrumentedJARPackage());
     if (!tmpDir.mkdir() || !instrumentedDir.mkdir() || !mainInstrumentedDir.mkdir()) {
-      System.err.println(
+      logger.error(
           "The temporary directories necessary for JAR instrumentation process could not be created. Please make sure you have permissions required to create a directory.");
     }
   }

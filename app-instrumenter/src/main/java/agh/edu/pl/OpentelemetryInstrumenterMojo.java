@@ -2,6 +2,7 @@
 package agh.edu.pl;
 
 import agh.edu.pl.artifact.ArtifactChooser;
+import agh.edu.pl.logger.LoggingConfigurer;
 import agh.edu.pl.repackaging.JarRepackager;
 import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.utils.Cleanup;
@@ -18,6 +19,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Mojo(
     name = "instrument-with-opentelemetry",
@@ -41,10 +44,13 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
   @Parameter(readonly = true, defaultValue = "false")
   private boolean noSuffix;
 
+  private final Logger logger = LoggerFactory.getLogger(OpentelemetryInstrumenterMojo.class);
+
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     Runtime.getRuntime()
         .addShutdownHook(new Thread(() -> new Cleanup().deleteAllTemporaryFolders()));
+    LoggingConfigurer.configureLogger();
     Set<Artifact> artifactSet = project.getArtifacts();
     HashMap<Artifact, Boolean> artifactsMap = new HashMap<>();
     artifactSet.forEach((artifact) -> artifactsMap.put(artifact, true));
@@ -55,7 +61,7 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
       List<File> artifactsToInstrument =
           new ArtifactChooser(project, artifactName).chooseArtifacts();
       for (File artifact : artifactsToInstrument) {
-        System.out.println("Instrumenting artifact " + artifact.getName());
+        logger.debug("Instrumenting artifact " + artifact.getName());
         repackager.setJarFile(artifact);
         repackager.checkFrameworkSupport();
         repackager.repackageJar(artifactsMap);
