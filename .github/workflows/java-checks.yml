@@ -21,9 +21,11 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: Spotless check
         run: mvn --batch-mode --update-snapshots spotless:check
+      - name: Package fake-backend
+        run: mvn --projects instrumentation-tests/utils/fake-backend package
       - name: Package and install plugin
-        run: mvn --projects app-instrumenter package && mvn install:install-file -Dfile=./app-instrumenter/target/app-instrumenter-1.0-SNAPSHOT.jar -DgroupId=agh.edu.pl -DartifactId=app-instrumenter -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true
+        run: mvn --projects app-instrumenter package && mvn --projects app-instrumenter install
       - name: Test apache-http-test-app
-        run: mvn --projects instrumentation-tests/test-apps/apache-http-test-app package && java -Dio.opentelemetry.javaagent.shaded.io.opentelemetry.context.contextStorageProvider=default -jar ./FINAL/apache-http-test-app-1.0-SNAPSHOT-shaded-instrumented.jar
+        run: ./instrumentation-tests/scripts/test-apache-http-app.sh
       - name: Test spring-test-app
         run: ./instrumentation-tests/scripts/test-spring-app.sh
