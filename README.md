@@ -37,17 +37,10 @@ Project consists of the following modules:
     <executions>
         <execution>
             <goals>
-                <goal>instrument-with-opentelemetry</goal>
+                <goal>instrument</goal>
             </goals>
         </execution>
     </executions>
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
-        </dependency>
-    </dependencies>
 </plugin>
 ```
 
@@ -67,7 +60,7 @@ from resources, instruments it and injects to **app-instrumenter** resources.
 
 2. Run `mvn --projects app-instrumenter package`
 
-3. Run `mvn --projects app-instrumenter install:install-file -Dfile=./target/app-instrumenter-1.0-SNAPSHOT.jar -DgroupId=agh.edu.pl -DartifactId=app-instrumenter -Dversion=1.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true -DcreateChecksum=true`
+3. Run `mvn --projects app-instrumenter install`
 
 ## Code quality
 Project uses Spotless. To apply Spotless

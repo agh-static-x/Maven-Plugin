@@ -20,7 +20,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 @Mojo(
-    name = "instrument-with-opentelemetry",
+    name = "instrument",
     defaultPhase = LifecyclePhase.PACKAGE,
     requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
     requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
