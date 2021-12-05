@@ -11,6 +11,7 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 public class AgentUtils {
 
@@ -83,6 +84,7 @@ public class AgentUtils {
     Path classPackage = Files.createDirectories(extractedAgent.resolve(path));
 
     Files.write(
-        classPackage.resolve(className), otelJarFile.getInputStream(entryToSave).readAllBytes());
+        classPackage.resolve(className),
+        IOUtils.toByteArray(otelJarFile.getInputStream(entryToSave)));
   }
 }

@@ -11,6 +11,7 @@ public class InstrumentationConstants {
     return new ProcessBuilder(
         "java",
         "-Dota.static.instrumenter=true",
+        "-Dotel.instrumentation.internal-class-loader.enabled=false",
         String.format("-javaagent:%s", agentPath),
         "-cp",
         String.format("%s", classpath),

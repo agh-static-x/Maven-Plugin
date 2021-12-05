@@ -17,9 +17,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -83,8 +83,8 @@ public class OpenTelemetryLoader {
           new URLClassLoader(
               new URL[] {otelJar.toURI().toURL()}, OpenTelemetryLoader.class.getClassLoader());
 
-      String OTEL_AGENT_NAME = "io.opentelemetry.javaagent.OpenTelemetryAgent";
-      openTelemetryAgentClass = Class.forName(OTEL_AGENT_NAME, true, otelClassLoader);
+      openTelemetryAgentClass =
+          Class.forName("io.opentelemetry.javaagent.OpenTelemetryAgent", true, otelClassLoader);
       System.out.println("Loaded OpenTelemetryAgent: " + openTelemetryAgentClass);
 
       Path tmpDir = agentUtils.extractAgent(otelJar);

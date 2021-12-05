@@ -1,9 +1,8 @@
 package agh.edu.pl.agent.instrumentation.advices;
 
 import io.opentelemetry.javaagent.StaticInstrumenter;
-import net.bytebuddy.asm.Advice;
-
 import java.util.Map;
+import net.bytebuddy.asm.Advice;
 
 public class HelperInjectorAdvice {
 
