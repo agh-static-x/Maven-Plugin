@@ -2,7 +2,6 @@
 package agh.edu.pl;
 
 import agh.edu.pl.artifact.ArtifactChooser;
-import agh.edu.pl.logger.LoggingConfigurer;
 import agh.edu.pl.repackaging.JarRepackager;
 import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.utils.Cleanup;
@@ -50,7 +49,6 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
   public void execute() throws MojoExecutionException, MojoFailureException {
     Runtime.getRuntime()
         .addShutdownHook(new Thread(() -> new Cleanup().deleteAllTemporaryFolders()));
-    LoggingConfigurer.configureLogger();
     Set<Artifact> artifactSet = project.getArtifacts();
     HashMap<Artifact, Boolean> artifactsMap = new HashMap<>();
     artifactSet.forEach((artifact) -> artifactsMap.put(artifact, true));
