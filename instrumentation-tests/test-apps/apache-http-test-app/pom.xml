@@ -84,7 +84,7 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>instrument-with-opentelemetry</goal>
+                            <goal>instrument</goal>
                         </goals>
                     </execution>
                 </executions>
