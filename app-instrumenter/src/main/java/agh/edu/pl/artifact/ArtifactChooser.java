@@ -8,11 +8,14 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ArtifactChooser {
 
   private final MavenProject project;
   private final String artifactName;
+  private final Logger logger = LoggerFactory.getLogger(ArtifactChooser.class);
 
   public ArtifactChooser(MavenProject project, String artifactName) {
     this.project = project;
@@ -36,14 +39,13 @@ public class ArtifactChooser {
           return Collections.singletonList(artifactFile);
         }
       }
-      System.out.println("Artifact with name " + artifactName + " not found.");
+      logger.debug("Artifact with name " + artifactName + " not found.");
     } else {
-      System.out.println("Artifact name not provided via parameters.");
+      logger.debug("Artifact name not provided via parameters.");
     }
 
     String allArtifactsNames = Arrays.toString(artifactFiles.stream().map(File::getName).toArray());
-    System.out.println(
-        "Will default to instrumenting all available artifacts: " + allArtifactsNames);
+    logger.debug("Will default to instrumenting all available artifacts: " + allArtifactsNames);
 
     return artifactFiles;
   }

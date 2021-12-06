@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AppFramework {
   private static final String BOOT_INF = "BOOT-INF/lib/";
@@ -14,13 +16,14 @@ public class AppFramework {
   private static final String WAR_SUPPORT_PREFIX = "WEB-INF/classes/";
   private static final String SPRING_SUPPORT_PREFIX_LIB = "BOOT-INF/lib/";
   private static final String WAR_SUPPORT_PREFIX_LIB = "WEB-INF/lib/";
+  private final Logger logger = LoggerFactory.getLogger(AppFramework.class);
 
   public FrameworkSupport getAppFramework(File mainFile) {
     JarFile jarFile;
     try {
       jarFile = new JarFile(mainFile);
     } catch (IOException exception) {
-      System.err.println("Error while converting File to JarFile.");
+      logger.error("Error while converting File to JarFile.");
       return null;
     }
     for (Enumeration<JarEntry> enums = jarFile.entries(); enums.hasMoreElements(); ) {

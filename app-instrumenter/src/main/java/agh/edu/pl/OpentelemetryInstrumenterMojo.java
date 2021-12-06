@@ -18,6 +18,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Mojo(
     name = "instrument",
@@ -41,6 +43,8 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
   @Parameter(readonly = true, defaultValue = "false")
   private boolean noSuffix;
 
+  private final Logger logger = LoggerFactory.getLogger(OpentelemetryInstrumenterMojo.class);
+
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     Runtime.getRuntime()
@@ -55,7 +59,7 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
       List<File> artifactsToInstrument =
           new ArtifactChooser(project, artifactName).chooseArtifacts();
       for (File artifact : artifactsToInstrument) {
-        System.out.println("Instrumenting artifact " + artifact.getName());
+        logger.debug("Instrumenting artifact " + artifact.getName());
         repackager.setJarFile(artifact);
         repackager.checkFrameworkSupport();
         repackager.repackageJar(artifactsMap);

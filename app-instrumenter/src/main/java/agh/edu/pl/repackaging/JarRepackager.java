@@ -18,12 +18,15 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 import org.apache.maven.artifact.Artifact;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JarRepackager {
   private String agentPath;
   private File jarFile;
   private final FolderNames folderNames = FolderNames.getInstance();
   private FrameworkSupport frameworkSupport;
+  private final Logger logger = LoggerFactory.getLogger(JarRepackager.class);
 
   public JarRepackager() {
     this.copyInstrumentedOtelJar();
@@ -39,7 +42,7 @@ public class JarRepackager {
     try {
       Files.createDirectories(path.getParent());
     } catch (IOException exception) {
-      System.err.println(
+      logger.error(
           "Error when creating temporary directories for agent JAR. Please make sure you have permissions required to create a directory.");
     }
 
@@ -51,7 +54,7 @@ public class JarRepackager {
           path,
           StandardCopyOption.REPLACE_EXISTING);
     } catch (IOException exception) {
-      System.err.println("Couldn't copy agent JAR from plugin resources.");
+      logger.error("Couldn't copy agent JAR from plugin resources.");
     }
   }
 

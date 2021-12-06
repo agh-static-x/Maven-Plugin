@@ -12,12 +12,15 @@ import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ZipEntryCreator {
 
   public static void createZipEntryFromFile(ZipOutputStream zout, File file, String entryPath)
       throws IOException {
     try {
+      Logger logger = LoggerFactory.getLogger(ZipEntryCreator.class);
       InputStream is = new FileInputStream(file);
       ZipEntry entry = new ZipEntry(entryPath);
       byte[] bytes = Files.readAllBytes(file.toPath());
@@ -32,8 +35,8 @@ public class ZipEntryCreator {
       zout.closeEntry();
     } catch (ZipException e) {
       if (!e.getMessage().contains("duplicate")) {
-        System.err.println(
-            "Error (ZipException) while creating Zip Entry " + entryPath + " from file.");
+        Logger logger = LoggerFactory.getLogger(ZipEntryCreator.class);
+        logger.error("Error (ZipException) while creating Zip Entry " + entryPath + " from file.");
       }
     }
   }
@@ -42,8 +45,8 @@ public class ZipEntryCreator {
       throws IOException {
     File tmpFile = new File(folderName, entry.getName());
     if (!tmpFile.getParentFile().mkdirs() && !tmpFile.getParentFile().exists()) {
-      System.err.println(
-          "Temporary directory for " + entry.getName() + " was not created properly.");
+      Logger logger = LoggerFactory.getLogger(ZipEntryCreator.class);
+      logger.error("Temporary directory for " + entry.getName() + " was not created properly.");
     }
     Files.copy(jarFile.getInputStream(entry), tmpFile.toPath());
     return tmpFile;

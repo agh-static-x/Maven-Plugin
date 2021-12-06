@@ -15,6 +15,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
 import org.codehaus.plexus.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AgentClassesExtractor {
   private final File mainFile;
@@ -22,6 +24,7 @@ public class AgentClassesExtractor {
   private final String lastFolder;
   private final FolderNames folderNames = FolderNames.getInstance();
   private FrameworkSupport frameworkSupport;
+  private final Logger logger = LoggerFactory.getLogger(AgentClassesExtractor.class);
 
   public AgentClassesExtractor(File mainFile, String agentPath, String lastFolder) {
     this.mainFile = mainFile;
@@ -29,7 +32,7 @@ public class AgentClassesExtractor {
     try {
       agentJar = new JarFile(agentPath);
     } catch (IOException e) {
-      System.err.println("Problem occurred while getting agent JAR file.");
+      logger.error("Problem occurred while getting agent JAR file.");
     }
   }
 
@@ -38,7 +41,7 @@ public class AgentClassesExtractor {
     try {
       jarFile = new JarFile(this.mainFile);
     } catch (IOException e) {
-      System.err.println(
+      logger.error(
           "Problem occurred while getting project JAR file "
               + mainFile.getPath()
               + ".Make sure you have defined JAR packaging in pom.xml.");
@@ -61,20 +64,20 @@ public class AgentClassesExtractor {
             zout.closeEntry();
           }
         } catch (IOException exception) {
-          System.err.println(
+          logger.error(
               "Error while copying entry " + entry.getName() + " from main JAR to temporary file.");
         }
       }
       try {
         jarFile.close();
       } catch (IOException exception) {
-        System.err.println("Main JAR was not closed properly.");
+        logger.error("Main JAR was not closed properly.");
       }
     } finally {
       try {
         FileUtils.deleteDirectory(lastFolder);
       } catch (IOException exception) {
-        System.err.println(
+        logger.error(
             "Temporary directory required for adding Agent classes process was not deleted properly.");
       }
     }
@@ -85,7 +88,7 @@ public class AgentClassesExtractor {
       File finalDir = new File(folderNames.getFinalFolder());
       this.frameworkSupport = frameworkSupport;
       if (!finalDir.mkdir() && !finalDir.exists()) {
-        System.err.println(
+        logger.error(
             "The output directory could not be created. Please make sure you have permissions required to create a directory.");
         return;
       }
@@ -104,7 +107,7 @@ public class AgentClassesExtractor {
       try {
         zout = new ZipOutputStream(new FileOutputStream(outFile));
       } catch (FileNotFoundException exception) {
-        System.err.println(
+        logger.error(
             "Could not create output stream for JAR file, because file "
                 + outFile.getPath()
                 + " does not exist.");
@@ -131,7 +134,7 @@ public class AgentClassesExtractor {
               } catch (ZipException e) {
                 if (e.getMessage().contains("duplicate")) continue;
                 else {
-                  System.err.println(
+                  logger.error(
                       "Error while copying OpenTelemetry file " + entryName + "to main JAR.");
                   return;
                 }
@@ -142,8 +145,7 @@ public class AgentClassesExtractor {
               zout.closeEntry();
             }
           } catch (IOException exception) {
-            System.err.println(
-                "Error while copying OpenTelemetry file " + entryName + "to main JAR.");
+            logger.error("Error while copying OpenTelemetry file " + entryName + "to main JAR.");
             return;
           }
         }
@@ -152,14 +154,14 @@ public class AgentClassesExtractor {
         zout.close();
         agentJar.close();
       } catch (IOException exception) {
-        System.err.println("Agent JAR file/output stream was not closed properly.");
+        logger.error("Agent JAR file/output stream was not closed properly.");
       }
     } finally {
       try {
         FileUtils.deleteDirectory(folderNames.getOpenTelemetryClassesPackage());
         FileUtils.deleteDirectory(folderNames.getFrameworkSupportFolder());
       } catch (IOException exception) {
-        System.err.println(
+        logger.error(
             "Temporary directory required for adding Agent classes to main JAR process was not deleted properly.");
         exception.printStackTrace();
       }

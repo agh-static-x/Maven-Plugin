@@ -12,12 +12,15 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.codehaus.plexus.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JarWithDependenciesInstrumenter {
   private final InstrumentationConfiguration instrumentationConfiguration;
   private final String agentPath;
   private final FolderNames folderNames = FolderNames.getInstance();
   private final String mainFileName;
+  private final Logger logger = LoggerFactory.getLogger(JarWithDependenciesInstrumenter.class);
 
   public JarWithDependenciesInstrumenter(
       InstrumentationConfiguration instrumentationConfiguration,
@@ -41,21 +44,20 @@ public class JarWithDependenciesInstrumenter {
                 .inheritIO()
                 .start();
       } catch (IOException exception) {
-        System.err.println(
-            "Error occurred during the instrumentation process for JAR dependencies.");
+        logger.error("Error occurred during the instrumentation process for JAR dependencies.");
       }
       int ret;
       if (process != null) {
         try {
           ret = process.waitFor();
           if (ret != 0) {
-            System.err.println(
+            logger.error(
                 "The instrumentation process for JAR dependencies finished with exit value "
                     + ret
                     + ".");
           }
         } catch (InterruptedException exception) {
-          System.err.println("The instrumentation process for JAR dependencies was interrupted.");
+          logger.error("The instrumentation process for JAR dependencies was interrupted.");
         }
       }
       File instrumentedMainFile =
@@ -64,7 +66,7 @@ public class JarWithDependenciesInstrumenter {
       try {
         instrumentedMainJar = new JarFile(instrumentedMainFile);
       } catch (IOException e) {
-        System.err.println(
+        logger.error(
             "Problem occurred while getting project JAR file "
                 + instrumentedMainFile.getName()
                 + ". Make sure you have defined JAR packaging in pom.xml.");
@@ -75,7 +77,7 @@ public class JarWithDependenciesInstrumenter {
       try {
         zout = new ZipOutputStream(new FileOutputStream(outFile));
       } catch (FileNotFoundException exception) {
-        System.err.println(
+        logger.error(
             "Could not create output stream for JAR file, because file "
                 + outFile.getPath()
                 + " does not exist.");
@@ -97,7 +99,7 @@ public class JarWithDependenciesInstrumenter {
                         folderNames.getJARWithInstrumentedDependenciesPackage(), dependencyName)),
                 entry.getName());
           } catch (IOException exception) {
-            System.err.println(
+            logger.error(
                 "Exception occurred while adding instrumented dependency "
                     + dependencyName
                     + " to main JAR.");
@@ -112,7 +114,7 @@ public class JarWithDependenciesInstrumenter {
             in.close();
             zout.closeEntry();
           } catch (IOException exception) {
-            System.err.println(
+            logger.error(
                 "Error occurred while adding dependency " + entry.getName() + " to main JAR.");
             return;
           }
@@ -122,14 +124,14 @@ public class JarWithDependenciesInstrumenter {
         zout.close();
         instrumentedMainJar.close();
       } catch (IOException exception) {
-        System.err.println("JAR file/output stream was not closed properly.");
+        logger.error("JAR file/output stream was not closed properly.");
       }
     } finally {
       try {
         FileUtils.deleteDirectory(folderNames.getMainJARInitialCopyPackage());
         FileUtils.deleteDirectory(folderNames.getJARWithInstrumentedDependenciesPackage());
       } catch (IOException exception) {
-        System.err.println(
+        logger.error(
             "Temporary directories required for dependencies instrumentation process were not deleted properly.");
       }
     }
