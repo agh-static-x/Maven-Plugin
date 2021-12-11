@@ -2,9 +2,9 @@
 package agh.edu.pl.repackaging;
 
 import agh.edu.pl.repackaging.classes.AgentClassesExtractor;
-import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.repackaging.config.InstrumentationConfiguration;
 import agh.edu.pl.repackaging.config.InstrumentationConstants;
+import agh.edu.pl.repackaging.config.TemporaryFolders;
 import agh.edu.pl.repackaging.frameworks.AppFramework;
 import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
 import agh.edu.pl.repackaging.instrumenters.classpath.InstrumentationClasspathPrepare;
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 public class JarRepackager {
   private String agentPath;
   private File jarFile;
-  private final FolderNames folderNames = FolderNames.getInstance();
+  private final TemporaryFolders temporaryFolders = TemporaryFolders.getInstance();
   private FrameworkSupport frameworkSupport;
   private final Logger logger = LoggerFactory.getLogger(JarRepackager.class);
 
@@ -40,7 +40,7 @@ public class JarRepackager {
    */
   public void copyInstrumentedOtelJar() {
     this.agentPath =
-        folderNames.getInstrumentedOtelJarPackage()
+        temporaryFolders.getInstrumentedOtelJarPackage()
             + File.separator
             + InstrumentationConstants.OTEL_AGENT_JAR_FILENAME;
 
@@ -96,10 +96,9 @@ public class JarRepackager {
     AgentClassesExtractor agentClassesExtractor =
         new AgentClassesExtractor(
             new File(
-                folderNames.getInstrumentedJARPackage(),
+                String.valueOf(temporaryFolders.getInstrumentedJARPackage()),
                 outFileNameParts[outFileNameParts.length - 1]),
-            agentPath,
-            folderNames.getInstrumentedJARPackage());
+            agentPath);
     agentClassesExtractor.addOpenTelemetryFolders(frameworkSupport, suffix);
   }
 

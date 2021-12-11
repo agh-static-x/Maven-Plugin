@@ -4,7 +4,7 @@ package agh.edu.pl.repackaging.frameworks;
 import static agh.edu.pl.utils.ZipEntryCreator.copySingleEntryFromJar;
 import static agh.edu.pl.utils.ZipEntryCreator.createZipEntryFromFile;
 
-import agh.edu.pl.repackaging.config.FolderNames;
+import agh.edu.pl.repackaging.config.TemporaryFolders;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -55,7 +55,7 @@ public class FrameworkSupport {
       throws IOException {
     File tmpFile =
         copySingleEntryFromJar(
-            entry, inputFile, FolderNames.getInstance().getFrameworkSupportFolder());
+            entry, inputFile, TemporaryFolders.getInstance().getFrameworkSupportFolder());
     String newEntryPath = entry.getName().replace(getClassesPrefix(), "");
     addFileToRepackage(newEntryPath);
     createZipEntryFromFile(zout, tmpFile, newEntryPath);

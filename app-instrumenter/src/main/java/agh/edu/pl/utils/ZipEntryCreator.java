@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.CRC32;
@@ -66,9 +67,9 @@ public class ZipEntryCreator {
    * @return File object representing the entry content
    * @throws IOException If copying the entry to directory throws I/O error
    */
-  public static File copySingleEntryFromJar(JarEntry entry, JarFile jarFile, String folderName)
+  public static File copySingleEntryFromJar(JarEntry entry, JarFile jarFile, Path folderPath)
       throws IOException {
-    File tmpFile = new File(folderName, entry.getName());
+    File tmpFile = new File(String.valueOf(folderPath), entry.getName());
     if (!tmpFile.getParentFile().mkdirs() && !tmpFile.getParentFile().exists()) {
       Logger logger = LoggerFactory.getLogger(ZipEntryCreator.class);
       logger.error("Temporary directory for " + entry.getName() + " was not created properly.");

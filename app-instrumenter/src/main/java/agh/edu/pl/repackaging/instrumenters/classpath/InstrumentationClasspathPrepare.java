@@ -1,7 +1,7 @@
 package agh.edu.pl.repackaging.instrumenters.classpath;
 
-import agh.edu.pl.repackaging.config.FolderNames;
 import agh.edu.pl.repackaging.config.InstrumentationConfiguration;
+import agh.edu.pl.repackaging.config.TemporaryFolders;
 import agh.edu.pl.repackaging.frameworks.FrameworkSupport;
 import java.io.*;
 import java.nio.file.Files;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 /** Prepares tthe configuration for instrumentation process. */
 public class InstrumentationClasspathPrepare {
   private final File mainFile;
-  private final FolderNames folderNames = FolderNames.getInstance();
+  private final TemporaryFolders temporaryFolders = TemporaryFolders.getInstance();
   private final FrameworkSupport frameworkSupport;
   private final HashMap<Artifact, Boolean> artifactMap;
   private final Logger logger = LoggerFactory.getLogger(InstrumentationClasspathPrepare.class);
@@ -46,14 +46,12 @@ public class InstrumentationClasspathPrepare {
    * @see JarEntry
    */
   public InstrumentationConfiguration prepareClasspath() {
-    createInitialFolders();
-
     InstrumentationConfiguration instrumentationConfiguration = new InstrumentationConfiguration();
 
     StringBuilder classpath = new StringBuilder();
 
     String fileName =
-        String.format("%s/%s", folderNames.getMainJARInitialCopyPackage(), mainFile.getName());
+        String.format("%s/%s", temporaryFolders.getMainJARInitialCopyPackage(), mainFile.getName());
     File f = new File(fileName);
     if (!f.getParentFile().mkdirs() && !f.getParentFile().exists()) {
       logger.error(
@@ -126,7 +124,7 @@ public class InstrumentationClasspathPrepare {
         Artifact artifact = entry.getKey();
         File file = artifact.getFile();
         String outFileName =
-            String.format("%s/%s", folderNames.getMainJARInitialCopyPackage(), file.getName());
+            String.format("%s/%s", temporaryFolders.getMainJARInitialCopyPackage(), file.getName());
         File outFile = new File(outFileName);
         try {
           Files.copy(file.toPath(), outFile.toPath());
@@ -157,7 +155,7 @@ public class InstrumentationClasspathPrepare {
    */
   private void unpackSingleDependency(JarEntry entry, JarFile jarFile, StringBuilder classpath) {
     String fileName =
-        String.format("%s/%s", folderNames.getMainJARInitialCopyPackage(), entry.getName());
+        String.format("%s/%s", temporaryFolders.getMainJARInitialCopyPackage(), entry.getName());
     File f = new File(fileName);
     if (!f.getParentFile().mkdirs() && !f.getParentFile().exists()) {
       logger.error(

@@ -3,14 +3,15 @@ package agh.edu.pl;
 
 import agh.edu.pl.artifact.ArtifactChooser;
 import agh.edu.pl.repackaging.JarRepackager;
-import agh.edu.pl.repackaging.config.FolderNames;
-import agh.edu.pl.utils.Cleanup;
+import agh.edu.pl.repackaging.config.TemporaryFolders;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -49,31 +50,28 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
    * the instrumentation process of artifacts chosen by the user.
    */
   @Override
-  public void execute() {
-    Runtime.getRuntime()
-        .addShutdownHook(new Thread(() -> new Cleanup().deleteAllTemporaryFolders()));
+  public void execute() throws MojoExecutionException {
+    try {
+      TemporaryFolders.create();
+    } catch (IOException e) {
+      throw new MojoExecutionException("Could not create required temporary folders");
+    }
 
     Set<Artifact> artifactSet = project.getArtifacts();
     HashMap<Artifact, Boolean> artifactsMap = new HashMap<>();
     artifactSet.forEach((artifact) -> artifactsMap.put(artifact, true));
 
     JarRepackager repackager = new JarRepackager();
-    if (outputFolder != null) FolderNames.getInstance().setFinalFolder(outputFolder);
-    else FolderNames.getInstance().setFinalFolder(project.getBuild().getDirectory());
-
-    try {
-      List<File> artifactsToInstrument =
-          new ArtifactChooser(project, artifactName).chooseArtifact();
-      for (File artifact : artifactsToInstrument) {
-        logger.debug("Instrumenting artifact " + artifact.getName());
-        repackager.setJarFile(artifact);
-        repackager.checkFrameworkSupport();
-        repackager.repackageJar(artifactsMap);
-        String suf = noSuffix ? "" : suffix;
-        repackager.addOpenTelemetryClasses(suf);
-      }
-    } finally {
-      new Cleanup().deleteAllTemporaryFolders();
+    if (outputFolder != null) TemporaryFolders.getInstance().setFinalFolder(outputFolder);
+    else TemporaryFolders.getInstance().setFinalFolder(project.getBuild().getDirectory());
+    List<File> artifactsToInstrument = new ArtifactChooser(project, artifactName).chooseArtifacts();
+    for (File artifact : artifactsToInstrument) {
+      logger.debug("Instrumenting artifact " + artifact.getName());
+      repackager.setJarFile(artifact);
+      repackager.checkFrameworkSupport();
+      repackager.repackageJar(artifactsMap);
+      String suf = noSuffix ? "" : suffix;
+      repackager.addOpenTelemetryClasses(suf);
     }
   }
 }
