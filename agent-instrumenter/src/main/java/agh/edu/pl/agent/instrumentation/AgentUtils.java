@@ -13,6 +13,7 @@ import java.util.jar.JarFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+/** Provides utility methods for javaagent instrumentation */
 public class AgentUtils {
 
   private final Path tmpDir;
@@ -34,6 +35,13 @@ public class AgentUtils {
                 }));
   }
 
+  /**
+   * Copies the javaagent file to the plugin <code>resources</code> folder
+   *
+   * @param agentPath Path to javaagent file that will be copied
+   * @param pluginResourcesPath Path to resources folder in plugin module
+   * @return Path to the copied javaagent file
+   */
   public static Path createAgentCopy(String agentPath, String pluginResourcesPath) {
 
     File agentFile = new File(agentPath);
@@ -50,6 +58,14 @@ public class AgentUtils {
     }
   }
 
+  /**
+   * Extracts the javaagent JAR entries to temporary directory and removes <code>class</code> and
+   * <code>classdata</code> file extensions
+   *
+   * @param agentFile File object representing the OpenTelemetry javaagent file
+   * @return Path to the directory with files extracted from javaagent JAR file
+   * @throws IOException If process encounters problems with JAR file entries
+   */
   public Path extractAgent(File agentFile) throws IOException {
     JarFile otelJarFile = new JarFile(agentFile);
 
@@ -74,6 +90,14 @@ public class AgentUtils {
     return extractedAgent;
   }
 
+  /**
+   * Extracts the JAR entry to temporary directory under new, sanitized name
+   *
+   * @param otelJarFile JarFile object representing the OpenTelemetry javaagent file
+   * @param entryToSave JAR entry that is extracted
+   * @param sanitized Sanitized JAR entry name
+   * @throws IOException If process of writing to file encounters problems
+   */
   private void extractEntry(JarFile otelJarFile, JarEntry entryToSave, String sanitized)
       throws IOException {
     int lastSlashIdx = sanitized.lastIndexOf("/");

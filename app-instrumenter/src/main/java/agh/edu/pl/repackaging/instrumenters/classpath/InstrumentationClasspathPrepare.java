@@ -16,6 +16,7 @@ import org.apache.maven.artifact.Artifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Prepares tthe configuration for instrumentation process. */
 public class InstrumentationClasspathPrepare {
   private final File mainFile;
   private final FolderNames folderNames = FolderNames.getInstance();
@@ -30,6 +31,13 @@ public class InstrumentationClasspathPrepare {
     this.artifactMap = artifactMap;
   }
 
+  /**
+   * Prepares the <code>classpath</code> and checks which of the dependencies are transitive (those
+   * dependencies are not included in the output JAR file, but need to be put on the <code>classpath
+   * </code> to improve the instrumentation process).
+   *
+   * @return configuration for instrumentation process
+   */
   public InstrumentationConfiguration prepareClasspath() {
     createInitialFolders();
 
@@ -128,6 +136,14 @@ public class InstrumentationClasspathPrepare {
     return instrumentationConfiguration;
   }
 
+  /**
+   * Unpacks entry from file to the temporary folder, marks the dependency as non-transitive and
+   * adds the path to temporary file with unpacked entry to the classpath.
+   *
+   * @param entry JarEntry that is being unpacked to temporary folder
+   * @param jarFile file that contains the entry
+   * @param classpath classpath that path to unpacked entry is to be put on
+   */
   private void unpackSingleDependency(JarEntry entry, JarFile jarFile, StringBuilder classpath) {
     String fileName =
         String.format("%s/%s", folderNames.getMainJARInitialCopyPackage(), entry.getName());

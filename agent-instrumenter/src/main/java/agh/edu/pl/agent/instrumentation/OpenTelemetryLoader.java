@@ -27,6 +27,7 @@ import java.util.zip.ZipOutputStream;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.asm.Advice;
 
+/** Responsible for loading and instrumenting the OpenTelemetry javaagent JAR file */
 public class OpenTelemetryLoader {
   public URLClassLoader otelClassLoader;
   private Class<?> openTelemetryAgentClass;
@@ -39,6 +40,7 @@ public class OpenTelemetryLoader {
     this.pluginResourcesPath = pluginResourcesPath;
   }
 
+  /** Conducts the process of OpenTelemetry javaagent JAR instrumentation */
   public void instrument() {
     loadClasses(new File(otelJarPath));
     File otelJarFile = new File(otelJarPath);
@@ -68,6 +70,12 @@ public class OpenTelemetryLoader {
     }
   }
 
+  /**
+   * Loads <code>io.opentelemetry.javaagent.OpenTelemetryAgent</code> class from OpenTelemetry JAR
+   * file
+   *
+   * @param otelJar File object representing the OpenTelemetry javvagent JAR file
+   */
   public synchronized void loadClasses(File otelJar) {
     AgentUtils agentUtils = null;
 
@@ -96,6 +104,12 @@ public class OpenTelemetryLoader {
     }
   }
 
+  /**
+   * Loads io.opentelemetry.javaagent.tooling.HelperInjector class from OpenTelemetry javaagent JAR
+   * file
+   *
+   * @param tmpDir Path to temporary directory with copied OpenTelemetry javaagent JAR file
+   */
   private synchronized void loadHelperInjector(Path tmpDir) {
     URL url = null;
     try {
@@ -113,6 +127,13 @@ public class OpenTelemetryLoader {
     }
   }
 
+  /**
+   * Instruments OpenTelemetry javaagent with <code>OpenTelemetryAgentAdvices</code> and <code>
+   * InstallBootstrapJarAdvice</code>
+   *
+   * @param jarFile File object representing the OpenTelemetry javaagent JAR file
+   * @throws IOException If instrumentation with ByteBuddy throws exception
+   */
   private void instrumentOpenTelemetryAgent(File jarFile) throws IOException {
     new ByteBuddy()
         .rebase(openTelemetryAgentClass)
@@ -124,7 +145,15 @@ public class OpenTelemetryLoader {
         .inject(jarFile);
   }
 
-  // we have to inject .classdata file which is not possible through bytebuddy injection
+  /**
+   * Instruments OpenTelemetry javaagent file with <code>HelperInjectorAdvice</code> and inject
+   * inject .classdata file (which is not possible through ByteBuddy injection) by repackaging
+   * original JAR file to other file, and replacing the <code>HelperInjector.classdata</code> file
+   * with the custom one
+   *
+   * @param jarFile File object representing the OpenTelemetry javaagent JAR file
+   * @throws IOException If instrumentation with ByteBuddy throws exception
+   */
   private void instrumentHelperInjector(File jarFile) throws IOException {
     byte[] helperInjectorBytes =
         new ByteBuddy()
@@ -163,6 +192,13 @@ public class OpenTelemetryLoader {
     Files.copy(Paths.get("tmp.jar"), jarFile.toPath(), REPLACE_EXISTING);
   }
 
+  /**
+   * Injects <code>BytesAndNames</code>, <code>PreTransformer</code>, <code>PostTransformer</code>
+   * and' <code>StaticInstrumenter</code> classes into OpenTelemetry javaagent file
+   *
+   * @param jarFile File object representing the OpenTelemetry javaagent JAR file
+   * @throws IOException If instrumentation with ByteBuddy throws exception
+   */
   public void injectClasses(File jarFile) throws IOException {
     List<Class<?>> classesToInject =
         Arrays.asList(

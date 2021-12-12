@@ -7,11 +7,16 @@ import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Contains methods related to cleanup performed after plugin processes finish. */
 public class Cleanup {
   private final Logger logger = LoggerFactory.getLogger(Cleanup.class);
 
   public Cleanup() {}
 
+  /**
+   * Deletes all temporary directories that was created by plugin's processes. If the directories
+   * were deleted beforehand, error will not be thrown.
+   */
   public void deleteAllTemporaryFolders() {
     FolderNames folderNames = FolderNames.getInstance();
     String[] foldersToDelete = {

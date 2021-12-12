@@ -15,8 +15,20 @@ import java.util.zip.ZipOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Contains static methods related to procedures on JAR entries. */
 public class ZipEntryCreator {
 
+  /**
+   * Creates new entry from file with path in JAR specified as parameter. Reads the content of
+   * provided file, then sets the proper size, compressed size and crc for the new entry. Puts the
+   * entry in ZipOutputStream and closes both file and entry.
+   *
+   * @param zout ZipOutputStream that entry should be transfered to
+   * @param file File object representing the JAR entry content
+   * @param entryPath entry path in output JAR
+   * @throws IOException If there are some problems related to files read operation or putting new
+   *     entry to ZipOutputStream
+   */
   public static void createZipEntryFromFile(ZipOutputStream zout, File file, String entryPath)
       throws IOException {
     try {
@@ -41,6 +53,15 @@ public class ZipEntryCreator {
     }
   }
 
+  /**
+   * Copies the JAR entry to local directory.
+   *
+   * @param entry JarEntry that is to be copied
+   * @param jarFile file that contains the entry
+   * @param folderName directory that the entry content should be copy to
+   * @return File object representing the entry content
+   * @throws IOException If copying the entry to directory throws I/O error
+   */
   public static File copySingleEntryFromJar(JarEntry entry, JarFile jarFile, String folderName)
       throws IOException {
     File tmpFile = new File(folderName, entry.getName());
