@@ -12,9 +12,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipOutputStream;
 
-/**
- * Contains methods supporting copying JAR entries with or without prefix specific to framework.
- */
+/** Contains methods supporting copying JAR entries with or without prefix specific to framework. */
 public class FrameworkSupport {
 
   private final String classesPrefix;
@@ -43,8 +41,9 @@ public class FrameworkSupport {
   }
 
   /**
-   * Copies the entry without the prefix specific to framework. To achieve that, first copies the entry to
-   * temporary folder and then stores the unpacked entry under a different path in output JAR.
+   * Copies the entry without the prefix specific to framework. To achieve that, first copies the
+   * entry to temporary folder and then stores the unpacked entry under a different path in output
+   * JAR.
    *
    * @param entry JarEntry that is being copied
    * @param zout ZipOutputStream of the file entry is being copied to

@@ -21,8 +21,8 @@ public class ZipEntryCreator {
   /**
    * Creates new entry from file with path in JAR specified as parameter. Reads the content of
    * provided file, then sets the proper size, compressed size and crc for the new entry. Puts the
-   * entry in ZipOutputStream and closes both file and entry.
-   * If entry with the same path already exists, the error is logged (but it won't affect the process).
+   * entry in ZipOutputStream and closes both file and entry. If entry with the same path already
+   * exists, the error is logged (but it won't affect the process).
    *
    * @param zout ZipOutputStream that entry should be transferred to
    * @param file File object representing the JAR entry content

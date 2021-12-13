@@ -11,9 +11,7 @@ import org.apache.maven.project.MavenProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Contains methods to retrieve all artifacts created in Maven project.
- */
+/** Contains methods to retrieve all artifacts created in Maven project. */
 public class ArtifactChooser {
 
   private final MavenProject project;
@@ -26,10 +24,11 @@ public class ArtifactChooser {
   }
 
   /**
-   * Returns a list of all Maven project artifacts (attached included) or artifact specified by user.
+   * Returns a list of all Maven project artifacts (attached included) or artifact specified by
+   * user.
    *
-   * @return list of File objects that represent artifacts retrieved from Maven project. May contains only one File,
-   *         if user specified the artifact name
+   * @return list of File objects that represent artifacts retrieved from Maven project. May
+   *     contains only one File, if user specified the artifact name
    */
   public List<File> chooseArtifact() {
     ArrayList<File> artifactFiles = new ArrayList<>();

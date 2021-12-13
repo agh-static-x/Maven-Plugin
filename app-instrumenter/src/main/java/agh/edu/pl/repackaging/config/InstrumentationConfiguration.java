@@ -1,8 +1,6 @@
 package agh.edu.pl.repackaging.config;
 
-/**
- * Contains parameters required for instrumentation process.
- */
+/** Contains parameters required for instrumentation process. */
 public class InstrumentationConfiguration {
   private String classpath;
   private String transitiveDependencies;

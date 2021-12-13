@@ -18,9 +18,7 @@ import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Contains methods to extract and add OpenTelemetry javaagent classes to another JAR file.
- */
+/** Contains methods to extract and add OpenTelemetry javaagent classes to another JAR file. */
 public class AgentClassesExtractor {
   private final File mainFile;
   private JarFile agentJar;
@@ -40,14 +38,14 @@ public class AgentClassesExtractor {
   }
 
   /**
-   * Copies classes from instrumented JAR file to the output JAR file. Adds prefix specific for framework if
-   * necessary.
-   * If error occurred while getting the instrumented JAR, the error is logged.
-   * If error occurred while copying entry from instrumented JAR to zip output stream, the error is logged.
+   * Copies classes from instrumented JAR file to the output JAR file. Adds prefix specific for
+   * framework if necessary. If error occurred while getting the instrumented JAR, the error is
+   * logged. If error occurred while copying entry from instrumented JAR to zip output stream, the
+   * error is logged.
    *
    * @param zout ZipOutputStream for file the main JAR file should be copied to
-   * @param frameworkSupport FrameworkSupport object with methods to check whether the prefix specific for framework
-   *                         should be added to classes
+   * @param frameworkSupport FrameworkSupport object with methods to check whether the prefix
+   *     specific for framework should be added to classes
    * @see FrameworkSupport
    * @see ZipOutputStream
    */
@@ -80,7 +78,9 @@ public class AgentClassesExtractor {
           }
         } catch (IOException exception) {
           logger.error(
-              "Error while copying entry " + entry.getName() + " from instrumented JAR to zip output stream.");
+              "Error while copying entry "
+                  + entry.getName()
+                  + " from instrumented JAR to zip output stream.");
         }
       }
       try {
@@ -99,15 +99,15 @@ public class AgentClassesExtractor {
   }
 
   /**
-   * Adds classes from OpenTelemetry javaagent JAR to instrumented JAR. Creates new JAR files, then copies the
-   * classes from the instrumented JAR. Adds classes from javaagent JAR, removes the shading and replaces classdata
-   * file extension with class file extension.
-   * If the output directory can't be created, the error is logged.
-   * If the ZipOutputStream for new file can't be created, the error is logged.
-   * If the file from OpenTelemetry JAR can't be copied, the error is logged.
+   * Adds classes from OpenTelemetry javaagent JAR to instrumented JAR. Creates new JAR files, then
+   * copies the classes from the instrumented JAR. Adds classes from javaagent JAR, removes the
+   * shading and replaces classdata file extension with class file extension. If the output
+   * directory can't be created, the error is logged. If the ZipOutputStream for new file can't be
+   * created, the error is logged. If the file from OpenTelemetry JAR can't be copied, the error is
+   * logged.
    *
-   * @param frameworkSupport FrameworkSupport object with methods to check whether the prefix specific for framework
-   *    *                    should be added to classes
+   * @param frameworkSupport FrameworkSupport object with methods to check whether the prefix
+   *     specific for framework * should be added to classes
    * @param suffix string that is added at the end of JAR name
    */
   public void addOpenTelemetryFolders(FrameworkSupport frameworkSupport, String suffix) {
@@ -250,8 +250,8 @@ public class AgentClassesExtractor {
   }
 
   /**
-   * Copies the entry with 'classdata' file extension with '.class' file extension and
-   * with prefix specific for framework.
+   * Copies the entry with 'classdata' file extension with '.class' file extension and with prefix
+   * specific for framework.
    *
    * @param entry JarEntry that is copied
    * @param zout ZipOutputStream the entry is copied to

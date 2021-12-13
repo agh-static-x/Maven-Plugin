@@ -12,7 +12,6 @@ import agh.edu.pl.repackaging.instrumenters.instrumentation.JarWithDependenciesI
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.*;
 import java.util.HashMap;
 import java.util.regex.Pattern;
@@ -34,8 +33,7 @@ public class JarRepackager {
 
   /**
    * Copies the instrumented OpenTelemetry javaagent JAR file from <code>resources</code> to
-   * temporary directory.
-   * If the temporary directory is not created properly, the error is logged.
+   * temporary directory. If the temporary directory is not created properly, the error is logged.
    * if the agent JAR file is not copied properly, the error is logged.
    *
    * @see Files#copy(InputStream, Path, CopyOption...)

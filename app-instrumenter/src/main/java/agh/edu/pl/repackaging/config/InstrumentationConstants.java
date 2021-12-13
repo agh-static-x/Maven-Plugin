@@ -1,9 +1,7 @@
 /* (C)2021 */
 package agh.edu.pl.repackaging.config;
 
-/**
- * Contains the constants required for the instrumentation process.
- */
+/** Contains the constants required for the instrumentation process. */
 public class InstrumentationConstants {
   public static final String STATIC_INSTRUMENTER_CLASS =
       "io.opentelemetry.javaagent.StaticInstrumenter";
@@ -13,7 +11,8 @@ public class InstrumentationConstants {
    * Returns the ProcessBuilder for instrumentation process.
    *
    * @param agentPath path to the OpenTelemetry javaagent JAR
-   * @param classpath classpath for instrumentation process (list of JARs to instrument, separated with path separator)
+   * @param classpath classpath for instrumentation process (list of JARs to instrument, separated
+   *     with path separator)
    * @param folderName output folder name
    * @param transitiveDependencies list of transitive dependencies separated with path separator
    * @return ProcessBuilder for instrumentation process
