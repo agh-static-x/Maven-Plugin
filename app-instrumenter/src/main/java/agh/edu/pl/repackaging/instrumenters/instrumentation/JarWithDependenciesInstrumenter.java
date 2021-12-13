@@ -38,6 +38,17 @@ public class JarWithDependenciesInstrumenter {
    * dependencies in it. Starts the instrumentation process and waits for its end. Packages the
    * instrumented JAR dependencies and puts them as entries into the main JAR file. Deletes the
    * temporary folders that are no longer needed after this stage.
+   * If any exception occurred during the execution of the java process, the error is logged.
+   * If the process exits with non-zero value, it is logged.
+   * If the process is interrupted, the error is logged.
+   * If problem occurred while getting instrumented file, the error is logged.
+   * If there is a problem with creating the JAR entry from file, the error is logged.
+   * If temporary folders required for the process are not deleted, the error is logged.
+   *
+   * @see Process
+   * @see ZipOutputStream
+   * @see JarFile
+   * @see JarEntry
    */
   public void instrumentJarWithDependencies() {
     try {

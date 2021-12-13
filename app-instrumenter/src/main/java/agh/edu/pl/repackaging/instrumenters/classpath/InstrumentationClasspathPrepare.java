@@ -32,11 +32,18 @@ public class InstrumentationClasspathPrepare {
   }
 
   /**
-   * Prepares the <code>classpath</code> and checks which of the dependencies are transitive (those
+   * Prepares the <code>classpath</code>, unpacks the dependencies from the main file to temporary folder
+   * (only if they are in JAR format) and checks which of the dependencies are transitive (those
    * dependencies are not included in the output JAR file, but need to be put on the <code>classpath
-   * </code> to improve the instrumentation process).
+   * </code> and put into temporary folder to improve the instrumentation process).
+   * If the main JAR file could not be copy, the problem is logged.
+   * If the main file could not be parsed as JAR file, the problem is logged.
+   * If the ZipOutputStream creation from file fails, the problem is logged.
+   * If the dependency could not be copied to temporary folder, the problem is logged.
    *
    * @return configuration for instrumentation process
+   * @see ZipOutputStream
+   * @see JarEntry
    */
   public InstrumentationConfiguration prepareClasspath() {
     createInitialFolders();
@@ -139,10 +146,15 @@ public class InstrumentationClasspathPrepare {
   /**
    * Unpacks entry from file to the temporary folder, marks the dependency as non-transitive and
    * adds the path to temporary file with unpacked entry to the classpath.
+   * If the temporary directories to store the file could not be created, the problem is logged.
+   * If the file could not be copied to temporary folder, the problem is logged.
    *
    * @param entry JarEntry that is being unpacked to temporary folder
    * @param jarFile file that contains the entry
    * @param classpath classpath that path to unpacked entry is to be put on
+   *
+   * @see InputStream
+   * @see Artifact
    */
   private void unpackSingleDependency(JarEntry entry, JarFile jarFile, StringBuilder classpath) {
     String fileName =
@@ -171,6 +183,10 @@ public class InstrumentationClasspathPrepare {
     classpath.append(fileName).append(File.pathSeparator);
   }
 
+  /**
+   * Creates temporary folders needed at the beginning of plugin workflow.
+   * If any of the folders could not be created, the problem is logged.
+   */
   private void createInitialFolders() {
     File tmpDir = new File(folderNames.getMainJARInitialCopyPackage());
     File instrumentedDir = new File(folderNames.getJARWithInstrumentedDependenciesPackage());
@@ -181,16 +197,29 @@ public class InstrumentationClasspathPrepare {
     }
   }
 
-  private void storeSingleJAREntry(JarEntry entry, JarFile jarFile, ZipOutputStream zout)
+  /**
+   * Transfers JAR entry from one file to other file. If the file is build based on the supported framework, it
+   * is stored in output file without prefix 9to avoid problems with shading during instrumentation process).
+   *
+   * @param entry JarEntry that is being transferred to other file
+   * @param inputFile JAR that contains the entry
+   * @param zout ZipOutputStream of the file entry should be transferred to
+   * @throws IOException If there will be any I/O exception during the transfer process or during the
+   *                     file closing process
+   * @see InputStream
+   * @see ZipEntry
+   * @see JarEntry
+   */
+  private void storeSingleJAREntry(JarEntry entry, JarFile inputFile, ZipOutputStream zout)
       throws IOException {
     if (frameworkSupport != null
         && entry.getName().startsWith(frameworkSupport.getClassesPrefix())
         && !entry.isDirectory()) {
-      frameworkSupport.copyMainClassWithoutPrefix(entry, zout, jarFile);
+      frameworkSupport.copyMainClassWithoutPrefix(entry, zout, inputFile);
     } else {
       ZipEntry outEntry = new ZipEntry(entry);
       zout.putNextEntry(outEntry);
-      InputStream in = jarFile.getInputStream(entry);
+      InputStream in = inputFile.getInputStream(entry);
       in.transferTo(zout);
       in.close();
       zout.closeEntry();

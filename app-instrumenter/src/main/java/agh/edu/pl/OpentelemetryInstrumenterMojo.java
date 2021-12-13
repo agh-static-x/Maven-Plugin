@@ -63,7 +63,7 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
 
     try {
       List<File> artifactsToInstrument =
-          new ArtifactChooser(project, artifactName).chooseArtifacts();
+          new ArtifactChooser(project, artifactName).chooseArtifact();
       for (File artifact : artifactsToInstrument) {
         logger.debug("Instrumenting artifact " + artifact.getName());
         repackager.setJarFile(artifact);

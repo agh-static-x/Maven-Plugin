@@ -12,6 +12,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * Contains methods supporting copying JAR entries with or without prefix specific to framework.
+ */
 public class FrameworkSupport {
 
   private final String classesPrefix;
@@ -39,11 +42,21 @@ public class FrameworkSupport {
     return filesToRepackage;
   }
 
-  public void copyMainClassWithoutPrefix(JarEntry entry, ZipOutputStream zout, JarFile jarFile)
+  /**
+   * Copies the entry without the prefix specific to framework. To achieve that, first copies the entry to
+   * temporary folder and then stores the unpacked entry under a different path in output JAR.
+   *
+   * @param entry JarEntry that is being copied
+   * @param zout ZipOutputStream of the file entry is being copied to
+   * @param inputFile file that contains the entry
+   * @throws IOException If the exception is thrown
+   * @see ZipOutputStream
+   */
+  public void copyMainClassWithoutPrefix(JarEntry entry, ZipOutputStream zout, JarFile inputFile)
       throws IOException {
     File tmpFile =
         copySingleEntryFromJar(
-            entry, jarFile, FolderNames.getInstance().getFrameworkSupportFolder());
+            entry, inputFile, FolderNames.getInstance().getFrameworkSupportFolder());
     String newEntryPath = entry.getName().replace(getClassesPrefix(), "");
     addFileToRepackage(newEntryPath);
     createZipEntryFromFile(zout, tmpFile, newEntryPath);

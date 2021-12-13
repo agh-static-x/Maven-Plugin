@@ -22,12 +22,16 @@ public class ZipEntryCreator {
    * Creates new entry from file with path in JAR specified as parameter. Reads the content of
    * provided file, then sets the proper size, compressed size and crc for the new entry. Puts the
    * entry in ZipOutputStream and closes both file and entry.
+   * If entry with the same path already exists, the error is logged (but it won't affect the process).
    *
-   * @param zout ZipOutputStream that entry should be transfered to
+   * @param zout ZipOutputStream that entry should be transferred to
    * @param file File object representing the JAR entry content
    * @param entryPath entry path in output JAR
    * @throws IOException If there are some problems related to files read operation or putting new
    *     entry to ZipOutputStream
+   * @see CRC32
+   * @see ZipOutputStream
+   * @see FileInputStream
    */
   public static void createZipEntryFromFile(ZipOutputStream zout, File file, String entryPath)
       throws IOException {
@@ -56,7 +60,7 @@ public class ZipEntryCreator {
   /**
    * Copies the JAR entry to local directory.
    *
-   * @param entry JarEntry that is to be copied
+   * @param entry JarEntry that is being copied
    * @param jarFile file that contains the entry
    * @param folderName directory that the entry content should be copy to
    * @return File object representing the entry content

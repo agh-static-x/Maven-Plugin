@@ -11,10 +11,9 @@ import agh.edu.pl.repackaging.instrumenters.classpath.InstrumentationClasspathPr
 import agh.edu.pl.repackaging.instrumenters.instrumentation.JarWithDependenciesInstrumenter;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.*;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 import org.apache.maven.artifact.Artifact;
@@ -36,6 +35,10 @@ public class JarRepackager {
   /**
    * Copies the instrumented OpenTelemetry javaagent JAR file from <code>resources</code> to
    * temporary directory.
+   * If the temporary directory is not created properly, the error is logged.
+   * if the agent JAR file is not copied properly, the error is logged.
+   *
+   * @see Files#copy(InputStream, Path, CopyOption...)
    */
   public void copyInstrumentedOtelJar() {
     this.agentPath =
@@ -72,6 +75,7 @@ public class JarRepackager {
    *
    * @param artifactMap map that contains all dependencies of the project (including the transitive
    *     ones)
+   * @see Artifact
    */
   public void repackageJar(HashMap<Artifact, Boolean> artifactMap) {
     InstrumentationConfiguration instrumentationConfiguration =

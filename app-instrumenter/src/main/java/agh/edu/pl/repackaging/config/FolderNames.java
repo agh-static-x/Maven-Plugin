@@ -3,6 +3,9 @@ package agh.edu.pl.repackaging.config;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
+/**
+ * Contains constants for temporary folders.
+ */
 public class FolderNames {
   private static FolderNames instance;
 

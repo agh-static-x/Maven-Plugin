@@ -2,6 +2,8 @@
 package agh.edu.pl.utils;
 
 import agh.edu.pl.repackaging.config.FolderNames;
+
+import java.io.File;
 import java.io.IOException;
 import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
@@ -16,6 +18,8 @@ public class Cleanup {
   /**
    * Deletes all temporary directories that was created by plugin's processes. If the directories
    * were deleted beforehand, error will not be thrown.
+   * 
+   * @see FileUtils#forceDelete(File) 
    */
   public void deleteAllTemporaryFolders() {
     FolderNames folderNames = FolderNames.getInstance();
