@@ -64,7 +64,7 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
     JarRepackager repackager = new JarRepackager();
     if (outputFolder != null) TemporaryFolders.getInstance().setFinalFolder(outputFolder);
     else TemporaryFolders.getInstance().setFinalFolder(project.getBuild().getDirectory());
-    List<File> artifactsToInstrument = new ArtifactChooser(project, artifactName).chooseArtifacts();
+    List<File> artifactsToInstrument = new ArtifactChooser(project, artifactName).chooseArtifact();
     for (File artifact : artifactsToInstrument) {
       logger.debug("Instrumenting artifact " + artifact.getName());
       repackager.setJarFile(artifact);
@@ -72,6 +72,12 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
       repackager.repackageJar(artifactsMap);
       String suf = noSuffix ? "" : suffix;
       repackager.addOpenTelemetryClasses(suf);
+    }
+
+    try {
+      TemporaryFolders.delete();
+    } catch (IOException e) {
+      throw new MojoExecutionException("Could not delete created temporary folders");
     }
   }
 }

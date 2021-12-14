@@ -29,28 +29,6 @@ public class TemporaryFolders {
     INSTRUMENTED_JAR = Files.createTempDirectory("INSTRUMENTED_JAR");
     OPENTELEMETRY_CLASSES = Files.createTempDirectory("OPENTELEMETRY_CLASSES");
     FRAMEWORK_SUPPORT_FOLDER = Files.createTempDirectory("FRAMEWORK_SUPPORT_FOLDER");
-
-    try {
-      Class.forName("org.codehaus.plexus.util.FileUtils");
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    Runtime.getRuntime()
-        .addShutdownHook(
-            new Thread(
-                () -> {
-                  try {
-                    FileUtils.deleteDirectory(INSTRUMENTED_OTEL_JAR_PACKAGE_NAME.toFile());
-                    FileUtils.deleteDirectory(MAIN_JAR_INITIAL_COPY.toFile());
-                    FileUtils.deleteDirectory(JAR_WITH_INSTRUMENTED_DEPENDENCIES.toFile());
-                    FileUtils.deleteDirectory(INSTRUMENTED_JAR.toFile());
-                    FileUtils.deleteDirectory(OPENTELEMETRY_CLASSES.toFile());
-                    FileUtils.deleteDirectory(FRAMEWORK_SUPPORT_FOLDER.toFile());
-                  } catch (IOException exception) {
-                    exception.printStackTrace();
-                  }
-                }));
   }
 
   public static void create() throws IOException {
@@ -58,6 +36,21 @@ public class TemporaryFolders {
       instance = new TemporaryFolders();
     } catch (IOException e) {
       logger.error("Could not create required temporary folders");
+      throw e;
+    }
+  }
+
+  public static void delete() throws IOException {
+    try {
+      FileUtils.deleteDirectory(instance.INSTRUMENTED_OTEL_JAR_PACKAGE_NAME.toFile());
+      FileUtils.deleteDirectory(instance.MAIN_JAR_INITIAL_COPY.toFile());
+      FileUtils.deleteDirectory(instance.JAR_WITH_INSTRUMENTED_DEPENDENCIES.toFile());
+      FileUtils.deleteDirectory(instance.INSTRUMENTED_JAR.toFile());
+      FileUtils.deleteDirectory(instance.OPENTELEMETRY_CLASSES.toFile());
+      FileUtils.deleteDirectory(instance.FRAMEWORK_SUPPORT_FOLDER.toFile());
+      instance = null;
+    } catch (IOException e) {
+      logger.error("Could not delete created temporary folders");
       throw e;
     }
   }

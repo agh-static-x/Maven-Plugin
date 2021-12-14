@@ -181,20 +181,6 @@ public class InstrumentationClasspathPrepare {
   }
 
   /**
-   * Creates temporary folders needed at the beginning of plugin workflow. If any of the folders
-   * could not be created, the problem is logged.
-   */
-  private void createInitialFolders() {
-    File tmpDir = new File(folderNames.getMainJARInitialCopyPackage());
-    File instrumentedDir = new File(folderNames.getJARWithInstrumentedDependenciesPackage());
-    File mainInstrumentedDir = new File(folderNames.getInstrumentedJARPackage());
-    if (!tmpDir.mkdir() || !instrumentedDir.mkdir() || !mainInstrumentedDir.mkdir()) {
-      logger.error(
-          "The temporary directories necessary for JAR instrumentation process could not be created. Please make sure you have permissions required to create a directory.");
-    }
-  }
-
-  /**
    * Transfers JAR entry from one file to other file. If the file is build based on the supported
    * framework, it is stored in output file without prefix 9to avoid problems with shading during
    * instrumentation process).
