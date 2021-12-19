@@ -1,3 +1,8 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ */
+package backend;
+
 import com.google.common.collect.ImmutableList;
 import io.grpc.stub.StreamObserver;
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
