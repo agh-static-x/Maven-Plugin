@@ -15,6 +15,7 @@ import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Contains methods that supports the process of file (with its dependencies) instrumentation. */
 public class JarWithDependenciesInstrumenter {
   private final InstrumentationConfiguration instrumentationConfiguration;
   private final String agentPath;
@@ -31,6 +32,23 @@ public class JarWithDependenciesInstrumenter {
     this.mainFileName = mainFileName;
   }
 
+  /**
+   * Instruments JAR (WAR) and its dependencies (if they are embedded JARs). Creates the
+   * instrumentation process based on provided configuration and includes the transitive
+   * dependencies in it. Starts the instrumentation process and waits for its end. Packages the
+   * instrumented JAR dependencies and puts them as entries into the main JAR file. Deletes the
+   * temporary folders that are no longer needed after this stage. If any exception occurred during
+   * the execution of the java process, the error is logged. If the process exits with non-zero
+   * value, it is logged. If the process is interrupted, the error is logged. If problem occurred
+   * while getting instrumented file, the error is logged. If there is a problem with creating the
+   * JAR entry from file, the error is logged. If temporary folders required for the process are not
+   * deleted, the error is logged.
+   *
+   * @see Process
+   * @see ZipOutputStream
+   * @see JarFile
+   * @see JarEntry
+   */
   public void instrumentJarWithDependencies() {
     try {
       Process process = null;

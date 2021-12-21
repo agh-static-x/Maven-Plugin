@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -45,19 +43,27 @@ public class OpentelemetryInstrumenterMojo extends AbstractMojo {
 
   private final Logger logger = LoggerFactory.getLogger(OpentelemetryInstrumenterMojo.class);
 
+  /**
+   * Conducts the process of application target file instrumentation. Adds the shutdown hook to
+   * clean the temporary directories. Sets the output folder for instrumented target file. Executes
+   * the instrumentation process of artifacts chosen by the user.
+   */
   @Override
-  public void execute() throws MojoExecutionException, MojoFailureException {
+  public void execute() {
     Runtime.getRuntime()
         .addShutdownHook(new Thread(() -> new Cleanup().deleteAllTemporaryFolders()));
+
     Set<Artifact> artifactSet = project.getArtifacts();
     HashMap<Artifact, Boolean> artifactsMap = new HashMap<>();
     artifactSet.forEach((artifact) -> artifactsMap.put(artifact, true));
+
     JarRepackager repackager = new JarRepackager();
     if (outputFolder != null) FolderNames.getInstance().setFinalFolder(outputFolder);
     else FolderNames.getInstance().setFinalFolder(project.getBuild().getDirectory());
+
     try {
       List<File> artifactsToInstrument =
-          new ArtifactChooser(project, artifactName).chooseArtifacts();
+          new ArtifactChooser(project, artifactName).chooseArtifact();
       for (File artifact : artifactsToInstrument) {
         logger.debug("Instrumenting artifact " + artifact.getName());
         repackager.setJarFile(artifact);

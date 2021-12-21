@@ -11,16 +11,15 @@ import agh.edu.pl.repackaging.instrumenters.classpath.InstrumentationClasspathPr
 import agh.edu.pl.repackaging.instrumenters.instrumentation.JarWithDependenciesInstrumenter;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.InputStream;
+import java.nio.file.*;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 import org.apache.maven.artifact.Artifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Conducts the process of repackaging and instrumenting the file. */
 public class JarRepackager {
   private String agentPath;
   private File jarFile;
@@ -32,6 +31,13 @@ public class JarRepackager {
     this.copyInstrumentedOtelJar();
   }
 
+  /**
+   * Copies the instrumented OpenTelemetry javaagent JAR file from <code>resources</code> to
+   * temporary directory. If the temporary directory is not created properly, the error is logged.
+   * if the agent JAR file is not copied properly, the error is logged.
+   *
+   * @see Files#copy(InputStream, Path, CopyOption...)
+   */
   public void copyInstrumentedOtelJar() {
     this.agentPath =
         folderNames.getInstrumentedOtelJarPackage()
@@ -62,6 +68,13 @@ public class JarRepackager {
     this.jarFile = jarFile;
   }
 
+  /**
+   * Conducts the repackaging and instrumentation process.
+   *
+   * @param artifactMap map that contains all dependencies of the project (including the transitive
+   *     ones)
+   * @see Artifact
+   */
   public void repackageJar(HashMap<Artifact, Boolean> artifactMap) {
     InstrumentationConfiguration instrumentationConfiguration =
         new InstrumentationClasspathPrepare(jarFile, frameworkSupport, artifactMap)
@@ -72,6 +85,11 @@ public class JarRepackager {
         .instrumentJarWithDependencies();
   }
 
+  /**
+   * Conducts the process of adding the classes from OpenTelemetry javaagent
+   *
+   * @param suffix suffix that will be added to output file's name
+   */
   public void addOpenTelemetryClasses(String suffix) {
     String pattern = Pattern.quote(System.getProperty("file.separator"));
     String[] outFileNameParts = jarFile.getName().split(pattern);
@@ -85,6 +103,10 @@ public class JarRepackager {
     agentClassesExtractor.addOpenTelemetryFolders(frameworkSupport, suffix);
   }
 
+  /**
+   * Checks if application is build in specific way (for example it is a WAR file or it is build on
+   * Spring Boot framework)
+   */
   public void checkFrameworkSupport() {
     this.frameworkSupport = new AppFramework().getAppFramework(jarFile);
   }
