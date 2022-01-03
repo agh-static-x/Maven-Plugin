@@ -1,3 +1,6 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package agh.edu.pl.agent.instrumentation;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
