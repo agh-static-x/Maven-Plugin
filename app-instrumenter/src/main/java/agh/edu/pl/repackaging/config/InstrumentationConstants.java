@@ -1,6 +1,8 @@
 /* (C)2021 */
 package agh.edu.pl.repackaging.config;
 
+import java.nio.file.Path;
+
 /** Contains the constants required for the instrumentation process. */
 public class InstrumentationConstants {
   public static final String STATIC_INSTRUMENTER_CLASS =
@@ -19,7 +21,7 @@ public class InstrumentationConstants {
    * @see ProcessBuilder
    */
   public static ProcessBuilder getInstrumentationProcess(
-      String agentPath, String classpath, String folderName, String transitiveDependencies) {
+      String agentPath, String classpath, Path folderPath, String transitiveDependencies) {
     return new ProcessBuilder(
         "java",
         "-Dota.static.instrumenter=true",
@@ -28,7 +30,7 @@ public class InstrumentationConstants {
         "-cp",
         String.format("%s", classpath),
         InstrumentationConstants.STATIC_INSTRUMENTER_CLASS,
-        folderName,
+        folderPath.toString(),
         transitiveDependencies);
   }
 }

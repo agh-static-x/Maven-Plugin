@@ -8,9 +8,11 @@ BACKEND_PID=$!
 export OTEL_TRACES_EXPORTER=otlp
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:8888/
 
+sleep 5
 
 java -Dio.opentelemetry.javaagent.shaded.io.opentelemetry.context.contextStorageProvider=default -jar ./instrumentation-tests/test-apps/apache-http-test-app/target/apache-http-test-app-1.0-SNAPSHOT-shaded-instrumented.jar
 APP_PID=$!
+
 
 TRACES=$(curl -m 2 http://localhost:8888/get-traces)
 
