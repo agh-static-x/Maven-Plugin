@@ -14,7 +14,10 @@ import io.opentelemetry.javaagent.BytesAndName;
 import io.opentelemetry.javaagent.PostTransformer;
 import io.opentelemetry.javaagent.PreTransformer;
 import io.opentelemetry.javaagent.StaticInstrumenter;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -22,12 +25,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
+import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.dynamic.DynamicType;
 
 /** Responsible for loading and instrumenting the OpenTelemetry javaagent JAR file */
 public class OpenTelemetryLoader {
@@ -36,36 +43,31 @@ public class OpenTelemetryLoader {
   private Class<?> helperInjectorClass;
   public String otelJarPath;
   private final String pluginResourcesPath;
+  private final Map<String, byte[]> classesToInstrument;
 
   public OpenTelemetryLoader(String otelJarPath, String pluginResourcesPath) {
     this.otelJarPath = otelJarPath;
     this.pluginResourcesPath = pluginResourcesPath;
+    this.classesToInstrument = new HashMap<>();
   }
 
   /** Conducts the process of OpenTelemetry javaagent JAR instrumentation */
   public void instrument() {
     loadClasses(new File(otelJarPath));
     File otelJarFile = new File(otelJarPath);
-    File copyFile = AgentUtils.createAgentCopy(otelJarPath, pluginResourcesPath).toFile();
 
-    try {
-      Files.copy(otelJarFile.toPath(), copyFile.toPath(), REPLACE_EXISTING);
-    } catch (IOException exception) {
-      System.err.println(
-          "OpenTelemetry Agent JAR could not be copied to instrumentation directory.");
-      return;
-    }
     System.out.println("Copied OTEL to " + pluginResourcesPath);
     try {
-      instrumentOpenTelemetryAgent(copyFile);
-      instrumentHelperInjector(copyFile);
+      instrumentOpenTelemetryAgent();
+      instrumentHelperInjector();
     } catch (IOException exception) {
       exception.printStackTrace();
       System.err.println("Problem occurred during OpenTelemetry Agent instrumentation.");
       return;
     }
+    prepareAdditionalClasses();
     try {
-      injectClasses(copyFile);
+      injectClasses(otelJarFile);
     } catch (IOException exception) {
       System.err.println(
           "The classes required for static instrumentation with OpenTelemetry Agent were not added properly.");
@@ -78,7 +80,7 @@ public class OpenTelemetryLoader {
    *
    * @param otelJar File object representing the OpenTelemetry javvagent JAR file
    */
-  public synchronized void loadClasses(File otelJar) {
+  private synchronized void loadClasses(File otelJar) {
     AgentUtils agentUtils = null;
 
     try {
@@ -136,15 +138,19 @@ public class OpenTelemetryLoader {
    * @param jarFile File object representing the OpenTelemetry javaagent JAR file
    * @throws IOException If instrumentation with ByteBuddy throws exception
    */
-  private void instrumentOpenTelemetryAgent(File jarFile) throws IOException {
-    new ByteBuddy()
-        .rebase(openTelemetryAgentClass)
-        .visit(Advice.to(OpenTelemetryAgentAdvices.class).on(isMethod().and(named("agentmain"))))
-        .visit(
-            Advice.to(InstallBootstrapJarAdvice.class)
-                .on(isMethod().and(named("installBootstrapJar"))))
-        .make()
-        .inject(jarFile);
+  private void instrumentOpenTelemetryAgent() throws IOException {
+    DynamicType.Unloaded<?> openTelemetryAgentType =
+        new ByteBuddy()
+            .rebase(openTelemetryAgentClass)
+            .visit(
+                Advice.to(OpenTelemetryAgentAdvices.class).on(isMethod().and(named("agentmain"))))
+            .visit(
+                Advice.to(InstallBootstrapJarAdvice.class)
+                    .on(isMethod().and(named("installBootstrapJar"))))
+            .make();
+    classesToInstrument.put(
+        openTelemetryAgentType.getTypeDescription().getInternalName() + ".class",
+        openTelemetryAgentType.getBytes());
   }
 
   /**
@@ -156,52 +162,25 @@ public class OpenTelemetryLoader {
    * @param jarFile File object representing the OpenTelemetry javaagent JAR file
    * @throws IOException If instrumentation with ByteBuddy throws exception
    */
-  private void instrumentHelperInjector(File jarFile) throws IOException {
-    byte[] helperInjectorBytes =
+  private void instrumentHelperInjector() throws IOException {
+    DynamicType.Unloaded<?> helperInjectorType =
         new ByteBuddy()
             .rebase(helperInjectorClass)
             .visit(
                 Advice.to(HelperInjectorAdvice.class)
                     .on(isMethod().and(named("injectBootstrapClassLoader"))))
-            .make()
-            .getBytes();
+            .make();
 
-    ZipInputStream in = new ZipInputStream(new FileInputStream(jarFile));
-    ZipOutputStream zout = new ZipOutputStream(new FileOutputStream("tmp.jar"));
-
-    ZipEntry entry;
-    while ((entry = in.getNextEntry()) != null) {
-      if (entry
-          .getName()
-          .equals("inst/io/opentelemetry/javaagent/tooling/HelperInjector.classdata")) continue;
-      zout.putNextEntry(entry);
-      StaticInstrumenter.copy(in, zout);
-      zout.closeEntry();
-    }
-
-    ZipEntry newEntry =
-        new ZipEntry("inst/io/opentelemetry/javaagent/tooling/HelperInjector.classdata");
-    newEntry.setSize(helperInjectorBytes.length);
-    newEntry.setCompressedSize(-1);
-    zout.putNextEntry(newEntry);
-
-    StaticInstrumenter.copy(new ByteArrayInputStream(helperInjectorBytes), zout);
-    zout.closeEntry();
-
-    zout.close();
-    in.close();
-
-    Files.copy(Paths.get("tmp.jar"), jarFile.toPath(), REPLACE_EXISTING);
+    classesToInstrument.put(
+        "inst/" + helperInjectorType.getTypeDescription().getInternalName() + ".classdata",
+        helperInjectorType.getBytes());
   }
 
   /**
-   * Injects <code>BytesAndNames</code>, <code>PreTransformer</code>, <code>PostTransformer</code>
-   * and' <code>StaticInstrumenter</code> classes into OpenTelemetry javaagent file
-   *
-   * @param jarFile File object representing the OpenTelemetry javaagent JAR file
-   * @throws IOException If instrumentation with ByteBuddy throws exception
+   * Loads <code>BytesAndNames</code>, <code>PreTransformer</code>, <code>PostTransformer</code>
+   * and' <code>StaticInstrumenter</code> classes
    */
-  public void injectClasses(File jarFile) throws IOException {
+  private void prepareAdditionalClasses() {
     List<Class<?>> classesToInject =
         Arrays.asList(
             BytesAndName.class,
@@ -215,8 +194,58 @@ public class OpenTelemetryLoader {
 
       String fullclazzName = "io.opentelemetry.javaagent." + clazzName;
 
-      new ByteBuddy().rebase(clazz).name(fullclazzName).make().inject(jarFile);
-      System.out.println("Instrumented " + fullclazzName);
+      DynamicType.Unloaded<?> type = new ByteBuddy().rebase(clazz).name(fullclazzName).make();
+
+      classesToInstrument.put(
+          type.getTypeDescription().getInternalName() + ".class", type.getBytes());
     }
+  }
+
+  /**
+   * Injects classes from <code>classesToInstrument</code> to <code>jarFile</code>
+   *
+   * @param jarFile File object representing the OpenTelemetry javaagent JAR file
+   * @throws IOException If instrumentation with ByteBuddy throws exception
+   */
+  private void injectClasses(File jarFile) throws IOException {
+
+    // following code mimics ByteBuddy's DynamicType.inject
+    // we don't use it directly, since it would mean copying jar every time we add one class
+    try (JarInputStream in = new JarInputStream(new FileInputStream(jarFile))) {
+
+      Manifest manifest = in.getManifest();
+
+      try (JarOutputStream zout =
+          manifest == null
+              ? new JarOutputStream(new FileOutputStream("tmp.jar"))
+              : new JarOutputStream(new FileOutputStream("tmp.jar"), manifest)) {
+        JarEntry entry;
+        // find class that we want to replace
+        while ((entry = in.getNextJarEntry()) != null) {
+          byte[] replacement = classesToInstrument.remove(entry.getName());
+          if (replacement == null) {
+            zout.putNextEntry(entry);
+            StaticInstrumenter.copy(in, zout);
+          } else {
+            zout.putNextEntry(new JarEntry(entry.getName()));
+            zout.write(replacement);
+            System.out.println("Instrumented " + entry.getName());
+          }
+          in.closeEntry();
+          zout.closeEntry();
+        }
+
+        // now, add extra classes
+        for (Map.Entry<String, byte[]> mapEntry : classesToInstrument.entrySet()) {
+          zout.putNextEntry(new JarEntry(mapEntry.getKey()));
+          zout.write(mapEntry.getValue());
+          zout.closeEntry();
+
+          System.out.println("Instrumented " + mapEntry.getKey());
+        }
+      }
+    }
+
+    Files.copy(Paths.get("tmp.jar"), jarFile.toPath(), REPLACE_EXISTING);
   }
 }
