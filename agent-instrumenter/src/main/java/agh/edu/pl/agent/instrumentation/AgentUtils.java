@@ -34,14 +34,14 @@ public class AgentUtils {
                   }
                 }));
   }
-  
-    /**
-     * Copies the javaagent file to the plugin <code>resources</code> folder
-     *
-     * @param agentPath Path to javaagent file that will be copied
-     * @param pluginResourcesPath Path to resources folder in plugin module
-     * @return Path to the copied javaagent file
-     */
+
+  /**
+   * Copies the javaagent file to the plugin <code>resources</code> folder
+   *
+   * @param agentPath Path to javaagent file that will be copied
+   * @param pluginResourcesPath Path to resources folder in plugin module
+   * @return Path to the copied javaagent file
+   */
   public Path extractAgent(File agentFile) throws IOException {
     JarFile otelJarFile = new JarFile(agentFile);
 
@@ -66,14 +66,14 @@ public class AgentUtils {
     return extractedAgent;
   }
 
-    /**
-     * Extracts the JAR entry to temporary directory under new, sanitized name
-     *
-     * @param otelJarFile JarFile object representing the OpenTelemetry javaagent file
-     * @param entryToSave JAR entry that is extracted
-     * @param sanitized Sanitized JAR entry name
-     * @throws IOException If process of writing to file encounters problems
-     */
+  /**
+   * Extracts the JAR entry to temporary directory under new, sanitized name
+   *
+   * @param otelJarFile JarFile object representing the OpenTelemetry javaagent file
+   * @param entryToSave JAR entry that is extracted
+   * @param sanitized Sanitized JAR entry name
+   * @throws IOException If process of writing to file encounters problems
+   */
   private void extractEntry(JarFile otelJarFile, JarEntry entryToSave, String sanitized)
       throws IOException {
     int lastSlashIdx = sanitized.lastIndexOf("/");

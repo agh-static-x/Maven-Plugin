@@ -74,12 +74,12 @@ public class OpenTelemetryLoader {
     }
   }
 
-    /**
-     * Loads <code>io.opentelemetry.javaagent.OpenTelemetryAgent</code> class from OpenTelemetry JAR
-     * file
-     *
-     * @param otelJar File object representing the OpenTelemetry javvagent JAR file
-     */
+  /**
+   * Loads <code>io.opentelemetry.javaagent.OpenTelemetryAgent</code> class from OpenTelemetry JAR
+   * file
+   *
+   * @param otelJar File object representing the OpenTelemetry javvagent JAR file
+   */
   private synchronized void loadClasses(File otelJar) {
     AgentUtils agentUtils = null;
 
@@ -131,13 +131,13 @@ public class OpenTelemetryLoader {
     }
   }
 
-    /**
-     * Instruments OpenTelemetry javaagent with <code>OpenTelemetryAgentAdvices</code> and <code>
-     * InstallBootstrapJarAdvice</code>
-     *
-     * @param jarFile File object representing the OpenTelemetry javaagent JAR file
-     * @throws IOException If instrumentation with ByteBuddy throws exception
-     */
+  /**
+   * Instruments OpenTelemetry javaagent with <code>OpenTelemetryAgentAdvices</code> and <code>
+   * InstallBootstrapJarAdvice</code>
+   *
+   * @param jarFile File object representing the OpenTelemetry javaagent JAR file
+   * @throws IOException If instrumentation with ByteBuddy throws exception
+   */
   private void instrumentOpenTelemetryAgent() throws IOException {
     DynamicType.Unloaded<?> openTelemetryAgentType =
         new ByteBuddy()
@@ -152,16 +152,16 @@ public class OpenTelemetryLoader {
         openTelemetryAgentType.getTypeDescription().getInternalName() + ".class",
         openTelemetryAgentType.getBytes());
   }
-  
-    /**
-     * Instruments OpenTelemetry javaagent file with <code>HelperInjectorAdvice</code> and inject
-     * inject .classdata file (which is not possible through ByteBuddy injection) by repackaging
-     * original JAR file to other file, and replacing the <code>HelperInjector.classdata</code> file
-     * with the custom one
-     *
-     * @param jarFile File object representing the OpenTelemetry javaagent JAR file
-     * @throws IOException If instrumentation with ByteBuddy throws exception
-     */
+
+  /**
+   * Instruments OpenTelemetry javaagent file with <code>HelperInjectorAdvice</code> and inject
+   * inject .classdata file (which is not possible through ByteBuddy injection) by repackaging
+   * original JAR file to other file, and replacing the <code>HelperInjector.classdata</code> file
+   * with the custom one
+   *
+   * @param jarFile File object representing the OpenTelemetry javaagent JAR file
+   * @throws IOException If instrumentation with ByteBuddy throws exception
+   */
   private void instrumentHelperInjector() throws IOException {
     DynamicType.Unloaded<?> helperInjectorType =
         new ByteBuddy()
@@ -176,10 +176,10 @@ public class OpenTelemetryLoader {
         helperInjectorType.getBytes());
   }
 
-    /**
-     * Loads <code>BytesAndNames</code>, <code>PreTransformer</code>, <code>PostTransformer</code>
-     * and' <code>StaticInstrumenter</code> classes
-     */
+  /**
+   * Loads <code>BytesAndNames</code>, <code>PreTransformer</code>, <code>PostTransformer</code>
+   * and' <code>StaticInstrumenter</code> classes
+   */
   private void prepareAdditionalClasses() {
     List<Class<?>> classesToInject =
         Arrays.asList(
@@ -201,12 +201,12 @@ public class OpenTelemetryLoader {
     }
   }
 
-    /**
-     * Injects classes from <code>classesToInstrument</code> to <code>jarFile</code>
-     *
-     * @param jarFile File object representing the OpenTelemetry javaagent JAR file
-     * @throws IOException If instrumentation with ByteBuddy throws exception
-     */
+  /**
+   * Injects classes from <code>classesToInstrument</code> to <code>jarFile</code>
+   *
+   * @param jarFile File object representing the OpenTelemetry javaagent JAR file
+   * @throws IOException If instrumentation with ByteBuddy throws exception
+   */
   private void injectClasses(File jarFile) throws IOException {
 
     // following code mimics ByteBuddy's DynamicType.inject
